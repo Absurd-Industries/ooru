@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Requests listing island — handles search, category filter, sort,
+ * Requests listing island - handles search, category filter, sort,
  * and renders the edge-to-edge feed of community requests.
  * Receives all requests as a prop from the Astro page and manages
  * client-side filtering / sorting.
@@ -335,7 +335,7 @@ function makerDisplayName(makerSlug: string): string {
 </template>
 
 <style scoped>
-/* Feed item — edge-to-edge, directly on kraft */
+/* Feed item - edge-to-edge, directly on kraft */
 .feed-item {
   padding: 1.25rem 0;
   border-bottom: 1px solid rgba(26, 26, 26, 0.08);
@@ -344,7 +344,7 @@ function makerDisplayName(makerSlug: string): string {
   border-bottom: none;
 }
 
-/* Upvote button — compact column layout */
+/* Upvote button - compact column layout */
 .upvote-btn {
   width: 38px;
   display: flex;
@@ -377,7 +377,7 @@ function makerDisplayName(makerSlug: string): string {
   font-size: 0.85rem;
 }
 
-/* Spec tag — smaller pill for tags */
+/* Spec tag - smaller pill for tags */
 .spec-tag {
   display: inline-flex;
   align-items: center;

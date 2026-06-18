@@ -29,14 +29,14 @@ const { maker } = Astro.props as { maker: Maker };
 // In production these would come from the API.
 // ────────────────────────────────────────────────────────────
 
-/** Banner colour — use avatarColor as the default */
+/** Banner colour - use avatarColor as the default */
 const bannerColor = maker.avatarColor;
 const bannerAccent = "#FF5900";
 
 const initial = maker.name.charAt(0).toUpperCase();
 const firstName = maker.name.split(" ")[0];
 
-/** Showcase — first project (mock campaign data) */
+/** Showcase - first project (mock campaign data) */
 const showcase = {
   name: `${firstName}'s Featured Project`,
   description: maker.bio ?? `Open-source ${maker.specialty.toLowerCase()} project by ${maker.name}.`,
@@ -623,7 +623,7 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
 
 <style>
   /* ================================================================ */
-  /* STEAM-STYLE PROFILE — page-scoped styles                        */
+  /* STEAM-STYLE PROFILE - page-scoped styles                        */
   /* ================================================================ */
 
   /* Breadcrumb */
@@ -632,7 +632,7 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
     font-weight: 500;
   }
 
-  /* Profile banner — filter on pseudo-element to avoid blurring content */
+  /* Profile banner - filter on pseudo-element to avoid blurring content */
   .profile-banner {
     --banner-bg: #1A1A1A;
     --banner-accent: #D94800;
@@ -658,7 +658,7 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
     pointer-events: none;
   }
 
-  /* Punch hole — card stock ring that cuts through the banner */
+  /* Punch hole - card stock ring that cuts through the banner */
   .punch-hole {
     position: absolute;
     top: 14px;
@@ -683,7 +683,7 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
   }
 
-  /* Banner layout — prevents smushing on narrow screens */
+  /* Banner layout - prevents smushing on narrow screens */
   .banner-layout {
     display: flex;
     flex-direction: column;
@@ -859,7 +859,7 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
     background: rgba(26, 26, 26, 0.1);
   }
 
-  /* Profile section nav — fixed bottom bar matching main bottom bar style */
+  /* Profile section nav - fixed bottom bar matching main bottom bar style */
   .profile-nav {
     position: fixed;
     bottom: 0;

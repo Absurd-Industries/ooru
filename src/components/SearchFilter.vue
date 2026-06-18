@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Reusable search input + category filter pills.
- * Vue island — used on listing pages (events, makers, etc.).
+ * Vue island - used on listing pages (events, makers, etc.).
  * Supports v-model for search text and active category.
  *
  * Usage:
@@ -92,7 +92,7 @@ function toggleCategory(id: string) {
 </template>
 
 <style scoped>
-/* Filter pills — mirrors global .filter-pill but scoped */
+/* Filter pills - mirrors global .filter-pill but scoped */
 .filter-pill {
   display: inline-flex;
   align-items: center;

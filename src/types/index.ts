@@ -1,5 +1,5 @@
 /**
- * Ooru — Shared TypeScript Types
+ * Ooru - Shared TypeScript Types
  *
  * Shaped as future API response interfaces so they can serve as
  * drop-in replacements when the platform moves to a D1 backend.
@@ -135,7 +135,7 @@ export interface Maker {
 // Events
 // ---------------------------------------------------------------------------
 
-/** A community event — meetup, workshop, hackathon, talk, or conference. */
+/** A community event - meetup, workshop, hackathon, talk, or conference. */
 export interface AbsurdEvent {
   /** URL-safe identifier, e.g. "soldering-101-blr". */
   slug: string;

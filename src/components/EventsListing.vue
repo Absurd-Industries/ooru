@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Events listing island — clean card layout matching homepage events style.
+ * Events listing island - clean card layout matching homepage events style.
  * City filter + search, events rendered as simple date-box microcards.
  */
 

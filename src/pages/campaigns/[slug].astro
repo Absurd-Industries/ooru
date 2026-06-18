@@ -1,6 +1,6 @@
 ---
 /**
- * Campaign detail page — dynamic route via getStaticPaths().
+ * Campaign detail page - dynamic route via getStaticPaths().
  *
  * For the "open-source-water-purifier" campaign (the primary example from
  * the reference design), this page renders the full detail layout:
@@ -219,7 +219,7 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
 
         <Card>
 
-            <!-- Hero media — full-bleed with overlaid nav buttons -->
+            <!-- Hero media - full-bleed with overlaid nav buttons -->
             <div class="campaign-section campaign-section--hero">
               <div class="hero-media-wrap">
                 {campaign.gallery && campaign.gallery.length > 0 ? (
@@ -1129,7 +1129,7 @@ if (document.querySelector('model-viewer')) {
   document.head.appendChild(script);
 }
 
-// Share button — native share on mobile, clipboard fallback on desktop
+// Share button - native share on mobile, clipboard fallback on desktop
 document.querySelectorAll('.share-float-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     if (navigator.share) {

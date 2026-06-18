@@ -2,6 +2,13 @@ import type { Friend } from "../types";
 
 export const friends: Friend[] = [
   {
+    name: "Absurd Industries",
+    url: "https://absurd.industries",
+    logo: "absurd-industries.png",
+    description:
+      "The studio behind Ooru - open-source hardware and curious experiments.",
+  },
+  {
     name: "PCB Cupid",
     url: "https://pcbcupid.com",
     logo: "pcb-cupid.png",

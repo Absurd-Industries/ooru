@@ -1,6 +1,6 @@
 ---
 /**
- * Homepage — the main landing page for ooru.build.
+ * Homepage - the main landing page for ooru.build.
  * Manifesto-style hero, image-rich how-it-works flow with real project
  * examples, featured campaigns strip, community CTA, and auto-scrolling
  * Friends of ooru marquee.
@@ -9,7 +9,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Card from "../components/Card.astro";
 import Tag from "../components/Tag.astro";
-import ProgressBar from "../components/ProgressBar.astro";
+import CampaignCard from "../components/CampaignCard.astro";
 import { friends } from "../data/friends";
 import { makers } from "../data/makers";
 import { events } from "../data/events";
@@ -34,7 +34,7 @@ const upcomingEvents = [...events]
 ---
 
 <BaseLayout title="Open Source STEAM for Makers, Tinkerers & Rebels">
-  <!-- Hero — manifesto pitch -->
+  <!-- Hero - manifesto pitch -->
   <section class="pt-10 pb-10 md:pt-16 md:pb-16">
     <div class="max-w-5xl mx-auto px-5 sm:px-6">
       <p class="text-sm font-semibold uppercase tracking-widest text-stamp mb-4">Bengaluru, India</p>
@@ -44,7 +44,7 @@ const upcomingEvents = [...events]
       </h1>
 
       <p class="text-base sm:text-lg lg:text-xl text-ink max-w-2xl mb-8 leading-relaxed">
-        Ooru is an open-source STEAM platform. Back hardware projects that ship with full schematics, firmware, and CAD files — because you should have the right to study, repair, and rebuild the things you own.
+        Ooru is where people build real things and share exactly how they're made - so you can fund them, fix them, and make them your own.
       </p>
 
       <div class="flex flex-wrap gap-3">
@@ -60,7 +60,7 @@ const upcomingEvents = [...events]
     </div>
   </section>
 
-  <!-- Explore — 4 sections with featured microcards -->
+  <!-- Explore - 4 sections with featured microcards -->
   <section class="pb-14 md:pb-20">
     <div class="max-w-5xl mx-auto px-5 sm:px-6 space-y-12">
 
@@ -78,31 +78,10 @@ const upcomingEvents = [...events]
         <p class="text-sm text-ink max-w-lg leading-relaxed mb-5">
           Back open-source hardware that ships with full source files. Every campaign is transparent - BOM, schematics, firmware, everything.
         </p>
-        <div class="campaign-strip-wrap">
-          <div class="campaign-strip">
-            {featuredCampaigns.map((campaign) => (
-              <a href={`/campaigns/${campaign.slug}`} class="card card-hover block no-underline text-ink group campaign-card">
-                <div class="card-bg"></div>
-                <div class="card-content">
-                  <div class="campaign-card-img" style="border-radius: 0.875rem 0.875rem 0 0;">
-                    <img
-                      src={campaign.image}
-                      alt={campaign.title}
-                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="p-4">
-                    <h3 class="font-serif font-bold text-sm mb-1 group-hover:text-stamp transition-colors truncate">{campaign.title}</h3>
-                    <p class="text-xs text-stencil mb-2">{campaign.makerName} &middot; {campaign.location}</p>
-                    <ProgressBar percent={campaign.percent} hot={campaign.percent >= 100} />
-                    <p class="text-[0.65rem] text-stencil mt-1.5">{campaign.percent >= 100 ? "Fully funded" : `${campaign.percent}% funded`}</p>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-          <div class="campaign-strip-fade" aria-hidden="true"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {featuredCampaigns.map((campaign) => (
+            <CampaignCard campaign={campaign} />
+          ))}
         </div>
       </div>
 
@@ -266,7 +245,7 @@ const upcomingEvents = [...events]
             <i class="ph-bold ph-caret-down faq-teaser-caret"></i>
           </summary>
           <div class="faq-teaser-answer">
-            Ooru is an open-source STEAM platform built by Absurd Industries, based in Bengaluru, India. 'Ooru' means village in Kannada and Telugu — we're building a digital village where makers, tinkerers, engineers, artists, and the endlessly curious come together to build hardware and software in the open. Everything we make ships with full source files.
+            Ooru is an open-source STEAM platform built by Absurd Industries, based in Bengaluru, India. 'Ooru' means village in Kannada and Telugu - we're building a digital village where makers, tinkerers, engineers, artists, and the endlessly curious come together to build hardware and software in the open. Everything we make ships with full source files.
           </div>
         </details>
         <details class="faq-teaser-item">
@@ -293,7 +272,7 @@ const upcomingEvents = [...events]
     </div>
   </section>
 
-  <!-- Friends of Absurd — auto-scrolling marquee -->
+  <!-- Friends of Absurd - auto-scrolling marquee -->
   <section class="pb-14 overflow-hidden">
     <div class="max-w-5xl mx-auto px-5 sm:px-6">
       <h2 class="font-serif text-xl font-bold mb-1">Friends of Ooru</h2>
@@ -327,59 +306,7 @@ const upcomingEvents = [...events]
 
 
 <style>
-  /* Campaign strip with scroll hint */
-  .campaign-strip-wrap {
-    position: relative;
-  }
-  .campaign-strip {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-  }
-  .campaign-strip-fade {
-    display: none;
-  }
-  .campaign-card-img {
-    height: 180px;
-    overflow: hidden;
-  }
-  @media (max-width: 640px) {
-    .campaign-strip {
-      display: flex;
-      gap: 1rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 0.5rem;
-      padding-right: 2rem;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    .campaign-strip::-webkit-scrollbar {
-      display: none;
-    }
-    .campaign-card {
-      min-width: 72vw;
-      scroll-snap-align: start;
-      flex-shrink: 0;
-    }
-    .campaign-card-img {
-      height: 200px;
-    }
-    .campaign-strip-fade {
-      display: block;
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 3rem;
-      background: linear-gradient(to right, transparent, rgba(212, 184, 150, 0.6));
-      pointer-events: none;
-      border-radius: 0 0.875rem 0.875rem 0;
-    }
-  }
-
-  /* Maker list rows — compact table style */
+  /* Maker list rows - compact table style */
   .maker-list-row {
     display: flex;
     align-items: center;
@@ -453,7 +380,7 @@ const upcomingEvents = [...events]
     border: 1px solid rgba(26, 26, 26, 0.08);
   }
 
-  /* Microcard — compact interactive item */
+  /* Microcard - compact interactive item */
   .microcard {
     display: flex;
     align-items: center;
@@ -500,12 +427,15 @@ const upcomingEvents = [...events]
   .friend-item:hover {
     opacity: 1;
   }
+  .friend-item img {
+    border-radius: 6px;
+  }
   @keyframes marquee-scroll {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
 
-  /* FAQ teaser — inline expandable accordions */
+  /* FAQ teaser - inline expandable accordions */
   .faq-teaser-list {
     border: 1px solid rgba(26, 26, 26, 0.08);
     border-radius: 0.75rem;

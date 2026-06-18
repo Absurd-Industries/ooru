@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Makers listing island — search + specialty filters + ID card grid.
+ * Makers listing island - search + specialty filters + ID card grid.
  * Renders the full ID-card markup in the Vue template so that
  * client-side filtering works seamlessly.
  */

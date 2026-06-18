@@ -8,8 +8,7 @@
 import { ClientRouter } from "astro:transitions";
 import SvgFilters from "../components/SvgFilters.astro";
 import Footer from "../components/Footer.astro";
-import BottomBar from "../components/BottomBar.vue";
-import DesktopNav from "../components/DesktopNav.vue";
+import TopNav from "../components/TopNav.vue";
 import ComingSoon from "../components/ComingSoon.vue";
 import DebugPanel from "../components/DebugPanel.vue";
 import "../styles/global.css";
@@ -17,7 +16,7 @@ import "../styles/global.css";
 const isDev = import.meta.env.DEV;
 
 interface Props {
-  /** Page title — appended with "| Ooru" */
+  /** Page title - appended with "| Ooru" */
   title: string;
   /** Meta description for SEO */
   description?: string;
@@ -25,9 +24,9 @@ interface Props {
   ogImage?: string;
   /** Which bottom bar tab is active: "campaigns", "makers", "requests", "events" */
   activeTab?: string;
-  /** Enable dark mode (class="dark" on html) — used by inventory */
+  /** Enable dark mode (class="dark" on html) - used by inventory */
   darkMode?: boolean;
-  /** Hide bottom/desktop nav — used on immersive pages like campaign detail */
+  /** Hide bottom/desktop nav - used on immersive pages like campaign detail */
   hideNav?: boolean;
 }
 
@@ -61,6 +60,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:card" content="summary_large_image" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
@@ -74,11 +74,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
       rel="stylesheet"
     />
 
-    <!-- Icons: Phosphor (CSS only — bold + duotone weights used) -->
+    <!-- Icons: Phosphor (CSS only - bold + duotone weights used) -->
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css" />
 
-    <!-- Icons: FontAwesome brands (CSS webfont — no JS, survives view transitions) -->
+    <!-- Icons: FontAwesome brands (CSS webfont - no JS, survives view transitions) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/brands.min.css" integrity="sha512-8RxmFOVaKQe/xtg6lbscU9DU0IRhURWEuiI0tXevv+lXbAHfkpamD4VKFQRto9WgfOJDwOZ74c/s9Yesv3VvIQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/fontawesome.min.css" integrity="sha512-d0olNN35C6VLiulAobxYHZiXJmq+vl+BGIgAxQtD5+kqudro/xNMvv2yIHAciGHpExTmF6XHQZFpKBtLW5csw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -89,11 +89,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <SvgFilters />
     <ComingSoon client:load />
 
+    {!hideNav && <TopNav activeTab={activeTab} client:load />}
+
     <slot />
 
     {!hideNav && <Footer />}
-    {!hideNav && <BottomBar activeTab={activeTab} client:load />}
-    {!hideNav && <DesktopNav activeTab={activeTab} client:load />}
     {isDev && (
       <DebugPanel
         route={Astro.url.pathname}
