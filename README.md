@@ -1,8 +1,12 @@
-# Ooru - ಊರು · ఊరు
+<div align="center">
+
+![Ooru - ಊರು · ఊరు](./docs/ooru-banner.png)
 
 **Your village for open-source hardware. India-rooted, globally open.**
 
 [ooru.build](https://ooru.build) · [Discord](https://discord.gg/DUSUtguG2H)
+
+</div>
 
 ---
 
@@ -16,6 +20,20 @@ People build real things and share exactly how they're made - so you can fund th
 - **Makers** - profiles of the people building what the community needs.
 - **Requests** - describe something that should exist; the community refines the spec and a maker brings it to life.
 - **Events** - Bengaluru-first STEAM meetups, workshops, hackathons, and talks.
+
+## A peek
+
+The homepage - top nav, manifesto hero, and featured campaigns:
+
+![Ooru homepage](./docs/screenshot-home.png)
+
+Browse, search, and filter open hardware campaigns:
+
+![Campaigns page](./docs/screenshot-campaigns.png)
+
+<img src="./docs/screenshot-mobile.png" width="320" alt="Ooru on mobile" />
+
+*Responsive down to the phone - cards stack, nav collapses to a menu.*
 
 ## Tech stack
 
