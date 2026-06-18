@@ -21,20 +21,6 @@ People build real things and share exactly how they're made - so you can fund th
 - **Requests** - describe something that should exist; the community refines the spec and a maker brings it to life.
 - **Events** - Bengaluru-first STEAM meetups, workshops, hackathons, and talks.
 
-## A peek
-
-The homepage - top nav, manifesto hero, and featured campaigns:
-
-![Ooru homepage](./docs/screenshot-home.png)
-
-Browse, search, and filter open hardware campaigns:
-
-![Campaigns page](./docs/screenshot-campaigns.png)
-
-<img src="./docs/screenshot-mobile.png" width="320" alt="Ooru on mobile" />
-
-*Responsive down to the phone - cards stack, nav collapses to a menu.*
-
 ## Tech stack
 
 - **[Astro](https://astro.build) 6** - static-first, with per-page SSR opt-in
