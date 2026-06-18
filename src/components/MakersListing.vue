@@ -235,11 +235,10 @@ function getInitial(name: string): string {
   display: block;
   border-radius: 0.875rem;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 .id-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(26, 26, 26, 0.15);
 }
 
 .id-card-inner {
@@ -301,7 +300,7 @@ function getInitial(name: string): string {
   width: 64px;
   height: 64px;
   object-fit: cover;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: url(#rounded-octagon);
 }
 .id-avatar-fallback {
   width: 64px;
@@ -309,7 +308,7 @@ function getInitial(name: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: url(#rounded-octagon);
   background: rgba(250, 243, 232, 0.15);
   color: #FAF3E8;
   font-weight: 700;
@@ -324,10 +323,6 @@ function getInitial(name: string): string {
   color: #FAF3E8;
   line-height: 1.2;
   margin: 0;
-  transition: color 0.15s;
-}
-.id-card:hover .id-name {
-  color: #FF5900;
 }
 
 .id-meta {
@@ -420,7 +415,7 @@ function getInitial(name: string): string {
   width: 80px;
   height: 80px;
   object-fit: cover;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: url(#rounded-octagon);
 }
 .square-tile-fallback {
   width: 80px;
@@ -428,7 +423,7 @@ function getInitial(name: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: url(#rounded-octagon);
   color: #FAF3E8;
   font-weight: 700;
   font-family: 'Fraunces', serif;
@@ -463,14 +458,14 @@ function getInitial(name: string): string {
 .table-avatar {
   width: 36px;
   height: 36px;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: url(#rounded-octagon);
   object-fit: cover;
   flex-shrink: 0;
 }
 .table-avatar-fallback {
   width: 36px;
   height: 36px;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  clip-path: url(#rounded-octagon);
   display: flex;
   align-items: center;
   justify-content: center;

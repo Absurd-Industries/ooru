@@ -718,7 +718,7 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
   .oct-avatar {
     width: 96px;
     height: 96px;
-    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    clip-path: url(#rounded-octagon);
     background: #FAF3E8;
     display: flex;
     align-items: center;
@@ -977,6 +977,6 @@ const contributions = Math.round(maker.projects * 8 + maker.backers / 10);
 
   /* Octagonal avatar helper */
   .oct-sm {
-    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    clip-path: url(#rounded-octagon);
   }
 </style>

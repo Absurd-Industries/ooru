@@ -33,7 +33,7 @@ import Card from "../../components/Card.astro";
       <Card>
         <div class="faq-list" id="faq-accordion">
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-question faq-q-icon"></i>
               <span>What is Ooru?</span>
@@ -44,7 +44,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-rocket-launch faq-q-icon"></i>
               <span>How do campaigns work?</span>
@@ -55,7 +55,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-hand-palm faq-q-icon"></i>
               <span>How do requests work?</span>
@@ -66,7 +66,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-scales faq-q-icon"></i>
               <span>What open-source licenses do projects use?</span>
@@ -77,7 +77,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-users-three faq-q-icon"></i>
               <span>How do I become a maker?</span>
@@ -88,7 +88,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-megaphone faq-q-icon"></i>
               <span>How do I request something?</span>
@@ -99,7 +99,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-map-pin faq-q-icon"></i>
               <span>Is this only in Bengaluru?</span>
@@ -110,7 +110,7 @@ import Card from "../../components/Card.astro";
             </div>
           </details>
 
-          <details>
+          <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-coin faq-q-icon"></i>
               <span>How is this funded?</span>
@@ -148,7 +148,8 @@ import Card from "../../components/Card.astro";
     }
     summary::-webkit-details-marker { display: none; }
     summary:hover { color: #FF5900; }
-    details[open] summary { color: #FF5900; }
+    /* Open state stays ink - orange is reserved for hover/interaction */
+    details[open] summary { color: #1A1A1A; }
     summary span {
       flex: 1;
     }
@@ -159,7 +160,7 @@ import Card from "../../components/Card.astro";
       transition: color 0.15s;
     }
     details[open] .faq-q-icon {
-      color: #FF5900;
+      color: #6B5B4A;
     }
     summary:hover .faq-q-icon {
       color: #FF5900;
@@ -172,7 +173,7 @@ import Card from "../../components/Card.astro";
     }
     details[open] .faq-icon {
       transform: rotate(180deg);
-      color: #FF5900;
+      color: #6B5B4A;
     }
     .faq-list {
       background: rgba(250, 243, 232, 0.6);

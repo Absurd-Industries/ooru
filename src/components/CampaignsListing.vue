@@ -224,7 +224,7 @@ function statusTagClass(status: string): string {
             <div class="flex items-center gap-2 mb-4">
               <div
                 class="w-6 h-6 flex items-center justify-center text-xs font-bold text-paper"
-                :style="{ background: campaign.avatarColor, clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' }"
+                :style="{ background: campaign.avatarColor, clipPath: 'url(#rounded-octagon)' }"
               >
                 {{ campaign.makerName.charAt(0) }}
               </div>
