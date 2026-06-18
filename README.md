@@ -2,7 +2,7 @@
 
 ![Ooru - ಊರು · ఊరు](./docs/ooru-banner.png)
 
-**Your village for open-source hardware. India-rooted, globally open.**
+**A warm community of makers who believe collabration beats competition.**
 
 [ooru.build](https://ooru.build) · [Discord](https://discord.gg/DUSUtguG2H)
 
@@ -10,7 +10,7 @@
 
 ---
 
-**Ooru** (ಊರು in Kannada, ఊరు in Telugu) means *village* or *hometown*. It's a digital village where makers, tinkerers, engineers, artists, and the endlessly curious come together to build hardware and software in the open.
+**Ooru** (ಊರು in Kannada, ఊరు in Telugu) means *village* or *hometown*. It's a digital community where makers, tinkerers, engineers, artists, and the endlessly curious come together to build hardware and software in the open.
 
 People build real things and share exactly how they're made - so you can fund them, fix them, and make them your own. Every project ships with full source files: bill of materials, schematics, firmware, and CAD.
 

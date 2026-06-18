@@ -17,7 +17,6 @@ const links = [
   { label: "Makers", href: "/makers" },
   { label: "Requests", href: "/requests" },
   { label: "Events", href: "/events" },
-  { label: "Hardware Devroom", href: "/hardware-devroom" },
   { label: "FAQ", href: "/faq" },
 ];
 
@@ -94,6 +93,8 @@ function isActive(href: string): boolean {
 
 <style scoped>
 .topnav {
+  /* Desktop only - phones use the fixed BottomBar */
+  display: none;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -235,6 +236,9 @@ function isActive(href: string): boolean {
 
 /* Desktop breakpoint */
 @media (min-width: 1024px) {
+  .topnav {
+    display: block;
+  }
   .topnav-links {
     display: flex;
   }

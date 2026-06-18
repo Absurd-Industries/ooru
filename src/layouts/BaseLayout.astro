@@ -9,6 +9,7 @@ import { ClientRouter } from "astro:transitions";
 import SvgFilters from "../components/SvgFilters.astro";
 import Footer from "../components/Footer.astro";
 import TopNav from "../components/TopNav.vue";
+import BottomBar from "../components/BottomBar.vue";
 import ComingSoon from "../components/ComingSoon.vue";
 import DebugPanel from "../components/DebugPanel.vue";
 import "../styles/global.css";
@@ -94,6 +95,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <slot />
 
     {!hideNav && <Footer />}
+    {!hideNav && <BottomBar activeTab={activeTab} client:load />}
     {isDev && (
       <DebugPanel
         route={Astro.url.pathname}

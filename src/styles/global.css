@@ -23,7 +23,15 @@
     background-image: url('/images/kraft-paper.jpg');
     background-repeat: repeat;
     background-size: auto;
+    padding-bottom: 72px;
     font-weight: 450;
+  }
+
+  /* Bottom bar is phone-only; remove its reserved space on desktop */
+  @media (min-width: 1024px) {
+    body {
+      padding-bottom: 0;
+    }
   }
 
   html.dark body {
@@ -347,6 +355,145 @@
     background-image: url('/images/paper-texture.png');
     background-repeat: repeat;
     background-size: 128px 128px;
+  }
+}
+
+
+/* -----------------------------------------------------------------------
+   7. BOTTOM BAR
+   Fixed bottom navigation bar (phone only) with links/buttons styling.
+   ----------------------------------------------------------------------- */
+
+@layer components {
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1A1A1A;
+    z-index: 50;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .bottom-bar--hidden {
+    transform: translateY(100%);
+  }
+
+  /* Bottom bar is phone-only - desktop uses TopNav */
+  @media (min-width: 1024px) {
+    .bottom-bar {
+      display: none;
+    }
+  }
+
+  .bottom-bar a,
+  .bottom-bar button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    color: rgba(250, 243, 232, 0.55);
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+    cursor: pointer;
+  }
+
+  .bottom-bar a:hover,
+  .bottom-bar a:active,
+  .bottom-bar button:hover {
+    color: #FF5900;
+  }
+
+  .bottom-bar a.active-tab {
+    color: #FF5900;
+  }
+
+  .bottom-bar i,
+  .bottom-bar .ph-bold {
+    font-size: 1.25rem;
+    margin-bottom: 3px;
+  }
+}
+
+
+/* -----------------------------------------------------------------------
+   8. MEGA MENU
+   Slide-up panel from the bottom bar, Vue transition classes.
+   ----------------------------------------------------------------------- */
+
+@layer components {
+  .mega-menu-wrapper {
+    position: fixed;
+    bottom: 56px;
+    left: 0;
+    right: 0;
+    z-index: 49;
+  }
+
+  .mega-menu {
+    background: #1A1A1A;
+    border-radius: 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+    padding: 0;
+  }
+
+  .mega-menu a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    color: rgba(250, 243, 232, 0.55);
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid rgba(250, 243, 232, 0.06);
+    flex-direction: row;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    transition: background 0.12s ease, color 0.12s ease;
+    text-align: left;
+    width: 100%;
+  }
+  .mega-menu a:last-child {
+    border-bottom: none;
+  }
+  .mega-menu a i {
+    font-size: 1rem;
+    color: rgba(250, 243, 232, 0.4);
+    width: 1.1rem;
+    text-align: left;
+    flex-shrink: 0;
+    transition: color 0.12s ease;
+  }
+  .mega-menu a:hover {
+    color: #FF5900;
+    background: rgba(250, 243, 232, 0.04);
+  }
+  .mega-menu a:hover i {
+    color: #FF5900;
+  }
+
+  /* Vue slide transition for the mega menu */
+  .slide-enter-active {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  }
+  .slide-leave-active {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1), opacity 0.15s ease;
+  }
+  .slide-enter-from,
+  .slide-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
   }
 }
 
