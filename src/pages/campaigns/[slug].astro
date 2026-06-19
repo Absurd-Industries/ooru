@@ -15,8 +15,16 @@ import Card from "../../components/Card.astro";
 import Tag from "../../components/Tag.astro";
 import ProgressBar from "../../components/ProgressBar.astro";
 import GalleryViewer from "../../components/GalleryViewer.vue";
+import FilePreview from "../../components/FilePreview.vue";
+import CampaignDiscussion from "../../components/CampaignDiscussion.vue";
+import CampaignRewards from "../../components/CampaignRewards.vue";
 import { campaigns } from "../../data/campaigns";
 import type { Campaign } from "../../types";
+
+// Backing model helpers: reserve 25% now, pay the balance on ship.
+const priceNum = (s: string) => parseInt(String(s).replace(/[^\d]/g, ""), 10) || 0;
+const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+const depositOf = (price: string) => Math.round(priceNum(price) * 0.25);
 
 export function getStaticPaths() {
   return campaigns.map((campaign) => ({
@@ -58,12 +66,143 @@ const bom = [
   { name: "Silicone tubing + fittings", qty: "1 set", source: "Local hardware store", cost: "₹59" },
 ];
 
-const sourceFiles = [
-  { name: "PCB Schematics", format: "KiCad", icon: "ph-bold ph-circuit-board" },
-  { name: "3D Models", format: "STEP", icon: "ph-bold ph-cube" },
-  { name: "Firmware", format: "C", icon: "ph-bold ph-code" },
-  { name: "Assembly Guide", format: "PDF", icon: "ph-bold ph-file-pdf" },
-  { name: "BOM Spreadsheet", format: "CSV / ODS", icon: "ph-bold ph-table" },
+// Bill of materials as downloadable CSV (generated from the table above).
+const bomCsv =
+  "Component,Qty,Source,Est. Cost (INR)\n" +
+  bom
+    .map(
+      (b) =>
+        `${b.name},${b.qty},${b.source.replace(/,/g, ";")},${b.cost.replace("₹", "")}`
+    )
+    .join("\n");
+
+// Source files with real, previewable content - the heart of the
+// open-source promise. Click any file to read it before you back it.
+const files = [
+  {
+    name: "PCB Schematic",
+    format: "KiCad",
+    icon: "ph-bold ph-circuit-board",
+    type: "code",
+    filename: `${campaign.slug}.kicad_sch`,
+    meta: "KiCad 8 schematic source",
+    content: `(kicad_sch (version 20231120) (generator "eeschema")
+  (uuid "a1b2c3d4-0000-4f00-8000-${campaign.slug.slice(0, 8).padEnd(8, "0")}")
+  (paper "A4")
+  (title_block
+    (title "${campaign.title}")
+    (company "Ooru / Open Hardware")
+    (comment 1 "Licensed under ${campaign.license}")
+  )
+  (lib_symbols
+    (symbol "MCU_Module:ESP32-WROOM-32"
+      (pin power_in line (at 0 7.62 270) (name "3V3") (number "1")))
+    (symbol "Sensor:SOIL-CAP-v2"
+      (pin passive line (at -5.08 0 0) (name "SIG") (number "2")))
+  )
+  (wire (pts (xy 88.9 73.66) (xy 101.6 73.66)))
+  (symbol (lib_id "MCU_Module:ESP32-WROOM-32") (at 95.25 80.01 0))
+  (symbol (lib_id "Sensor:SOIL-CAP-v2") (at 60.96 90.17 0))
+)`,
+  },
+  {
+    name: "Firmware",
+    format: "C",
+    icon: "ph-bold ph-code",
+    type: "code",
+    filename: "firmware.c",
+    meta: "Embedded C source",
+    content: `// ${campaign.title} - firmware
+// SPDX-License-Identifier: ${campaign.license}
+#include "board.h"
+#include "sensor.h"
+#include "lora.h"
+
+#define SAMPLE_INTERVAL_MS  60000
+#define DEEP_SLEEP_ENABLED  1
+
+void setup(void) {
+  board_init();
+  sensor_calibrate();
+  lora_join_otaa();
+}
+
+void loop(void) {
+  reading_t r = sensor_read();
+  if (r.valid) {
+    lora_send(&r, sizeof(r));
+  }
+#if DEEP_SLEEP_ENABLED
+  board_deep_sleep(SAMPLE_INTERVAL_MS);
+#else
+  delay(SAMPLE_INTERVAL_MS);
+#endif
+}`,
+  },
+  {
+    name: "3D Model",
+    format: campaign.modelUrl ? "GLB / STEP" : "STEP",
+    icon: "ph-bold ph-cube",
+    type: campaign.modelUrl ? "3d" : "text",
+    filename: "enclosure.step",
+    modelUrl: campaign.modelUrl,
+    meta: "Weatherproof enclosure",
+    content: campaign.modelUrl
+      ? undefined
+      : `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('${campaign.title} enclosure'),'2;1');
+FILE_NAME('enclosure.step','2026-01-01T00:00:00',('Ooru'),(''),'','','');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 }'));
+ENDSEC;
+DATA;
+#1 = CARTESIAN_POINT('',(0.,0.,0.));
+#2 = DIRECTION('',(0.,0.,1.));
+/* ... full B-rep solid omitted in preview - download to open in CAD ... */
+ENDSEC;
+END-ISO-10303-21;`,
+  },
+  {
+    name: "Assembly Guide",
+    format: "Guide",
+    icon: "ph-bold ph-file-text",
+    type: "text",
+    filename: "assembly-guide.md",
+    meta: "Step-by-step build",
+    content: `# ${campaign.title} - Assembly Guide
+
+## You will need
+- 2.0mm hex driver, fine-tip soldering iron, flush cutters
+- The parts in bom.csv (every part is sourceable - see the Source column)
+
+## 1. Populate the board
+Solder the through-hole components first, lowest profile to highest.
+Double-check the diode and electrolytic cap orientation against the
+silkscreen.
+
+## 2. Flash the firmware
+Connect over USB-C and run \`make flash\`. The firmware source is in
+firmware.c - read it first, it is short on purpose.
+
+## 3. Close the enclosure
+Seat the board on the standoffs, route the sensor cable through the
+grommet, and torque the 4 corner screws lightly. Do not over-tighten.
+
+## 4. Field check
+Power on. The status LED breathes while joining the network, then
+pulses once per successful reading.
+
+Licensed under ${campaign.license}. Remix freely.`,
+  },
+  {
+    name: "Bill of Materials",
+    format: "CSV",
+    icon: "ph-bold ph-table",
+    type: "csv",
+    filename: "bom.csv",
+    meta: `${bom.length} components`,
+    content: bomCsv,
+  },
 ];
 
 const manufacturingSteps = [
@@ -94,41 +233,173 @@ const updates = [
 
 const rewardTiers = [
   {
+    name: "Source Supporter",
+    price: "₹500",
+    blurb: "Back the mission and get every design file the moment we ship.",
+    perks: [
+      "Full source files (schematics, CAD, firmware)",
+      "Name in the project credits",
+      "Backer-only build updates",
+    ],
+    delivery: "Sep 2026",
+    ships: "Digital - no shipping",
+    backers: 56,
+    claimed: 56,
+    total: null,
+  },
+  {
     name: "Early Bird",
     price: "₹1,500",
+    blurb: "The complete unit at a thank-you price for the first backers.",
     perks: [
       "1 fully assembled unit",
       "Complete schematics and source files",
       "Name in project credits",
     ],
+    delivery: "Oct 2026",
+    ships: "Worldwide",
+    backers: 42,
     claimed: 42,
     total: 50,
   },
   {
     name: "Maker Bundle",
     price: "₹3,500",
+    blurb: "Build it yourself - every part, plus extras and a printed guide.",
     perks: [
       "1 complete kit (unassembled) with all parts",
       "3 extra filter elements",
       "Your name etched on the PCB silkscreen",
       "Printed assembly guide",
     ],
+    delivery: "Oct 2026",
+    ships: "Worldwide",
+    backers: 89,
     claimed: 89,
     total: 150,
   },
   {
     name: "Workshop Pack",
     price: "₹12,000",
+    blurb: "Everything a makerspace needs to run a build session.",
     perks: [
       "5 complete units (assembled)",
       "Workshop hosting guide and slides",
       "Priority email support from the maker",
       "Logo placement on project page",
     ],
+    delivery: "Nov 2026",
+    ships: "Worldwide",
+    backers: 12,
     claimed: 12,
     total: 30,
   },
 ];
+
+// Every campaign gets a sensible default set of tiers derived from its own numbers.
+const genericTiers = [
+  {
+    name: "Source Supporter",
+    price: "₹500",
+    blurb: "Back the build and get every open-source file the day we ship.",
+    perks: [
+      "Full source files under " + campaign.license,
+      "Name in the project credits",
+      "Backer-only build updates",
+    ],
+    delivery: "Sep 2026",
+    ships: "Digital - no shipping",
+    backers: Math.max(8, Math.round(campaign.backers * 0.18)),
+    claimed: Math.max(8, Math.round(campaign.backers * 0.18)),
+    total: null,
+  },
+  {
+    name: "Early Bird",
+    price: "₹2,500",
+    blurb: "The complete, assembled product at a thank-you price.",
+    perks: [
+      "1 fully assembled unit",
+      "Complete source files and documentation",
+      "Name in project credits",
+    ],
+    delivery: "Oct 2026",
+    ships: "Worldwide",
+    backers: Math.max(20, Math.round(campaign.backers * 0.45)),
+    claimed: 60,
+    total: 75,
+  },
+  {
+    name: "Maker Kit",
+    price: "₹4,500",
+    blurb: "Every part to build it yourself, plus a printed assembly guide.",
+    perks: [
+      "Complete kit (unassembled) with all parts",
+      "Step-by-step printed assembly guide",
+      "Your name on the PCB silkscreen",
+    ],
+    delivery: "Nov 2026",
+    ships: "Worldwide",
+    backers: Math.max(10, Math.round(campaign.backers * 0.3)),
+    claimed: 38,
+    total: 120,
+  },
+];
+
+const tiers = isShowcase ? rewardTiers : genericTiers;
+
+// Generic updates so every campaign's Updates tab has content.
+const genericUpdates = [
+  {
+    date: "Two weeks ago",
+    title: "We hit a major prototyping milestone",
+    text: "The latest revision is assembled and running on the bench. Everything from the enclosure fit to the firmware is behaving as designed, and we are moving into a longer reliability run before we lock the production files. Thank you for getting us here.",
+  },
+  {
+    date: "One month ago",
+    title: "Source files are live in the repository",
+    text: "As promised, the full design package is public from day one - schematics, CAD, and firmware are all in the project repository under " + campaign.license + ". Browse them, build along, and tell us what you would change.",
+  },
+];
+
+const updatesList = isShowcase ? updates : genericUpdates;
+
+// Campaign FAQ - applies to every project.
+const faqs = [
+  {
+    q: "When will rewards ship?",
+    a: "Estimated delivery is on each reward tier. We only commit to dates we are confident in - if anything slips, backers hear it first in an update, with the reason and a new estimate.",
+  },
+  {
+    q: "Is this really fully open source?",
+    a: "Yes. Every schematic, board file, 3D model, and line of firmware is released under " + campaign.license + ". You can study it, repair it, manufacture it, and remix it - that is the whole point of building on Ooru.",
+  },
+  {
+    q: "Can I build it myself instead of backing a unit?",
+    a: "Absolutely. The Source Supporter tier gets you the complete file package, and the bill of materials lists every part with a place to buy it. The Maker Kit tier ships you the parts if you would rather not source them.",
+  },
+  {
+    q: "Do you ship internationally?",
+    a: "Yes - physical rewards ship worldwide. Any duties or import taxes are the backer's responsibility and are not included in the pledge amount.",
+  },
+  {
+    q: "What happens if the campaign is not fully funded?",
+    a: "This is an all-or-nothing campaign. If we do not reach the goal, no one is charged and no rewards ship. You are only backing a project that has the support to actually happen.",
+  },
+];
+
+// Risks & Challenges - a Kickstarter-required section.
+const risks = `Building open hardware in the open means we share our challenges as readily as our wins. The core technology is already working in our prototypes, so the largest remaining risks are in manufacturing and fulfilment: component lead times can shift, and moving from a hand-built prototype to a repeatable production run always surfaces small surprises.
+
+We have de-risked this by finalising the design before launching, sourcing every part from at least two suppliers, and field-testing real units rather than bench mock-ups. Because the entire design is open, you are never locked in - if we ever could not finish, the complete files are already public so the community can carry it forward. We will keep you honest with regular, specific updates at every step.`;
+
+// Lightweight creator stats for the maker card.
+const creatorStats = {
+  created: 1 + (campaign.backers % 3),
+  backed: 4 + (campaign.backers % 11),
+  firstCreated: campaign.backers % 3 === 0,
+};
+
+const estDelivery = campaign.status === "coming" ? "TBA" : "September 2026";
 
 const comments = [
   {
@@ -202,6 +473,15 @@ const comments = [
 const statusLabel = campaign.status === "live" ? "Live" : campaign.status === "funded" ? "Funded" : "Coming Soon";
 const statusVariant = campaign.status === "live" ? "stamp" : campaign.status === "funded" ? "funded" : "default";
 
+// In-page section nav (Kickstarter-style sticky tabs). Only lists sections that render.
+const sectionNav = [
+  { id: "story", label: "Story" },
+  { id: "rewards", label: "Rewards" },
+  { id: "updates", label: "Updates", count: updatesList.length },
+  { id: "faq", label: "FAQ", count: faqs.length },
+  { id: "comments", label: "Comments", count: isShowcase ? comments.length : 0 },
+];
+
 ---
 
 <BaseLayout
@@ -268,6 +548,16 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
               </div>
             </div>
 
+            <!-- Sticky in-page section nav (Kickstarter-style tabs) -->
+            <nav class="section-nav" id="section-nav">
+              {sectionNav.map((s) => (
+                <a href={`#sec-${s.id}`} class="section-nav-link" data-target={`sec-${s.id}`}>
+                  {s.label}
+                  {s.count != null && <span class="section-nav-count">{s.count}</span>}
+                </a>
+              ))}
+            </nav>
+
             <!-- Born from request callout -->
             {campaign.bornFromRequest && (
               <div class="campaign-section">
@@ -290,7 +580,7 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
             )}
 
             <!-- About This Project -->
-            <div class="campaign-section">
+            <div class="campaign-section" id="sec-story">
               <h2 class="font-serif font-bold text-lg mb-4">About This Project</h2>
               <div class="text-sm leading-relaxed text-ink-light space-y-4">
                 <p>{campaign.tagline}</p>
@@ -392,29 +682,17 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
 
             <!-- Open Source Files -->
             {isShowcase ? (
-              <div class="campaign-section">
-                <div class="flex items-center justify-between mb-4">
+              <div class="campaign-section" id="sec-files">
+                <div class="flex items-center justify-between mb-1">
                   <h2 class="font-serif font-bold text-lg">Open Source Files</h2>
                   <Tag variant="funded">
                     <i class="ph-bold ph-scales mr-1" style="font-size: 0.65rem;"></i>
                     {campaign.license}
                   </Tag>
                 </div>
+                <p class="text-xs text-ink-faint mb-4">Preview every file before you back it - read the firmware, inspect the BOM, spin the model.</p>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {sourceFiles.map((file) => (
-                    <div class="file-card">
-                      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(26,26,26,0.05);">
-                        <i class:list={[file.icon, "file-card-icon text-stencil text-lg transition-colors"]}></i>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-semibold leading-snug">{file.name}</div>
-                        <div class="text-xs text-ink-faint">{file.format}</div>
-                      </div>
-                      <i class="ph-bold ph-download-simple text-stencil file-card-icon transition-colors"></i>
-                    </div>
-                  ))}
-                </div>
+                <FilePreview files={files} campaignSlug={campaign.slug} license={campaign.license} client:visible />
               </div>
             ) : (
               <div class="campaign-section">
@@ -517,16 +795,43 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
               </div>
             )}
 
-            <!-- Updates Feed (showcase only) -->
-            {isShowcase && (
-              <div class="campaign-section">
-                <h2 class="font-serif font-bold text-lg mb-5">Updates</h2>
+            <!-- Risks & Challenges (Kickstarter-standard section) -->
+            <div class="campaign-section" id="sec-risks">
+              <h2 class="font-serif font-bold text-lg mb-3">
+                <i class="ph-duotone ph-warning-circle mr-2" style="font-size:1rem;"></i>
+                Risks &amp; Challenges
+              </h2>
+              <div class="text-sm leading-relaxed text-ink-light space-y-4 whitespace-pre-line">{risks}</div>
+            </div>
 
-                {updates.map((update, idx) => (
+            <!-- FAQ -->
+            <div class="campaign-section" id="sec-faq">
+              <h2 class="font-serif font-bold text-lg mb-4">Frequently Asked Questions</h2>
+              <div class="campaign-faq">
+                {faqs.map((f) => (
+                  <details class="campaign-faq-item" name="campaign-faq">
+                    <summary class="campaign-faq-q">
+                      <span>{f.q}</span>
+                      <i class="ph-bold ph-caret-down campaign-faq-caret"></i>
+                    </summary>
+                    <div class="campaign-faq-a">{f.a}</div>
+                  </details>
+                ))}
+              </div>
+              <p class="text-xs text-ink-faint mt-4">
+                Still curious? <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="text-stamp hover:underline" style="text-decoration:none;">Ask the maker on Discord</a>.
+              </p>
+            </div>
+
+            <!-- Updates Feed -->
+            <div class="campaign-section" id="sec-updates">
+              <h2 class="font-serif font-bold text-lg mb-5">Updates <span class="text-sm font-sans font-normal text-ink-faint ml-1">({updatesList.length})</span></h2>
+
+                {updatesList.map((update, idx) => (
                   <div class="flex gap-3">
                     <div class="flex flex-col items-center flex-shrink-0">
                       <div class:list={["w-3 h-3 rounded-full mt-1", idx === 0 ? "bg-stamp" : "bg-kraft-dark"]}></div>
-                      {idx < updates.length - 1 && (
+                      {idx < updatesList.length - 1 && (
                         <div class:list={["w-0.5 flex-1 mt-1", idx === 0 ? "bg-stamp/30" : "bg-kraft-dark/20"]}></div>
                       )}
                     </div>
@@ -538,107 +843,22 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
                   </div>
                 ))}
               </div>
-            )}
 
-            <!-- Discussion (showcase only) -->
-            {isShowcase && (
-              <div class="campaign-section">
-                <h2 class="font-serif font-bold text-lg mb-2">
-                  Discussion
-                  <span class="text-sm font-sans font-normal text-ink-faint ml-1">({comments.length} comments)</span>
-                </h2>
-
-                <!-- Comment composer placeholder -->
-                <div class="mb-6 mt-4">
-                  <div class="flex gap-3">
-                    <div class="w-8 h-8 flex items-center justify-center text-xs font-bold text-paper flex-shrink-0 mt-0.5 oct-sm" style="background: #6B5B4A;">
-                      <i class="ph-bold ph-user text-xs"></i>
-                    </div>
-                    <div class="flex-1">
-                      <textarea
-                        class="comment-textarea"
-                        placeholder="Comments coming soon. Join Discord to discuss this project."
-                        rows="2"
-                        disabled
-                        style="opacity: 0.5; cursor: not-allowed;"
-                      ></textarea>
-                      <div class="flex items-center justify-between mt-2">
-                        <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="text-xs text-stamp hover:underline">Discuss on Discord</a>
-                        <button class="btn btn-stamp btn-sm" disabled style="opacity: 0.4; cursor: not-allowed;">Post Comment</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Comments list -->
-                <div>
-                  {comments.map((comment) => (
-                    <div class="comment-entry">
-                      <div class="flex gap-3">
-                        <div
-                          class="w-8 h-8 flex items-center justify-center text-xs font-bold text-paper flex-shrink-0 oct-sm"
-                          style={`background: ${comment.color}`}
-                        >
-                          {comment.initials}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="flex flex-wrap items-center gap-2 mb-1">
-                            <span class="text-sm font-semibold">{comment.author}</span>
-                            {comment.badge && (
-                              <Tag variant={comment.badgeVariant} class="text-[0.6rem] py-0">{comment.badge}</Tag>
-                            )}
-                            <span class="text-xs text-ink-faint">{comment.time}</span>
-                          </div>
-                          <p class="text-sm leading-relaxed text-ink-light">{comment.content}</p>
-                          <div class="flex items-center gap-2 mt-2">
-                            <span class="comment-vote" style="cursor: default; opacity: 0.5;" title="Coming soon">
-                              <i class="ph-bold ph-heart"></i>
-                            </span>
-                            <span class="comment-action" style="cursor: default; opacity: 0.5;" title="Coming soon">
-                              <i class="ph-bold ph-chat-circle"></i>
-                              Reply
-                            </span>
-                          </div>
-
-                          <!-- Nested replies -->
-                          {comment.replies && comment.replies.length > 0 && (
-                            <div class="mt-3">
-                              {comment.replies.map((reply) => (
-                                <div class="comment-reply comment-entry">
-                                  <div class="flex gap-3">
-                                    <div
-                                      class="w-7 h-7 flex items-center justify-center text-[10px] font-bold text-paper flex-shrink-0 oct-sm"
-                                      style={`background: ${reply.color}`}
-                                    >
-                                      {reply.initials}
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                      <div class="flex flex-wrap items-center gap-2 mb-1">
-                                        <span class="text-sm font-semibold">{reply.author}</span>
-                                        {reply.badge && (
-                                          <Tag variant={reply.badgeVariant} class="text-[0.6rem] py-0">{reply.badge}</Tag>
-                                        )}
-                                        <span class="text-xs text-ink-faint">{reply.time}</span>
-                                      </div>
-                                      <p class="text-sm leading-relaxed text-ink-light">{reply.content}</p>
-                                      <div class="flex items-center gap-2 mt-1.5">
-                                        <span class="comment-vote" style="cursor: default; opacity: 0.5;" title="Coming soon">
-                                          <i class="ph-bold ph-heart"></i>
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <!-- Discussion -->
+            <div class="campaign-section" id="sec-comments">
+              <CampaignDiscussion
+                subjectId={campaign.slug}
+                makerName={campaign.makerName}
+                seed={isShowcase
+                  ? comments.map((c, i) => ({
+                      ...c,
+                      hearts: [9, 14, 6, 4][i] ?? 3,
+                      replies: (c.replies || []).map((r) => ({ ...r, hearts: 5 })),
+                    }))
+                  : []}
+                client:visible
+              />
+            </div>
 
         </Card>
 
@@ -650,99 +870,109 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
         <!-- Funding Progress -->
         <Card class="mb-5">
           <div class="p-5">
-            <div class="mb-3" style="height: 7px;">
+            <div class="funding-amount">{campaign.raisedFormatted}</div>
+            <div class="text-xs text-ink-faint mb-3">pledged of {campaign.goalFormatted} goal</div>
+
+            <div class="mb-4" style="height: 7px;">
               <ProgressBar percent={campaign.percent} hot={campaign.percent >= 90 && campaign.status === "live"} />
             </div>
 
-            <div class="text-sm mb-1">
-              <strong class="text-ink font-semibold">{campaign.raisedFormatted}</strong>
-              <span class="text-ink-faint"> raised of {campaign.goalFormatted}</span>
-            </div>
-            <div class="flex items-center gap-3 text-sm text-ink-faint mb-4">
+            <div class="funding-stats">
+              <div class="funding-stat">
+                <div class="funding-stat-num">{campaign.percent}%</div>
+                <div class="funding-stat-label">funded</div>
+              </div>
+              <div class="funding-stat">
+                <div class="funding-stat-num">{campaign.backers}</div>
+                <div class="funding-stat-label">backers</div>
+              </div>
               {campaign.daysLeft != null && (
-                <span>
-                  <strong class="text-ink font-semibold">{campaign.daysLeft}</strong> days left
-                </span>
+                <div class="funding-stat">
+                  <div class="funding-stat-num">{campaign.daysLeft}</div>
+                  <div class="funding-stat-label">days left</div>
+                </div>
               )}
-              <span>&middot;</span>
-              <span>
-                <strong class="text-ink font-semibold">{campaign.backers}</strong> backers
-              </span>
-            </div>
-
-            <div class="flex items-center gap-2 text-xs text-ink-faint mb-4">
-              <i class="ph-bold ph-calendar-blank text-stencil"></i>
-              <span>Est. delivery: <strong class="text-ink">September 2026</strong></span>
             </div>
 
             {campaign.status === "live" && (
-              <button onclick="window.__comingSoon && window.__comingSoon('Back This Project', 'Choose a reward tier and complete checkout. Payment processing launches with the next platform update.')" class="btn btn-stamp w-full">
+              <a href="#sec-rewards" class="btn btn-stamp w-full mt-4" style="text-decoration:none;">
                 <i class="ph-bold ph-heart mr-2"></i>Back This Project
-              </button>
+              </a>
             )}
             {campaign.status === "funded" && (
-              <div class="btn w-full" style="background: #2A5F41; color: #FAF3E8; cursor: default;">
+              <div class="btn w-full mt-4" style="background: #2A5F41; color: #FAF3E8; cursor: default;">
                 <i class="ph-bold ph-check-circle mr-2"></i>Fully Funded
               </div>
             )}
             {campaign.status === "coming" && (
-              <button onclick="window.__comingSoon && window.__comingSoon('Get Notified', 'Sign up for launch notifications so you never miss this campaign going live.')" class="btn btn-outline w-full">
+              <button onclick="window.__comingSoon && window.__comingSoon('Get Notified', 'Sign up for launch notifications so you never miss this campaign going live.')" class="btn btn-outline w-full mt-4">
                 <i class="ph-bold ph-bell mr-2"></i>Notify Me
               </button>
             )}
+
+            {campaign.status === "live" && (
+              <p class="funding-note">
+                <i class="ph-bold ph-shield-check"></i>
+                <span>Reserve for 25% now, pay the rest on ship. Cancel before shipment for a full refund.</span>
+              </p>
+            )}
+
+            <div class="funding-foot">
+              <span><i class="ph-bold ph-calendar-blank"></i> Est. delivery {estDelivery}</span>
+              <button class="funding-share share-float-btn"><i class="ph-bold ph-share-network"></i> Share</button>
+            </div>
           </div>
         </Card>
 
-        <!-- Reward Tiers (showcase only) -->
-        {isShowcase && rewardTiers.map((tier, idx) => (
-          <Card class="mb-5">
-            <div class="p-5">
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="font-serif font-bold text-base">{tier.name}</h3>
-                <Tag variant="stamp">{tier.price}</Tag>
-              </div>
+        <!-- Rewards rail (right side on desktop, stacks on mobile) -->
+        {campaign.status === "live" && (
+          <CampaignRewards tiers={tiers} campaignSlug={campaign.slug} client:visible />
+        )}
 
-              <ul class="space-y-1.5 mb-4">
-                {tier.perks.map((perk) => (
-                  <li class="flex items-start gap-2 text-sm text-ink-light">
-                    <i class="ph-bold ph-check-circle text-funded mt-0.5 flex-shrink-0" style="font-size: 0.85rem;"></i>
-                    <span>{perk}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div class="tier-progress mb-1.5">
-                <div
-                  class="tier-progress-fill"
-                  style={`width: ${(tier.claimed / tier.total) * 100}%`}
-                ></div>
-              </div>
-              <div class="text-xs text-ink-faint">
-                <strong class="text-ink">{tier.claimed} of {tier.total}</strong> claimed
-              </div>
-
-              <button onclick="window.__comingSoon && window.__comingSoon('Select Tier', 'Proceed to checkout for this reward tier. Payment processing launches with the next platform update.')" class="btn btn-outline btn-sm w-full mt-3">Select This Tier</button>
-            </div>
-          </Card>
-        ))}
-
-        <!-- Maker Profile Card -->
+        <!-- Creator Card -->
         <Card class="mb-5">
           <div class="p-5">
-            <div class="flex items-center gap-3 mb-3">
+            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-ink-faint mb-3">Creator</div>
+            <div class="flex items-center gap-3 mb-4">
               <div
                 class="w-12 h-12 flex items-center justify-center text-sm font-bold text-paper flex-shrink-0 oct-sm"
                 style={`background: ${campaign.avatarColor}`}
               >
                 {campaign.makerName.split(" ").map((w) => w[0]).join("")}
               </div>
-              <div>
-                <div class="font-semibold text-sm">{campaign.makerName}</div>
-                <div class="text-xs text-ink-faint">{campaign.location}</div>
+              <div class="min-w-0">
+                <div class="font-semibold text-sm leading-tight">{campaign.makerName}</div>
+                <div class="text-xs text-ink-faint flex items-center gap-1">
+                  <i class="ph-bold ph-map-pin" style="font-size:0.7rem;"></i>{campaign.location}
+                </div>
               </div>
             </div>
 
-            <a href={`/makers/${campaign.makerSlug}`} class="btn btn-outline btn-sm w-full" style="text-decoration:none;">View Profile</a>
+            <div class="creator-stats">
+              <div>
+                <div class="creator-stat-num">{creatorStats.created}</div>
+                <div class="creator-stat-label">{creatorStats.created === 1 ? "campaign" : "campaigns"} created</div>
+              </div>
+              <div>
+                <div class="creator-stat-num">{creatorStats.backed}</div>
+                <div class="creator-stat-label">projects backed</div>
+              </div>
+            </div>
+
+            {creatorStats.firstCreated && (
+              <div class="creator-badge">
+                <i class="ph-bold ph-seal-check"></i> First created on Ooru
+              </div>
+            )}
+
+            <p class="text-xs text-ink-light leading-relaxed mt-3 mb-4">
+              Building open hardware in {campaign.location}. Every project ships with full source files so you can study, repair, and remix it.
+            </p>
+
+            <div class="grid grid-cols-2 gap-2">
+              <a href={`/makers/${campaign.makerSlug}`} class="btn btn-outline btn-sm w-full" style="text-decoration:none;">Profile</a>
+              <button onclick="window.__comingSoon && window.__comingSoon('Contact the maker', 'Direct messaging launches with the next platform update. For now, find the maker on Discord.')" class="btn btn-outline btn-sm w-full">Contact</button>
+            </div>
           </div>
         </Card>
 
@@ -750,32 +980,22 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
     </div>
   </div>
 
-  <!-- Floating CTA pill -->
+  <!-- Floating CTA pill (phones only - scrolls to the rewards rail) -->
   <div class="float-pill" id="campaign-float">
-    <!-- Expanded panel (tiers) -->
-    <div class="float-pill-panel" id="float-tiers">
-      {isShowcase && rewardTiers.map((tier) => (
-        <button class="float-tier-option" data-tier-name={tier.name} data-tier-price={tier.price}>
-          <span class="font-serif font-bold text-sm" style="color: #FAF3E8;">{tier.name}</span>
-          <span class="font-bold text-xs" style="color: rgba(250,243,232,0.45);">{tier.price}</span>
-        </button>
-      ))}
-    </div>
-    <!-- Pill button -->
     {campaign.status === "live" && (
-      <button class="float-pill-btn" id="back-project-btn">
+      <a href="#sec-rewards" class="float-pill-btn" style="text-decoration:none;">
         <div class="float-pill-info">
           <span class="float-pill-title">{campaign.percent}% funded</span>
           <span class="float-pill-sub">{campaign.backers} backers</span>
         </div>
         <div class="float-pill-right">
           <span class="float-pill-label">Back This Project</span>
-          <i class="ph-bold ph-caret-up float-pill-chevron" style="font-size:0.65rem;"></i>
+          <i class="ph-bold ph-arrow-up float-pill-chevron" style="font-size:0.7rem;"></i>
         </div>
-      </button>
+      </a>
     )}
     {campaign.status === "funded" && (
-      <button class="float-pill-btn float-pill-btn--funded">
+      <div class="float-pill-btn float-pill-btn--funded">
         <div class="float-pill-info">
           <span class="float-pill-title">Fully funded</span>
           <span class="float-pill-sub">{campaign.backers} backers</span>
@@ -783,20 +1003,8 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
         <div class="float-pill-right">
           <i class="ph-bold ph-check-circle" style="font-size:0.8rem; opacity:0.5;"></i>
         </div>
-      </button>
-    )}
-  </div>
-
-  <!-- Checkout mock modal -->
-  <div class="checkout-backdrop" id="checkout-modal">
-    <div class="checkout-modal">
-      <div class="coming-soon-icon">
-        <i class="ph-bold ph-shopping-cart"></i>
       </div>
-      <div class="coming-soon-title" id="checkout-title">Checkout</div>
-      <p class="coming-soon-desc" id="checkout-desc">Redirecting to payment...</p>
-      <button class="coming-soon-dismiss" id="checkout-dismiss">Got it</button>
-    </div>
+    )}
   </div>
 </BaseLayout>
 
@@ -834,6 +1042,10 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
     align-items: stretch;
     max-width: 42rem;
     margin: 0 auto;
+  }
+  /* Phones only - desktop has the rewards rail + funding panel visible */
+  @media (min-width: 1024px) {
+    .float-pill { display: none !important; }
   }
   @media (min-width: 640px) {
     .float-pill {
@@ -1118,6 +1330,263 @@ const statusVariant = campaign.status === "live" ? "stamp" : campaign.status ===
     transform: scale(1) translateY(0);
   }
 
+  /* ---- Sticky in-page section nav (Kickstarter-style) ---- */
+  .section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: rgba(250, 243, 232, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid rgba(26, 26, 26, 0.06);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+    padding: 0.4rem 1rem;
+  }
+  .section-nav::-webkit-scrollbar { display: none; }
+  @media (min-width: 640px) {
+    .section-nav { padding: 0.45rem 2rem; }
+  }
+  .section-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6B5B4A;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s;
+  }
+  .section-nav-link:hover { color: #1A1A1A; }
+  .section-nav-link.active {
+    color: #1A1A1A;
+    background: rgba(26, 26, 26, 0.06);
+  }
+  .section-nav-count {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #FAF3E8;
+    background: #6B5B4A;
+    border-radius: 999px;
+    padding: 0.05rem 0.35rem;
+    min-width: 1.1rem;
+    text-align: center;
+  }
+  .section-nav-link.active .section-nav-count { background: #1A1A1A; }
+  /* Offset anchored sections so they clear the sticky nav */
+  [id^="sec-"] { scroll-margin-top: 56px; }
+
+  /* ---- Funding panel (KS-style) ---- */
+  .funding-amount {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    line-height: 1.1;
+    color: #1A1A1A;
+  }
+  .funding-stats { display: flex; gap: 0.5rem; }
+  .funding-stat { flex: 1; }
+  .funding-stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    line-height: 1.1;
+    color: #1A1A1A;
+  }
+  .funding-stat-label {
+    font-size: 0.62rem;
+    color: #6B5B4A;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 0.1rem;
+  }
+  .funding-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    color: #6B5B4A;
+    line-height: 1.4;
+    margin-top: 0.85rem;
+  }
+  .funding-note i { color: #2A5F41; margin-top: 0.05rem; flex-shrink: 0; }
+  .funding-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(26, 26, 26, 0.06);
+    font-size: 0.7rem;
+    color: #6B5B4A;
+  }
+  .funding-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    color: #6B5B4A;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .funding-share:hover { color: #FF5900; }
+
+  /* ---- Reward cards (main column) ---- */
+  .reward-card {
+    border: 1.5px solid rgba(26, 26, 26, 0.1);
+    border-radius: 0.75rem;
+    padding: 1rem 1.1rem;
+    background: rgba(250, 243, 232, 0.4);
+    transition: border-color 0.15s;
+  }
+  .reward-card:hover { border-color: rgba(26, 26, 26, 0.28); }
+  .reward-card--soldout { opacity: 0.6; }
+  .reward-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+  .reward-price {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #1A1A1A;
+  }
+  .reward-left {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #B74803;
+    background: rgba(217, 72, 0, 0.08);
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .reward-left--out { color: #6B5B4A; background: rgba(26, 26, 26, 0.06); }
+  .reward-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1A1A1A;
+    margin-bottom: 0.2rem;
+  }
+  .reward-blurb {
+    font-size: 0.8rem;
+    color: #6B5B4A;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+  .reward-includes-label {
+    display: block;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6B5B4A;
+    margin-bottom: 0.35rem;
+  }
+  .reward-includes ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+  }
+  .reward-includes li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-size: 0.82rem;
+    color: #1A1A1A;
+    line-height: 1.4;
+  }
+  .reward-includes li i { color: #2A5F41; font-size: 0.75rem; margin-top: 0.18rem; flex-shrink: 0; }
+  .reward-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.9rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid rgba(26, 26, 26, 0.06);
+    font-size: 0.7rem;
+    color: #6B5B4A;
+  }
+
+  /* ---- Creator card ---- */
+  .creator-stats {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid rgba(26, 26, 26, 0.06);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.06);
+  }
+  .creator-stats > div { flex: 1; }
+  .creator-stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1A1A1A;
+    line-height: 1;
+  }
+  .creator-stat-label { font-size: 0.62rem; color: #6B5B4A; margin-top: 0.15rem; }
+  .creator-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #2A5F41;
+  }
+
+  /* ---- Campaign FAQ accordion ---- */
+  .campaign-faq {
+    border: 1px solid rgba(26, 26, 26, 0.08);
+    border-radius: 0.625rem;
+    overflow: hidden;
+  }
+  .campaign-faq-item { border-bottom: 1px solid rgba(26, 26, 26, 0.06); }
+  .campaign-faq-item:last-child { border-bottom: none; }
+  .campaign-faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #1A1A1A;
+    transition: color 0.15s;
+  }
+  .campaign-faq-q::-webkit-details-marker { display: none; }
+  .campaign-faq-q:hover { color: #FF5900; }
+  .campaign-faq-caret {
+    font-size: 0.7rem;
+    color: #6B5B4A;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .campaign-faq-item[open] .campaign-faq-caret { transform: rotate(180deg); }
+  .campaign-faq-a {
+    padding: 0 1rem 1rem;
+    font-size: 0.85rem;
+    color: #4A3D2F;
+    line-height: 1.65;
+  }
+
 </style>
 
 <script is:inline data-astro-rerun>
@@ -1144,43 +1613,6 @@ document.querySelectorAll('.share-float-btn').forEach(function(btn) {
   });
 });
 
-// Expandable backing tiers
-(function() {
-  var backBtn = document.getElementById('back-project-btn');
-  var tiers = document.getElementById('float-tiers');
-  if (!backBtn || !tiers) return;
-
-  backBtn.addEventListener('click', function() {
-    var isExpanded = tiers.classList.toggle('expanded');
-    backBtn.classList.toggle('open', isExpanded);
-  });
-
-  // Tier selection -> checkout modal
-  var modal = document.getElementById('checkout-modal');
-  var modalTitle = document.getElementById('checkout-title');
-  var modalDesc = document.getElementById('checkout-desc');
-  var modalDismiss = document.getElementById('checkout-dismiss');
-
-  document.querySelectorAll('.float-tier-option').forEach(function(opt) {
-    opt.addEventListener('click', function() {
-      var name = opt.getAttribute('data-tier-name');
-      var price = opt.getAttribute('data-tier-price');
-      modalTitle.textContent = name + ' - ' + price;
-      modalDesc.textContent = 'This will redirect you to the checkout page for the ' + name + ' tier. Payment processing is coming soon.';
-      modal.classList.add('active');
-      tiers.classList.remove('expanded');
-      backBtn.classList.remove('open');
-    });
-  });
-
-  modalDismiss.addEventListener('click', function() {
-    modal.classList.remove('active');
-  });
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) modal.classList.remove('active');
-  });
-})();
-
 // Show float pill after scrolling past hero
 (function() {
   var pill = document.getElementById('campaign-float');
@@ -1200,5 +1632,35 @@ document.querySelectorAll('.share-float-btn').forEach(function(btn) {
       pill.style.pointerEvents = 'none';
     }
   }, { passive: true });
+})();
+
+// Section nav scroll-spy (highlights the current section)
+(function() {
+  var nav = document.getElementById('section-nav');
+  if (!nav) return;
+  var links = Array.prototype.slice.call(nav.querySelectorAll('.section-nav-link'));
+  if (!links.length) return;
+
+  function setActive(id) {
+    links.forEach(function(l) {
+      l.classList.toggle('active', l.getAttribute('data-target') === id);
+    });
+  }
+
+  var sections = links
+    .map(function(l) { return document.getElementById(l.getAttribute('data-target')); })
+    .filter(Boolean);
+
+  var observer = new IntersectionObserver(function(entries) {
+    var visible = entries.filter(function(e) { return e.isIntersecting; });
+    if (!visible.length) return;
+    visible.sort(function(a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+    setActive(visible[0].target.id);
+  }, { rootMargin: '-56px 0px -65% 0px', threshold: 0 });
+
+  sections.forEach(function(s) { observer.observe(s); });
+  links.forEach(function(l) {
+    l.addEventListener('click', function() { setActive(l.getAttribute('data-target')); });
+  });
 })();
 </script>

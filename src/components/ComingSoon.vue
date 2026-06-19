@@ -42,6 +42,7 @@ onUnmounted(() => {
     @click="onBackdropClick"
   >
     <div class="coming-soon-modal">
+      <img src="/images/graphics/tools-circle.png" class="tools-emblem cs-emblem" alt="" aria-hidden="true" />
       <div class="coming-soon-icon">
         <i class="ph-bold ph-wrench"></i>
       </div>
