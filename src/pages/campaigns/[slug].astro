@@ -482,11 +482,28 @@ const sectionNav = [
   { id: "comments", label: "Comments", count: isShowcase ? comments.length : 0 },
 ];
 
+// SEO: contextual OG image (campaign photo + title) + structured data.
+const ogImagePath = `/og/campaigns/${campaign.slug}.png`;
+const campaignLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: campaign.title,
+  description: campaign.tagline,
+  image: new URL(ogImagePath, Astro.site).href,
+  category: campaign.category,
+  brand: { "@type": "Brand", name: campaign.makerName },
+  url: new URL(`/campaigns/${campaign.slug}`, Astro.site).href,
+  license:
+    "https://spdx.org/licenses/" + campaign.license.replace(/\s+/g, "") + ".html",
+};
 ---
 
 <BaseLayout
   title={campaign.title}
   description={campaign.tagline}
+  ogImage={ogImagePath}
+  ogType="article"
+  jsonLd={campaignLd}
   activeTab="campaigns"
   hideNav
 >
