@@ -32,47 +32,57 @@ const props = defineProps<{
 }>();
 
 // ── Tour ────────────────────────────────────────────────────────────────
+// cam = the exact framing (world positions, in mm) captured from the debug panel.
 interface TourStep {
   id: string; title: string; body: string;
-  view: "top" | "front" | "side";
+  cam: { pos: [number, number, number]; target: [number, number, number] };
   show?: string[];        // parts to keep solid; others ghost + edges
   dims?: boolean; insert?: boolean; press?: boolean;
 }
 const TOUR: TourStep[] = [
-  { id: "size", view: "top", dims: true,
+  { id: "size", dims: true,
+    cam: { pos: [-0.4, 269.7, 43.1], target: [-0.4, 20.4, 43.1] },
     title: "Palm-sized", body: "Nine keys, a rotary encoder and up to four layers - in a footprint that sits under your palm." },
-  { id: "pcb", view: "front", show: ["pcb"],
+  { id: "pcb", show: ["pcb"],
+    cam: { pos: [-100.8, 108.6, -76.1], target: [-18.5, 6.4, 4.8] },
     title: "Open-source PCB", body: "Everything ghosts away to the open-source PCB - hot-swap sockets, RP2040, OLED, all public." },
-  { id: "insert", view: "front", show: ["pcb", "switches"], insert: true,
-    title: "Drop-in switches", body: "MX switches drop straight into the hot-swap sockets. No soldering required." },
-  { id: "keys", view: "side", press: true,
+  { id: "insert", show: ["pcb", "switches", "keycaps"], insert: true,
+    cam: { pos: [-2, 36.8, -157.3], target: [-13.6, 16.9, 2.2] },
+    title: "Drop-in switches", body: "Switch + keycap drop straight into the hot-swap sockets. No soldering required." },
+  { id: "keys", press: true,
+    cam: { pos: [-120.7, 266.6, 51.7], target: [-12.7, 14.1, 41.1] },
     title: "Cap it and type", body: "Pop on the keycaps and go - tactile, clicky or silent, your call." },
 ];
 
 // ── Customizer ──────────────────────────────────────────────────────────
+// A part can drive several meshes (the case = both plates).
 interface PartOpt { label: string; color: string; }
-interface PartCfg { id: string; label: string; options: PartOpt[]; }
+interface PartCfg { id: string; label: string; meshes: string[]; options: PartOpt[]; }
 const PARTS: PartCfg[] = [
-  { id: "frontplate", label: "Top plate", options: [
+  { id: "body", label: "Body / case", meshes: ["frontplate", "backplate"], options: [
     { label: "Cream", color: "#E7DCC2" }, { label: "White", color: "#F2EEE6" },
     { label: "Black", color: "#1D1D1F" }, { label: "Blue", color: "#1F8FD6" }, { label: "Mint", color: "#7AD6B0" } ] },
-  { id: "backplate", label: "Bottom plate", options: [
-    { label: "Cream", color: "#E7DCC2" }, { label: "White", color: "#F2EEE6" },
-    { label: "Black", color: "#1D1D1F" }, { label: "Blue", color: "#1F8FD6" }, { label: "Mint", color: "#7AD6B0" } ] },
-  { id: "trim", label: "Trim / gasket", options: [
+  { id: "trim", label: "Trim / gasket", meshes: ["trim"], options: [
     { label: "Orange", color: "#F2851F" }, { label: "Purple", color: "#6B4DB3" },
     { label: "Lime", color: "#B6D641" }, { label: "Pink", color: "#E7779E" }, { label: "Black", color: "#1D1D1F" } ] },
-  { id: "keycaps", label: "Keycaps", options: [
+  { id: "keycaps", label: "Keycaps", meshes: ["keycaps"], options: [
     { label: "Purple", color: "#6B4DB3" }, { label: "Lavender", color: "#B9A3E3" },
     { label: "Pink", color: "#E7A6C6" }, { label: "Cream", color: "#ECE3D2" },
     { label: "Blue", color: "#2F6FB0" }, { label: "Black", color: "#222226" } ] },
-  { id: "switches", label: "Switches", options: [
+  { id: "switches", label: "Switches", meshes: ["switches"], options: [
     { label: "Black", color: "#1C1C1E" }, { label: "Red", color: "#C0392B" },
     { label: "Brown", color: "#6B4A2B" }, { label: "Clear", color: "#D9D9DE" } ] },
-  { id: "knob", label: "Knob", options: [
+  { id: "knob", label: "Knob", meshes: ["knob"], options: [
     { label: "Orange", color: "#F58A21" }, { label: "Black", color: "#1D1D1F" },
     { label: "Purple", color: "#6B4DB3" }, { label: "Cream", color: "#E7DCC2" } ] },
 ];
+// mesh name -> the part that controls its colour
+const MESH_PART: Record<string, PartCfg> = {};
+for (const p of PARTS) for (const m of p.meshes) MESH_PART[m] = p;
+function colorFor(meshName: string): string | THREE.Color {
+  const p = MESH_PART[meshName];
+  return (p && chosen.value[p.id]) || S.value?.baseColor[meshName];
+}
 
 const mode = ref<"tour" | "customize">("tour");
 const tourIndex = ref(0);
@@ -102,7 +112,7 @@ onMounted(() => {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.AgXToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  renderer.toneMappingExposure = 1.15;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   Object.assign(renderer.domElement.style, { display: "block", width: "100%", height: "100%" });
   wrap.appendChild(renderer.domElement);
@@ -119,17 +129,18 @@ onMounted(() => {
   controls.minDistance = 60; controls.maxDistance = 1000;
   controls.maxPolarAngle = Math.PI * 0.52;
 
-  // ── Dramatic lighting: strong warm key, low cool fill, teal+orange rims ──
-  const key = new THREE.DirectionalLight(0xfff1dc, 3.2);
+  // ── Lighting: warm key + soft hemisphere lift + cool fill + colour rims ──
+  const key = new THREE.DirectionalLight(0xfff3e2, 2.7);
   key.position.set(150, 300, 170); key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.camera.near = 20; key.shadow.camera.far = 1100; key.shadow.bias = -0.0004; key.shadow.radius = 9;
   Object.assign(key.shadow.camera as THREE.OrthographicCamera, { left: -200, right: 200, top: 200, bottom: -200 });
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0x9fb6ff, 0.35); fill.position.set(-160, 70, -40); scene.add(fill);
-  const rimA = new THREE.DirectionalLight(0xff7a2f, 1.1); rimA.position.set(120, 40, -200); scene.add(rimA);
-  const rimB = new THREE.DirectionalLight(0x39d0d8, 0.8); rimB.position.set(-150, 30, -160); scene.add(rimB);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.08));
+  // hemisphere keeps the shadow side readable (better than pure-black ambient)
+  scene.add(new THREE.HemisphereLight(0xf3e6cf, 0x14161c, 0.55));
+  const fill = new THREE.DirectionalLight(0xaec6ff, 0.5); fill.position.set(-160, 80, -30); scene.add(fill);
+  const rimA = new THREE.DirectionalLight(0xff8a45, 0.8); rimA.position.set(120, 40, -200); scene.add(rimA);
+  const rimB = new THREE.DirectionalLight(0x49d6de, 0.55); rimB.position.set(-150, 30, -160); scene.add(rimB);
 
   // ── Cassette-tech ground (orbits with camera) ──
   const groundMat = new THREE.MeshStandardMaterial({
@@ -142,7 +153,7 @@ onMounted(() => {
   // ── Postprocessing: render -> subtle bloom -> output (tone map + sRGB) ──
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.35, 0.6, 0.82);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.14, 0.5, 0.92);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
@@ -171,6 +182,10 @@ onMounted(() => {
       const name = (((m.material as THREE.MeshStandardMaterial)?.name || m.name || "").replace(/-Mesh$/, "")).toLowerCase();
       const std = m.material as THREE.MeshStandardMaterial;
       std.roughness = 0.55; std.metalness = 0.05; std.envMapIntensity = 1.1;
+      // brighter, slightly emissive PCB so it reads when isolated
+      if (name === "pcb") {
+        std.color.set("#2f9466"); std.emissive.set("#0e3a26"); std.emissiveIntensity = 0.5; std.roughness = 0.5;
+      }
       m.castShadow = true; m.receiveShadow = true;
       S.value.meshes[name] = m;
       S.value.baseColor[name] = std.color.clone();
@@ -215,19 +230,17 @@ onMounted(() => {
       st.controls.target.lerpVectors(st.tween.tFrom, st.tween.tTo, e);
       if (k >= 1) st.tween = null;
     }
-    // switch drop-insert loop
+    // drop-insert loop: switch + keycap fall into the sockets together
+    const drop = st.insertActive ? 1 - Math.pow(1 - (performance.now() % 1700) / 1700, 3) : -1;
     if (st.meshes.switches) {
       const sw = st.meshes.switches;
-      if (st.insertActive) {
-        const t = (performance.now() % 1600) / 1600;
-        const e = 1 - Math.pow(1 - t, 3);
-        sw.position.y = st.switchBaseY + 16 * (1 - e);
-      } else sw.position.y += (st.switchBaseY - sw.position.y) * 0.2;
+      if (drop >= 0) sw.position.y = st.switchBaseY + 22 * (1 - drop);
+      else sw.position.y += (st.switchBaseY - sw.position.y) * 0.2;
     }
-    // keycap press loop
     if (st.meshes.keycaps) {
       const kc = st.meshes.keycaps;
-      if (st.pressActive) {
+      if (drop >= 0) kc.position.y = st.keycapBaseY + 42 * (1 - drop); // caps fall from higher
+      else if (st.pressActive) {
         const p = (Math.sin(performance.now() / 320) * 0.5 + 0.5) ** 2;
         kc.position.y = st.keycapBaseY - p * 2.4;
       } else kc.position.y += (st.keycapBaseY - kc.position.y) * 0.2;
@@ -272,20 +285,22 @@ function cassetteTexture(): THREE.Texture {
 function buildDims(size: THREE.Vector3): THREE.Group {
   const grp = new THREE.Group();
   const mat = new THREE.LineBasicMaterial({ color: 0xf2f0ea });
-  const hw = size.x / 2, hd = size.z / 2, y = 0.6, m = 16, tk = 6;
+  const hw = size.x / 2, hd = size.z / 2, y = 0.6, m = 12, tk = 6;
   const seg = (pts: number[][]) => new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(p[0], p[1], p[2]))), mat);
+  // width (X) dimension hugging the right edge; depth (Z) hugging the front edge
+  grp.add(seg([[hw + m, y, -hd], [hw + m, y, hd]]));
+  grp.add(seg([[hw + m - tk, y, -hd], [hw + m + tk, y, -hd]]));
+  grp.add(seg([[hw + m - tk, y, hd], [hw + m + tk, y, hd]]));
   grp.add(seg([[-hw, y, hd + m], [hw, y, hd + m]]));
   grp.add(seg([[-hw, y, hd + m - tk], [-hw, y, hd + m + tk]]));
   grp.add(seg([[hw, y, hd + m - tk], [hw, y, hd + m + tk]]));
-  grp.add(seg([[-hw - m, y, -hd], [-hw - m, y, hd]]));
-  grp.add(seg([[-hw - m - tk, y, -hd], [-hw - m + tk, y, -hd]]));
-  grp.add(seg([[-hw - m - tk, y, hd], [-hw - m + tk, y, hd]]));
   grp.visible = false;
-  grp.userData = { widthAt: new THREE.Vector3(0, y, hd + m), depthAt: new THREE.Vector3(-hw - m, y, 0) };
+  // widthAt = right side (the 109), depthAt = front (the 79)
+  grp.userData = { widthAt: new THREE.Vector3(hw + m, y, 0), depthAt: new THREE.Vector3(0, y, hd + m) };
   return grp;
 }
 
-// ── annotations ──
+// ── annotations (anchored to a part's top edge, not its centre) ──
 function updateAnnos(v: THREE.Vector3) {
   const st = S.value; if (!st) { annos.value = []; return; }
   const out: { x: number; y: number; text: string }[] = [];
@@ -294,6 +309,10 @@ function updateAnnos(v: THREE.Vector3) {
     const q = p.clone().project(st.camera); if (q.z > 1) return;
     out.push({ x: (q.x * 0.5 + 0.5) * rect.width, y: (-q.y * 0.5 + 0.5) * rect.height, text });
   };
+  const edge = (part: string, vv: THREE.Vector3) => { // top-front edge of the part
+    const b = new THREE.Box3().setFromObject(st.meshes[part]);
+    vv.set((b.min.x + b.max.x) / 2, b.max.y, b.max.z);
+  };
   if (mode.value === "tour") {
     const step = TOUR[tourIndex.value];
     if (step.dims && st.dims) {
@@ -301,31 +320,32 @@ function updateAnnos(v: THREE.Vector3) {
       push(st.dims.userData.widthAt, d ? `${Math.round(d.w)} mm` : "width");
       push(st.dims.userData.depthAt, d ? `${Math.round(d.d)} mm` : "depth");
     }
-    if (step.id === "pcb" && st.meshes.pcb) { new THREE.Box3().setFromObject(st.meshes.pcb).getCenter(v); push(v, "Hot-swap PCB"); }
-    if (step.insert && st.meshes.switches) { new THREE.Box3().setFromObject(st.meshes.switches).getCenter(v); push(v, "Drop-in"); }
-    if (step.press && st.meshes.keycaps) { new THREE.Box3().setFromObject(st.meshes.keycaps).getCenter(v); push(v, "Press"); }
+    if (step.id === "pcb" && st.meshes.pcb) { edge("pcb", v); push(v, "Hot-swap PCB"); }
+    if (step.insert && st.meshes.switches) { edge("switches", v); push(v, "Drop-in"); }
+    if (step.press && st.meshes.keycaps) { edge("keycaps", v); push(v, "Press"); }
   }
   annos.value = out;
 }
 
 // ── camera framing ──
-function dirFor(view: string): THREE.Vector3 {
-  return (view === "top" ? new THREE.Vector3(0.02, 1, 0.05)
-    : view === "side" ? new THREE.Vector3(1, 0.22, 0.45)
-    : new THREE.Vector3(0.55, 0.5, 1)).normalize();
-}
-function frame(center: THREE.Vector3, r: number, view: string) {
+function frameCam(cam: { pos: number[]; target: number[] }) {
   const st = S.value; if (!st) return;
-  const f = view === "top" ? 1.05 : view === "front" ? 1.15 : 1.3;
-  const dist = Math.max(70, (r / Math.sin((st.camera.fov * Math.PI) / 180 / 2)) * f);
-  st.tween = { from: st.camera.position.clone(), to: center.clone().add(dirFor(view).multiplyScalar(dist)),
-    tFrom: st.controls.target.clone(), tTo: center.clone(), start: performance.now(), dur: 950 };
+  st.tween = {
+    from: st.camera.position.clone(), to: new THREE.Vector3(...cam.pos),
+    tFrom: st.controls.target.clone(), tTo: new THREE.Vector3(...cam.target),
+    start: performance.now(), dur: 950,
+  };
 }
-function boxOf(parts?: string[]): { c: THREE.Vector3; r: number } {
-  const st = S.value; const box = new THREE.Box3();
-  const list = parts && parts.length ? parts.map((p) => st.meshes[p]).filter(Boolean) : Object.values(st.meshes);
-  list.forEach((m: any) => box.expandByObject(m));
-  return { c: box.getCenter(new THREE.Vector3()), r: Math.max(box.getSize(new THREE.Vector3()).length() / 2, 18) };
+function frameBox(meshNames: string[]) { // for the customiser: a 3/4 angle on a part
+  const st = S.value; if (!st) return;
+  const box = new THREE.Box3();
+  meshNames.map((n) => st.meshes[n]).filter(Boolean).forEach((m: any) => box.expandByObject(m));
+  const c = box.getCenter(new THREE.Vector3());
+  const r = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 22);
+  const dist = (r / Math.sin((st.camera.fov * Math.PI) / 180 / 2)) * 1.25;
+  const dir = new THREE.Vector3(0.55, 0.5, 1).normalize();
+  st.tween = { from: st.camera.position.clone(), to: c.clone().add(dir.multiplyScalar(dist)),
+    tFrom: st.controls.target.clone(), tTo: c.clone(), start: performance.now(), dur: 850 };
 }
 
 // ── steps / isolation ──
@@ -337,32 +357,28 @@ function applyStep(i: number, instant = false) {
   if (st.dims) st.dims.visible = !!step.dims;
   st.insertActive = !!step.insert;
   st.pressActive = !!step.press;
-  const { c, r } = boxOf(step.show);
-  if (instant) {
-    st.camera.position.copy(c.clone().add(dirFor(step.view).multiplyScalar(Math.max(150, r * 2.6))));
-    st.controls.target.copy(c);
-  } else frame(c, r, step.view);
+  if (instant) { st.camera.position.set(...step.cam.pos); st.controls.target.set(...step.cam.target); }
+  else frameCam(step.cam);
 }
 function nextStep() { applyStep(tourIndex.value + 1); }
 function prevStep() { applyStep(tourIndex.value - 1); }
 
+function paint(name: string, m: any) { (m.material as THREE.MeshStandardMaterial).color.set(colorFor(name) as any); }
 function restoreAll() {
   const st = S.value; if (!st) return;
   for (const [name, m] of Object.entries<any>(st.meshes)) {
     const mat = m.material as THREE.MeshStandardMaterial;
-    mat.transparent = false; mat.opacity = 1; mat.depthWrite = true;
-    mat.color.set(chosen.value[name] ?? st.baseColor[name]); mat.needsUpdate = true;
+    mat.transparent = false; mat.opacity = 1; mat.depthWrite = true; paint(name, m); mat.needsUpdate = true;
     if (st.edges[name]) st.edges[name].visible = false;
   }
 }
-function showOnly(ids: string[]) {
+function showOnly(meshNames: string[]) {
   const st = S.value; if (!st) return;
-  const set = new Set(ids);
+  const set = new Set(meshNames);
   for (const [name, m] of Object.entries<any>(st.meshes)) {
     const mat = m.material as THREE.MeshStandardMaterial;
     if (set.has(name)) {
-      mat.transparent = false; mat.opacity = 1; mat.depthWrite = true;
-      mat.color.set(chosen.value[name] ?? st.baseColor[name]);
+      mat.transparent = false; mat.opacity = 1; mat.depthWrite = true; paint(name, m);
       if (st.edges[name]) st.edges[name].visible = false;
     } else {
       mat.transparent = true; mat.opacity = 0.04; mat.depthWrite = false;
@@ -379,12 +395,14 @@ function enterCustomize() {
   selectPart(activePart.value);
 }
 function selectPart(id: string) {
-  activePart.value = id; showOnly([id]);
-  const { c, r } = boxOf([id]); frame(c, r, "front");
+  activePart.value = id;
+  const part = PARTS.find((p) => p.id === id)!;
+  showOnly(part.meshes); frameBox(part.meshes);
 }
 function pickColor(id: string, color: string) {
   chosen.value = { ...chosen.value, [id]: color };
-  const m = S.value?.meshes[id]; if (m) (m.material as THREE.MeshStandardMaterial).color.set(color);
+  const part = PARTS.find((p) => p.id === id); const st = S.value; if (!part || !st) return;
+  for (const mn of part.meshes) { const m = st.meshes[mn]; if (m) (m.material as THREE.MeshStandardMaterial).color.set(color); }
 }
 
 // ── debug ──
@@ -436,7 +454,8 @@ onBeforeUnmount(() => {
         </div>
         <div class="mx-nav">
           <button class="mx-nav-btn" @click="prevStep"><i class="ph-bold ph-caret-left"></i></button>
-          <button class="mx-nav-btn" @click="nextStep"><i class="ph-bold ph-caret-right"></i></button>
+          <button v-if="tourIndex < TOUR.length - 1" class="mx-nav-btn" @click="nextStep"><i class="ph-bold ph-caret-right"></i></button>
+          <button v-else class="mx-cta" @click="enterCustomize">Customise <i class="ph-bold ph-arrow-right"></i></button>
         </div>
       </div>
 
@@ -495,6 +514,8 @@ onBeforeUnmount(() => {
 .mx-nav { display: flex; gap: 0.4rem; flex-shrink: 0; }
 .mx-nav-btn { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.18); background: rgba(10,10,12,0.6); color: #faf3e8; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.15s; }
 .mx-nav-btn:hover { border-color: #ff6c1e; color: #ff6c1e; }
+.mx-cta { display: inline-flex; align-items: center; gap: 0.35rem; height: 38px; padding: 0 0.9rem; border-radius: 999px; border: none; background: #ff6c1e; color: #11131a; font-size: 0.78rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+.mx-cta:hover { background: #ff7d33; }
 
 .mx-ui--custom { flex-direction: column; align-items: stretch; }
 .mx-parts { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.45rem; }
