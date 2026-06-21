@@ -10,6 +10,7 @@
  */
 import { ref, computed } from "vue";
 import { logDownload } from "../lib/store";
+import { t } from "../lib/i18n-client";
 
 type FileType = "code" | "csv" | "pdf" | "3d" | "image" | "text";
 
@@ -158,14 +159,14 @@ function download(file: SourceFile) {
               <!-- fallback -->
               <div v-else class="fp-fallback">
                 <i :class="active.icon"></i>
-                <p>Preview isn't available for this format.<br />Download it to open in your tools.</p>
+                <p>{{ t("file.noPreview") }}</p>
               </div>
             </div>
 
             <div class="fp-foot">
               <span class="text-xs text-ink-faint">{{ active.meta || active.format }}</span>
               <button class="btn btn-stamp btn-sm" @click="download(active)">
-                <i class="ph-bold ph-download-simple mr-1.5"></i>Download
+                <i class="ph-bold ph-download-simple mr-1.5"></i>{{ t("file.download") }}
               </button>
             </div>
           </div>

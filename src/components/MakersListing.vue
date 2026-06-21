@@ -8,6 +8,7 @@
 import { ref, computed } from "vue";
 import type { Maker } from "../types";
 import SearchFilter from "./SearchFilter.vue";
+import { t } from "../lib/i18n-client";
 
 const props = defineProps<{
   makers: Maker[];
@@ -57,7 +58,7 @@ function getInitial(name: string): string {
       <div class="max-w-xl">
         <SearchFilter
           :categories="categories"
-          placeholder="Search makers by name, title, or skills..."
+          :placeholder='t("listing.searchMakers")'
           v-model="searchText"
           v-model:active-category="activeCategory"
         />
@@ -95,7 +96,7 @@ function getInitial(name: string): string {
       <div class="card-bg"></div>
       <div class="card-content p-8 sm:p-12 text-center">
         <i class="ph-bold ph-magnifying-glass text-4xl text-ink-faint/40 mb-4 block"></i>
-        <h3 class="font-serif font-bold text-lg mb-2">No makers found</h3>
+        <h3 class="font-serif font-bold text-lg mb-2">{{ t("listing.noMakers") }}</h3>
         <p class="text-sm text-ink-faint">Try adjusting your search or filter to find what you're looking for.</p>
       </div>
     </div>

@@ -534,6 +534,31 @@
     .brand-wordmark .brand-dot {
         color: #ff5900;
     }
+    /* Locale-aware logo: swap the Latin wordmark for the Kannada/Telugu
+       script form based on <html lang> (set before paint by I18n.astro). */
+    .brand-wordmark .wm-alt {
+        display: none;
+    }
+    html[lang="kn"] .brand-wordmark .wm-en,
+    html[lang="te"] .brand-wordmark .wm-en {
+        display: none;
+    }
+    html[lang="kn"] .brand-wordmark .wm-kn {
+        display: inline;
+    }
+    html[lang="te"] .brand-wordmark .wm-te {
+        display: inline;
+    }
+    .brand-wordmark .wm-kn {
+        font-family: "Noto Sans Kannada", "DM Sans", sans-serif;
+        font-weight: 800;
+        text-transform: none;
+    }
+    .brand-wordmark .wm-te {
+        font-family: "Noto Sans Telugu", "DM Sans", sans-serif;
+        font-weight: 800;
+        text-transform: none;
+    }
     html.dark .brand-wordmark {
         color: #faf3e8;
     }

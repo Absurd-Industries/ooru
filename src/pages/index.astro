@@ -10,6 +10,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Card from "../components/Card.astro";
 import Tag from "../components/Tag.astro";
 import CampaignCard from "../components/CampaignCard.astro";
+import HeroPolaroids from "../components/HeroPolaroids.astro";
+import GeoEyebrow from "../components/GeoEyebrow.vue";
+import { t } from "../i18n";
 import { friends } from "../data/friends";
 import { makers } from "../data/makers";
 import { events } from "../data/events";
@@ -36,26 +39,35 @@ const upcomingEvents = [...events]
 <BaseLayout title="Open Source STEAM for Makers, Tinkerers & Rebels">
   <!-- Hero - manifesto pitch -->
   <section class="pt-10 pb-20 md:pt-16 md:pb-32">
-    <div class="max-w-5xl mx-auto px-5 sm:px-6">
-      <p class="text-sm font-semibold uppercase tracking-widest text-stencil mb-4">Bengaluru, India</p>
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
+      <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-8 items-center">
+        <div>
+          <GeoEyebrow fallback="Bengaluru, India" client:load />
 
-      <h1 class="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight mb-6">
-        Built open.<br class="hidden sm:block" /> Backed by you.
-      </h1>
+          <h1 class="font-serif text-4xl sm:text-5xl md:text-6xl font-black leading-[0.95] tracking-tight mb-6">
+            <span data-i18n="hero.titleA">{t("hero.titleA")}</span><br class="hidden sm:block" />
+            <span data-i18n="hero.titleB">{t("hero.titleB")}</span>
+          </h1>
 
-      <p class="text-base sm:text-lg lg:text-xl text-ink max-w-2xl mb-8 leading-relaxed">
-        Back projects that are repairable, come with blueprints and be a part of thriving community of makers!
-      </p>
+          <p class="text-base sm:text-lg lg:text-xl text-ink max-w-2xl mb-8 leading-relaxed" data-i18n="hero.desc">
+            {t("hero.desc")}
+          </p>
 
-      <div class="flex flex-wrap gap-3">
-        <a href="/campaigns" class="btn btn-primary">
-          <i class="ph-duotone ph-rocket-launch mr-1.5" style="font-size:0.9rem;"></i>
-          Explore Campaigns
-        </a>
-        <a href="/requests" class="btn btn-outline">
-          <i class="ph-duotone ph-hand-palm mr-1.5" style="font-size:0.9rem;"></i>
-          Request Something
-        </a>
+          <div class="flex flex-wrap gap-3">
+            <a href="/campaigns" class="btn btn-primary">
+              <i class="ph-duotone ph-rocket-launch mr-1.5" style="font-size:0.9rem;"></i>
+              <span data-i18n="hero.exploreCampaigns">{t("hero.exploreCampaigns")}</span>
+            </a>
+            <a href="/requests" class="btn btn-outline">
+              <i class="ph-duotone ph-hand-palm mr-1.5" style="font-size:0.9rem;"></i>
+              <span data-i18n="hero.requestSomething">{t("hero.requestSomething")}</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="hidden lg:block">
+          <HeroPolaroids campaigns={featuredCampaigns} />
+        </div>
       </div>
     </div>
   </section>
@@ -69,14 +81,14 @@ const upcomingEvents = [...events]
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-serif text-2xl sm:text-3xl font-bold">
             <i class="ph-duotone ph-rocket-launch text-ink mr-1" style="font-size:1.4rem;"></i>
-            Campaigns
+            <span data-i18n="section.campaigns">{t("section.campaigns")}</span>
           </h2>
           <a href="/campaigns" class="text-sm text-stamp font-bold no-underline hover:underline">
-            All campaigns <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
+            <span data-i18n="home.campaigns.all">{t("home.campaigns.all")}</span> <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
           </a>
         </div>
-        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5">
-          Back gadgets that come with their blueprints - so you can build, fix, or improve them yourself.
+        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5" data-i18n="home.campaigns.desc">
+          {t("home.campaigns.desc")}
         </p>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {featuredCampaigns.map((campaign) => (
@@ -90,14 +102,14 @@ const upcomingEvents = [...events]
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-serif text-2xl sm:text-3xl font-bold">
             <i class="ph-duotone ph-hand-palm text-ink mr-1" style="font-size:1.4rem;"></i>
-            Requests
+            <span data-i18n="section.requests">{t("section.requests")}</span>
           </h2>
           <a href="/requests" class="text-sm text-stamp font-bold no-underline hover:underline">
-            All requests <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
+            <span data-i18n="home.requests.all">{t("home.requests.all")}</span> <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
           </a>
         </div>
-        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5">
-          Suggest something that should exist. The community shapes the idea, and a maker brings it to life.
+        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5" data-i18n="home.requests.desc">
+          {t("home.requests.desc")}
         </p>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {featuredRequests.map((req) => (
@@ -123,14 +135,14 @@ const upcomingEvents = [...events]
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-serif text-2xl sm:text-3xl font-bold">
             <i class="ph-duotone ph-users-three text-ink mr-1" style="font-size:1.4rem;"></i>
-            Makers
+            <span data-i18n="section.makers">{t("section.makers")}</span>
           </h2>
           <a href="/makers" class="text-sm text-stamp font-bold no-underline hover:underline">
-            All makers <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
+            <span data-i18n="home.makers.all">{t("home.makers.all")}</span> <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
           </a>
         </div>
-        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5">
-          Meet the people who actually build things - and share exactly how they did it.
+        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5" data-i18n="home.makers.desc">
+          {t("home.makers.desc")}
         </p>
         <div class="maker-list">
           {featuredMakers.map((maker) => (
@@ -161,14 +173,14 @@ const upcomingEvents = [...events]
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-serif text-2xl sm:text-3xl font-bold">
             <i class="ph-duotone ph-calendar-dots text-ink mr-1" style="font-size:1.4rem;"></i>
-            Events
+            <span data-i18n="section.events">{t("section.events")}</span>
           </h2>
           <a href="/events" class="text-sm text-stamp font-bold no-underline hover:underline">
-            All events <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
+            <span data-i18n="home.events.all">{t("home.events.all")}</span> <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
           </a>
         </div>
-        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5">
-          Meetups, workshops, and talks for curious people - starting in Bengaluru.
+        <p class="text-lg sm:text-md text-ink max-w-lg leading-relaxed mb-5" data-i18n="home.events.desc">
+          {t("home.events.desc")}
         </p>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {upcomingEvents.map((ev) => (
@@ -205,10 +217,9 @@ const upcomingEvents = [...events]
           <img src="/images/graphics/tools-circle.png" class="tools-emblem cta-emblem" alt="" aria-hidden="true" />
           <div class="flex flex-col sm:flex-row sm:items-center gap-6 relative z-10">
             <div class="flex-1 min-w-0">
-              <h2 class="font-serif font-bold text-2xl sm:text-3xl text-paper tracking-tight mb-2">Join the Guild</h2>
-              <p class="text-sm text-kraft max-w-md leading-relaxed">
-                Chat with makers, get build help, share your projects,
-                and stay in the loop on new campaigns and events.
+              <h2 class="font-serif font-bold text-2xl sm:text-3xl text-paper tracking-tight mb-2" data-i18n="home.guild.title">{t("home.guild.title")}</h2>
+              <p class="text-sm text-kraft max-w-md leading-relaxed" data-i18n="home.guild.desc">
+                {t("home.guild.desc")}
               </p>
             </div>
             <a
@@ -218,7 +229,7 @@ const upcomingEvents = [...events]
               class="btn btn-stamp flex-shrink-0"
             >
               <i class="ph-bold ph-discord-logo mr-2" style="font-size:1rem;"></i>
-              Join Discord
+              <span data-i18n="home.guild.cta">{t("home.guild.cta")}</span>
             </a>
           </div>
         </div>
@@ -232,42 +243,36 @@ const upcomingEvents = [...events]
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-serif text-2xl sm:text-3xl font-bold">
           <i class="ph-duotone ph-question text-ink mr-1" style="font-size:1.4rem;"></i>
-          FAQ
+          <span data-i18n="section.faq">{t("section.faq")}</span>
         </h2>
         <a href="/faq" class="text-sm text-stamp font-bold no-underline hover:underline">
-          All questions <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
+          <span data-i18n="home.faq.all">{t("home.faq.all")}</span> <i class="ph-bold ph-arrow-right ml-0.5" style="font-size:0.65rem;"></i>
         </a>
       </div>
       <div class="faq-teaser-list">
         <details class="faq-teaser-item" name="ooru-faq-home">
           <summary class="faq-teaser-summary">
             <i class="ph-duotone ph-question text-stencil faq-teaser-icon"></i>
-            <span>What is Ooru?</span>
+            <span data-i18n="faq.q1">{t("faq.q1")}</span>
             <i class="ph-bold ph-caret-down faq-teaser-caret"></i>
           </summary>
-          <div class="faq-teaser-answer">
-            Ooru is an open-source STEAM platform built by Absurd Industries, based in Bengaluru, India. 'Ooru' means village in Kannada and Telugu - we're building a digital community where makers, tinkerers, engineers, artists, and the endlessly curious come together to build hardware and software in the open. Everything we make ships with full source files.
-          </div>
+          <div class="faq-teaser-answer" data-i18n="faq.a1">{t("faq.a1")}</div>
         </details>
         <details class="faq-teaser-item" name="ooru-faq-home">
           <summary class="faq-teaser-summary">
             <i class="ph-duotone ph-rocket-launch text-stencil faq-teaser-icon"></i>
-            <span>How do campaigns work?</span>
+            <span data-i18n="faq.q2">{t("faq.q2")}</span>
             <i class="ph-bold ph-caret-down faq-teaser-caret"></i>
           </summary>
-          <div class="faq-teaser-answer">
-            Makers launch crowdfunding campaigns for open-source hardware projects. Each campaign includes a bill of materials, schematics, firmware, and CAD files. You back a project you believe in, the maker builds it, and you get both the product and the knowledge to build it yourself.
-          </div>
+          <div class="faq-teaser-answer" data-i18n="faq.a2">{t("faq.a2")}</div>
         </details>
         <details class="faq-teaser-item" name="ooru-faq-home">
           <summary class="faq-teaser-summary">
             <i class="ph-duotone ph-hand-palm text-stencil faq-teaser-icon"></i>
-            <span>How do requests work?</span>
+            <span data-i18n="faq.q3">{t("faq.q3")}</span>
             <i class="ph-bold ph-caret-down faq-teaser-caret"></i>
           </summary>
-          <div class="faq-teaser-answer">
-            Anyone can describe something that should exist but doesn't. The community upvotes, discusses, and refines the spec. When a maker picks up a request, it becomes a campaign. Your idea could become a real product backed by the community.
-          </div>
+          <div class="faq-teaser-answer" data-i18n="faq.a3">{t("faq.a3")}</div>
         </details>
       </div>
     </div>
@@ -276,9 +281,9 @@ const upcomingEvents = [...events]
   <!-- Friends of Absurd - auto-scrolling marquee -->
   <section class="pb-28 overflow-hidden">
     <div class="max-w-5xl mx-auto px-5 sm:px-6">
-      <h2 class="font-serif text-xl font-bold mb-1">Friends of Ooru</h2>
-      <p class="text-sm text-ink max-w-md leading-relaxed mb-5">
-        Communities and companies building open hardware alongside us.
+      <h2 class="font-serif text-xl font-bold mb-1" data-i18n="home.friends.title">{t("home.friends.title")}</h2>
+      <p class="text-sm text-ink max-w-md leading-relaxed mb-5" data-i18n="home.friends.desc">
+        {t("home.friends.desc")}
       </p>
     </div>
     <div class="friends-marquee-wrapper">

@@ -7,6 +7,7 @@
  */
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { hasReacted, toggleReaction, reactionCount, onChange } from "../lib/store";
+import { t } from "../lib/i18n-client";
 
 const props = defineProps<{ makerId: string; baseCount?: number }>();
 
@@ -33,7 +34,7 @@ function toggle() {
 <template>
   <button class="cheer-btn" :class="{ 'cheer-btn--on': cheered }" @click="toggle">
     <i :class="cheered ? 'ph-fill ph-hands-clapping' : 'ph-bold ph-hands-clapping'"></i>
-    <span>{{ cheered ? "Cheered" : "Cheer" }}</span>
+    <span>{{ cheered ? t("cheer.cheered") : t("cheer.cheer") }}</span>
     <span class="cheer-count">{{ count }}</span>
   </button>
 </template>

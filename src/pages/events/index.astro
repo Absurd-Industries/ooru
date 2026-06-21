@@ -7,6 +7,7 @@
  */
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { t } from "../../i18n";
 import EventsListing from "../../components/EventsListing.vue";
 import { events } from "../../data/events";
 ---
@@ -21,11 +22,10 @@ import { events } from "../../data/events";
     <!-- Page Header -->
     <div class="mb-6">
       <h1 class="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-ink mb-2">
-        <i class="ph-duotone ph-calendar-dots text-ink mr-2" style="font-size:1.4rem;"></i>Events
+        <i class="ph-duotone ph-calendar-dots text-ink mr-2" style="font-size:1.4rem;"></i><span data-i18n="section.events">{t("section.events")}</span>
       </h1>
-      <p class="text-sm text-ink max-w-lg leading-relaxed">
-        Bengaluru-first STEAM (Science, Technology, Engineering, Art & Math) events for makers, scientists, artists, engineers,
-        and the endlessly curious. Find your people.
+      <p class="text-sm text-ink max-w-lg leading-relaxed" data-i18n="page.events.desc">
+        {t("page.events.desc")}
       </p>
     </div>
 

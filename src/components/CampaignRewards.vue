@@ -6,6 +6,7 @@
  * store (src/lib/store.ts) as the current mock profile.
  */
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { t } from "../lib/i18n-client";
 import {
   getPledge,
   createPledge,
@@ -64,7 +65,7 @@ function isMine(tier: Tier) {
 
 <template>
   <div id="sec-rewards" class="cr-root">
-    <h2 class="font-serif font-bold text-base mb-1">Select a reward</h2>
+    <h2 class="font-serif font-bold text-base mb-1">{{ t("rewards.select") }}</h2>
     <p class="text-xs text-ink-faint mb-3">Reserve for 25% now, pay the rest when it ships.</p>
 
     <!-- Active pledge banner -->
@@ -100,14 +101,14 @@ function isMine(tier: Tier) {
             class="reward-left"
             :class="{ 'reward-left--out': tier.claimed >= tier.total }"
           >
-            {{ tier.claimed >= tier.total ? "Sold out" : `${tier.total - tier.claimed} of ${tier.total} left` }}
+            {{ tier.claimed >= tier.total ? t("rewards.soldOut") : t("rewards.left", { n: tier.total - tier.claimed, total: tier.total }) }}
           </span>
         </div>
         <h3 class="reward-name">{{ tier.name }}</h3>
         <p class="reward-blurb">{{ tier.blurb }}</p>
 
         <div class="reward-includes">
-          <span class="reward-includes-label">Includes</span>
+          <span class="reward-includes-label">{{ t("rewards.includes") }}</span>
           <ul>
             <li v-for="perk in tier.perks" :key="perk"><i class="ph-bold ph-check"></i><span>{{ perk }}</span></li>
           </ul>
@@ -131,7 +132,7 @@ function isMine(tier: Tier) {
             Reserve for {{ inr(Math.round(priceNum(tier.price) * 0.25)) }}
           </button>
         </template>
-        <div v-else class="btn btn-outline btn-sm w-full mt-3" style="opacity:0.5; cursor:not-allowed;">Sold out</div>
+        <div v-else class="btn btn-outline btn-sm w-full mt-3" style="opacity:0.5; cursor:not-allowed;">{{ t("rewards.soldOut") }}</div>
       </div>
     </div>
 

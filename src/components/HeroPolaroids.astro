@@ -1,0 +1,129 @@
+---
+/**
+ * A scattered pile of polaroid-style cards for the featured campaigns,
+ * shown on the right of the homepage hero (desktop only). Each links to
+ * its campaign.
+ */
+interface PolaroidCampaign {
+  slug: string;
+  title: string;
+  image?: string;
+  makerName: string;
+  icon: string;
+  avatarColor: string;
+}
+interface Props {
+  campaigns: PolaroidCampaign[];
+}
+const { campaigns } = Astro.props;
+
+// position / tilt per card (front-to-back); index 0 renders on top
+const layout = [
+  { rot: "-7deg", top: "8%", left: "2%", z: 3 },
+  { rot: "6deg", top: "0%", right: "0%", z: 2 },
+  { rot: "-3deg", bottom: "0%", left: "26%", z: 4 },
+];
+const cards = campaigns.slice(0, 3);
+---
+
+<div class="hero-polaroids" aria-label="Featured campaigns">
+  {
+    cards.map((c, i) => {
+      const p = layout[i] ?? layout[0];
+      const pos = [
+        p.top != null && `top:${p.top}`,
+        p.bottom != null && `bottom:${p.bottom}`,
+        p.left != null && `left:${p.left}`,
+        p.right != null && `right:${p.right}`,
+        `--rot:${p.rot}`,
+        `z-index:${p.z}`,
+      ]
+        .filter(Boolean)
+        .join(";");
+      return (
+        <a href={`/campaigns/${c.slug}`} class="polaroid" style={pos} title={c.title}>
+          <div class="polaroid-photo">
+            {c.image ? (
+              <img src={c.image} alt={c.title} loading="lazy" width="220" height="220" />
+            ) : (
+              <div class="polaroid-fallback" style={`background:${c.avatarColor}`}>
+                <i class={c.icon} />
+              </div>
+            )}
+          </div>
+          <div class="polaroid-caption">
+            <div class="polaroid-title">{c.title}</div>
+            <div class="polaroid-maker">by {c.makerName}</div>
+          </div>
+        </a>
+      );
+    })
+  }
+</div>
+
+<style>
+  .hero-polaroids {
+    position: relative;
+    width: 100%;
+    height: 440px;
+  }
+  .polaroid {
+    position: absolute;
+    width: 220px;
+    background: #faf3e8;
+    padding: 11px 11px 0;
+    border-radius: 12px;
+    /* hand-cut paper edge + soft shadow */
+    filter: url(#papercut-2) drop-shadow(0 10px 22px rgba(26, 26, 26, 0.22));
+    transform: rotate(var(--rot, 0deg));
+    transition:
+      transform 0.25s cubic-bezier(0.2, 0, 0, 1),
+      filter 0.25s;
+    text-decoration: none;
+    color: #1a1a1a;
+  }
+  .polaroid:hover {
+    transform: rotate(0deg) translateY(-8px) scale(1.04);
+    filter: url(#papercut-2) drop-shadow(0 18px 34px rgba(26, 26, 26, 0.32));
+    z-index: 20 !important;
+  }
+  .polaroid-photo {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 7px;
+    background: #ece0cd;
+  }
+  .polaroid-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .polaroid-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #faf3e8;
+    font-size: 2.5rem;
+  }
+  .polaroid-caption {
+    padding: 0.55rem 0.25rem 0.7rem;
+  }
+  .polaroid-title {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    color: #1a1a1a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .polaroid-maker {
+    font-size: 0.72rem;
+    color: #6b5b4a;
+    margin-top: 0.1rem;
+  }
+</style>

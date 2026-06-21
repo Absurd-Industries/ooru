@@ -85,10 +85,17 @@ interface DB {
   reactions: Reaction[];
   pledges: Pledge[];
   file_downloads: FileDownload[];
+  /** Local UI preferences: locale, cached geo, dismissed banners, etc. */
+  prefs: Record<string, unknown>;
 }
 
 const KEY = "ooru.db.v1";
-const VERSION = 1;
+/**
+ * Bump DB_VERSION on any release that changes this local schema, or whenever
+ * you want to "burst" (wipe) every guest's local data. load() discards data
+ * stamped with a different version, so a bump = a clean reset on next load.
+ */
+const DB_VERSION = 2;
 
 // The signed-in "you" - the mock current profile. In production this
 // comes from the session; here it's seeded once and reused.
@@ -108,13 +115,14 @@ const SEED_USER: Profile = {
 
 function emptyDB(): DB {
   return {
-    version: VERSION,
+    version: DB_VERSION,
     profiles: [SEED_USER],
     follows: [],
     comments: [],
     reactions: [],
     pledges: [],
     file_downloads: [],
+    prefs: {},
   };
 }
 
@@ -132,11 +140,12 @@ function load(): DB {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return emptyDB();
     const db = JSON.parse(raw) as DB;
-    if (!db || db.version !== VERSION) return emptyDB();
-    // Make sure the current user always exists.
+    if (!db || db.version !== DB_VERSION) return emptyDB();
+    // Make sure the current user + prefs always exist.
     if (!db.profiles.some((p) => p.id === CURRENT_USER_ID)) {
       db.profiles.push(SEED_USER);
     }
+    if (!db.prefs) db.prefs = {};
     return db;
   } catch {
     return emptyDB();
@@ -181,6 +190,35 @@ export function upsertProfile(p: Profile): void {
   if (i >= 0) db.profiles[i] = p;
   else db.profiles.push(p);
   save(db);
+}
+
+// ── Preferences (locale, cached geo, dismissed banners, …) ──────────
+export function getPref<T = unknown>(key: string, fallback: T): T {
+  const v = load().prefs[key];
+  return v === undefined ? fallback : (v as T);
+}
+
+export function setPref(key: string, value: unknown): void {
+  const db = load();
+  db.prefs[key] = value;
+  save(db);
+}
+
+/**
+ * Wipe the entire local guest session - a manual "burst". Everything the
+ * guest accumulated (reactions, comments, pledges, follows, prefs) is local
+ * only, so this fully resets their experience.
+ */
+export function resetGuest(): void {
+  if (!hasStorage()) return;
+  try {
+    window.localStorage.removeItem(KEY);
+    // A full manual reset also clears the saved language choice.
+    window.localStorage.removeItem("ooru.locale");
+    window.dispatchEvent(new CustomEvent("ooru:db-change"));
+  } catch {
+    /* ignore */
+  }
 }
 
 // ── Reactions (hearts / upvotes) ────────────────────────────────────

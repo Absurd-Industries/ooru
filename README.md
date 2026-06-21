@@ -73,6 +73,29 @@ A craft / kraft-paper aesthetic with organic, paper-cut card edges (SVG `feTurbu
 **Icons:** Phosphor Icons + FontAwesome brands.
 **Logo:** the wordmark is paired with the actual Kannada (ಊರు) and Telugu (ఊరు) script, rendered as vector paths so it's font-independent everywhere.
 
+## Localization (i18n)
+
+The UI ships in **English (default), Kannada (ಕನ್ನಡ), and Telugu (తెలుగు)** with an in-page
+language switcher (top bar + footer). Only the **UI chrome** is translated - dynamic content
+(campaign, maker, and event data) stays in its source language for now.
+
+How it works:
+
+- Strings live in `src/i18n/{en,kn,te}.ts` as flat key → string maps. `en.ts` is the single
+  source of truth; `index.ts` exposes `t(key, locale, vars?)` with `{placeholder}` interpolation.
+- Astro markup renders English at build via `t("key")` and tags the element with
+  `data-i18n="key"` (or `data-i18n-attr="placeholder:key"`). `src/components/I18n.astro` is a
+  no-FOUC `<head>` script that reads the saved locale, sets `<html lang>`, and swaps the static
+  DOM before paint. Vue islands localize reactively via `src/lib/i18n-client.ts` (`t()` + `setLocale()`).
+- The **logo** swaps to the Kannada/Telugu wordmark (ಊరు / ఊరు) purely from `<html lang>` + CSS.
+- **English is always the fallback:** a key missing in `kn`/`te` falls back to `en`, then to the
+  raw key - nothing ever renders blank.
+
+> **Maintenance rule:** whenever you add, change, or remove a UI string, update **all three** of
+> `en.ts`, `kn.ts`, and `te.ts` (mirror the exact key, keep `{placeholders}` intact, and keep
+> brand/proper nouns - Ooru, Discord, etc. - untranslated). English is the contract; the other
+> two must mirror its keys.
+
 ## Deployment
 
 Cloudflare Pages via the `@astrojs/cloudflare` adapter. All pages prerender (static) by default;

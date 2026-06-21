@@ -8,6 +8,7 @@
 
 import { ref, computed } from "vue";
 import type { Request } from "../types";
+import { t } from "../lib/i18n-client";
 
 const props = defineProps<{
   requests: Request[];
@@ -154,7 +155,7 @@ function makerDisplayName(makerSlug: string): string {
       <input
         v-model="searchText"
         type="text"
-        placeholder="Search requests..."
+        :placeholder='t("listing.searchRequests")'
         class="w-full pl-10 pr-4 py-2.5 rounded-full border border-ink/10 bg-paper text-sm text-ink placeholder:text-kraft-dark focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp/30 transition-colors"
       />
       <button
@@ -325,7 +326,7 @@ function makerDisplayName(makerSlug: string): string {
         <i
           class="ph-bold ph-magnifying-glass text-4xl text-stencil opacity-40 mb-3 block"
         ></i>
-        <h3 class="font-serif font-bold text-lg mb-1">No requests found</h3>
+        <h3 class="font-serif font-bold text-lg mb-1">{{ t("listing.noRequests") }}</h3>
         <p class="text-sm text-ink-faint">
           Try a different category or search term.
         </p>

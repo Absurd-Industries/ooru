@@ -10,10 +10,26 @@
 
 import { ref, onMounted, onUnmounted } from "vue";
 import { bottomBarTabs, megaMenuItems } from "../data/navigation";
+import { t } from "../lib/i18n-client";
 
 const props = defineProps<{
   activeTab?: string;
 }>();
+
+// Map nav hrefs to i18n keys; brand items (Discord) fall back to their label.
+const NAV_KEYS: Record<string, string> = {
+  "/": "nav.home",
+  "/events": "nav.events",
+  "/campaigns": "nav.campaigns",
+  "/makers": "nav.makers",
+  "/requests": "nav.requests",
+  "/faq": "nav.faq",
+  "/contact": "nav.contact",
+};
+function navLabel(item: { href: string; label: string }): string {
+  const k = NAV_KEYS[item.href];
+  return k ? t(k) : item.label;
+}
 
 const megaMenuOpen = ref(false);
 const hidden = ref(false);
@@ -71,11 +87,11 @@ onUnmounted(() => {
         :class="{ 'active-tab': tab.href === '/' ? !activeTab : activeTab === tab.href.replace('/', '') }"
       >
         <i :class="tab.icon"></i>
-        <span>{{ tab.label }}</span>
+        <span>{{ navLabel(tab) }}</span>
       </a>
       <button @click="megaMenuOpen = !megaMenuOpen">
         <i :class="megaMenuOpen ? 'ph-bold ph-x' : 'ph-bold ph-dots-three'"></i>
-        <span>More</span>
+        <span>{{ t("nav.more") }}</span>
       </button>
     </div>
 
@@ -91,7 +107,7 @@ onUnmounted(() => {
             @click="closeMegaMenu"
           >
             <i :class="item.icon"></i>
-            {{ item.label }}
+            {{ navLabel(item) }}
           </a>
         </div>
       </div>

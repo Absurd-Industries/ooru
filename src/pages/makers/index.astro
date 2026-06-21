@@ -6,6 +6,7 @@
  */
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { t } from "../../i18n";
 import Card from "../../components/Card.astro";
 import MakerCard from "../../components/MakerCard.astro";
 import MakersListing from "../../components/MakersListing.vue";
@@ -23,10 +24,10 @@ import { makers } from "../../data/makers";
     <div class="max-w-5xl mx-auto px-5 sm:px-6">
       <div class="max-w-2xl">
         <h1 class="font-serif font-bold text-3xl sm:text-4xl tracking-tight mb-2">
-          <i class="ph-duotone ph-users-three text-ink mr-2" style="font-size:1.4rem;"></i>Makers
+          <i class="ph-duotone ph-users-three text-ink mr-2" style="font-size:1.4rem;"></i><span data-i18n="section.makers">{t("section.makers")}</span>
         </h1>
-        <p class="text-ink text-base sm:text-lg leading-relaxed">
-          Hardware rebels with workshops, not just followers.
+        <p class="text-ink text-base sm:text-lg leading-relaxed" data-i18n="page.makers.desc">
+          {t("page.makers.desc")}
         </p>
       </div>
     </div>
@@ -54,13 +55,12 @@ import { makers } from "../../data/makers";
       <Card variant="dark">
         <div class="px-6 py-10 sm:px-10 sm:py-12 text-center text-paper">
           <i class="ph-bold ph-soldering-iron text-4xl text-stamp mb-4 block"></i>
-          <h2 class="font-serif font-bold text-2xl sm:text-3xl tracking-tight mb-3">Become a Maker</h2>
-          <p class="text-sm sm:text-base text-kraft max-w-md mx-auto mb-6 leading-relaxed">
-            Got a workshop and an unreasonable urge to build things? Create your maker profile,
-            share your skills, and join a community that ships real hardware.
+          <h2 class="font-serif font-bold text-2xl sm:text-3xl tracking-tight mb-3" data-i18n="page.makers.becomeTitle">{t("page.makers.becomeTitle")}</h2>
+          <p class="text-sm sm:text-base text-kraft max-w-md mx-auto mb-6 leading-relaxed" data-i18n="page.makers.becomeDesc">
+            {t("page.makers.becomeDesc")}
           </p>
           <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="btn btn-stamp">
-            Join the Guild
+            <span data-i18n="page.makers.becomeCta">{t("page.makers.becomeCta")}</span>
           </a>
         </div>
       </Card>

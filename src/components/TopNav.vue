@@ -7,17 +7,19 @@
  */
 
 import { ref } from "vue";
+import { t } from "../lib/i18n-client";
+import LangSwitcher from "./LangSwitcher.vue";
 
 const props = defineProps<{
     activeTab?: string;
 }>();
 
 const links = [
-    { label: "Campaigns", href: "/campaigns" },
-    { label: "Makers", href: "/makers" },
-    { label: "Requests", href: "/requests" },
-    { label: "Events", href: "/events" },
-    { label: "FAQ", href: "/faq" },
+    { key: "nav.campaigns", href: "/campaigns" },
+    { key: "nav.makers", href: "/makers" },
+    { key: "nav.requests", href: "/requests" },
+    { key: "nav.events", href: "/events" },
+    { key: "nav.faq", href: "/faq" },
 ];
 
 const open = ref(false);
@@ -31,10 +33,14 @@ function isActive(href: string): boolean {
     <header class="topnav">
         <div class="topnav-inner">
             <a href="/" class="topnav-logo" aria-label="Ooru home">
-                <span class="brand-wordmark"
-                    >ooru<span class="brand-dot">.</span
-                    ><span class="text-xs">build</span></span
-                >
+                <span class="brand-wordmark">
+                    <span class="wm-en"
+                        >ooru<span class="brand-dot">.</span
+                        ><span class="text-xs">build</span></span
+                    >
+                    <span class="wm-alt wm-kn">ಊರು</span>
+                    <span class="wm-alt wm-te">ఊరు</span>
+                </span>
             </a>
 
             <!-- Desktop links -->
@@ -45,7 +51,7 @@ function isActive(href: string): boolean {
                     :href="l.href"
                     class="topnav-link"
                     :class="{ active: isActive(l.href) }"
-                    >{{ l.label }}</a
+                    >{{ t(l.key) }}</a
                 >
                 <a
                     href="https://discord.gg/DUSUtguG2H"
@@ -54,8 +60,9 @@ function isActive(href: string): boolean {
                     class="topnav-discord"
                 >
                     <i class="ph-bold ph-discord-logo"></i>
-                    <span>Discord</span>
+                    <span>{{ t("nav.discord") }}</span>
                 </a>
+                <LangSwitcher />
             </nav>
 
             <!-- Mobile toggle -->
@@ -79,13 +86,13 @@ function isActive(href: string): boolean {
                     class="topnav-mobile-link"
                     :class="{ active: isActive(l.href) }"
                     @click="open = false"
-                    >{{ l.label }}</a
+                    >{{ t(l.key) }}</a
                 >
                 <a
                     href="/contact"
                     class="topnav-mobile-link"
                     @click="open = false"
-                    >Contact</a
+                    >{{ t("nav.contact") }}</a
                 >
                 <a
                     href="https://discord.gg/DUSUtguG2H"
@@ -94,8 +101,9 @@ function isActive(href: string): boolean {
                     class="topnav-mobile-link discord"
                     @click="open = false"
                 >
-                    <i class="ph-bold ph-discord-logo"></i> Discord
+                    <i class="ph-bold ph-discord-logo"></i> {{ t("nav.discord") }}
                 </a>
+                <div class="topnav-mobile-lang"><LangSwitcher variant="block" /></div>
             </nav>
         </Transition>
     </header>

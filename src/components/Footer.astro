@@ -1,8 +1,11 @@
 ---
 /**
  * Site-wide footer - craft-style with angled logo, organized links.
- * Static component - no JS shipped.
+ * Mostly static; the language switcher + "reset my data" are tiny islands.
  */
+import { t } from "../i18n";
+import LangSwitcher from "./LangSwitcher.vue";
+import ResetData from "./ResetData.vue";
 ---
 
 <footer class="footer-wrap">
@@ -10,40 +13,52 @@
         <!-- Top section: angled logo + tagline -->
         <div class="flex flex-col items-center mb-8 pt-2">
             <a href="/" class="footer-logo-link" aria-label="Ooru home">
-                <span class="brand-wordmark footer-wordmark"
-                    >ooru<span class="brand-dot">.</span><span class="text-sm"
-                        >build</span
-                    ></span
-                >
+                <span class="brand-wordmark footer-wordmark">
+                    <span class="wm-en"
+                        >ooru<span class="brand-dot">.</span><span
+                            class="text-sm">build</span
+                        ></span
+                    >
+                    <span class="wm-alt wm-kn">ಊరು</span>
+                    <span class="wm-alt wm-te">ఊరు</span>
+                </span>
             </a>
             <p
                 class="text-sm text-stencil text-center mt-3 max-w-xs leading-relaxed"
                 style="font-weight:500;"
+                data-i18n="footer.tagline"
             >
-                A warm community of makers who believe collabration beats
-                competition!
+                {t("footer.tagline")}
             </p>
         </div>
 
         <!-- Links: compact horizontal layout -->
         <div class="footer-links">
             <div class="footer-col">
-                <h4 class="footer-heading">Platform</h4>
+                <h4 class="footer-heading" data-i18n="footer.platform">
+                    {t("footer.platform")}
+                </h4>
                 <a href="/campaigns"
-                    ><i class="ph-duotone ph-rocket-launch"></i> Campaigns</a
+                    ><i class="ph-duotone ph-rocket-launch"></i>
+                    <span data-i18n="nav.campaigns">{t("nav.campaigns")}</span></a
                 >
                 <a href="/makers"
-                    ><i class="ph-duotone ph-users-three"></i> Makers</a
+                    ><i class="ph-duotone ph-users-three"></i>
+                    <span data-i18n="nav.makers">{t("nav.makers")}</span></a
                 >
                 <a href="/requests"
-                    ><i class="ph-duotone ph-hand-palm"></i> Requests</a
+                    ><i class="ph-duotone ph-hand-palm"></i>
+                    <span data-i18n="nav.requests">{t("nav.requests")}</span></a
                 >
                 <a href="/events"
-                    ><i class="ph-duotone ph-calendar-dots"></i> Events</a
+                    ><i class="ph-duotone ph-calendar-dots"></i>
+                    <span data-i18n="nav.events">{t("nav.events")}</span></a
                 >
             </div>
             <div class="footer-col">
-                <h4 class="footer-heading">Community</h4>
+                <h4 class="footer-heading" data-i18n="footer.community">
+                    {t("footer.community")}
+                </h4>
                 <a
                     href="https://discord.gg/DUSUtguG2H"
                     target="_blank"
@@ -111,25 +126,41 @@
                 >
             </div>
             <div class="footer-col">
-                <h4 class="footer-heading">More</h4>
-                <a href="/faq"><i class="ph-duotone ph-question"></i> FAQ</a>
+                <h4 class="footer-heading" data-i18n="footer.more">
+                    {t("footer.more")}
+                </h4>
+                <a href="/faq"
+                    ><i class="ph-duotone ph-question"></i>
+                    <span data-i18n="nav.faq">{t("nav.faq")}</span></a
+                >
                 <a href="/contact"
-                    ><i class="ph-duotone ph-envelope-simple"></i> Contact</a
+                    ><i class="ph-duotone ph-envelope-simple"></i>
+                    <span data-i18n="nav.contact">{t("nav.contact")}</span></a
                 >
                 <a href="/privacy-policy"
-                    ><i class="ph-duotone ph-lock"></i> Privacy</a
+                    ><i class="ph-duotone ph-lock"></i>
+                    <span data-i18n="footer.privacy">{t("footer.privacy")}</span></a
                 >
                 <a href="/terms-and-conditions"
-                    ><i class="ph-duotone ph-file-text"></i> Terms</a
+                    ><i class="ph-duotone ph-file-text"></i>
+                    <span data-i18n="footer.terms">{t("footer.terms")}</span></a
+                >
+                <a href="/sitemap"
+                    ><i class="ph-duotone ph-tree-structure"></i>
+                    <span data-i18n="footer.sitemap">{t("footer.sitemap")}</span></a
                 >
             </div>
         </div>
 
         <!-- Bottom bar -->
         <div class="footer-bottom">
+            <div class="footer-actions">
+                <LangSwitcher client:visible />
+                <ResetData client:visible />
+            </div>
             <p class="text-xs text-stencil">
-                <span class="copyleft">&copy;</span> Copyleft 2023-2026 &middot; Made
-                with curiosity in Bengaluru
+                <span class="copyleft">&copy;</span>
+                <span data-i18n="footer.copyright">{t("footer.copyright")}</span>
             </p>
         </div>
     </div>
@@ -225,5 +256,13 @@
         border-top: 1px solid rgba(26, 26, 26, 0.08);
         padding: 1rem 0;
         text-align: center;
+    }
+    .footer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 0.85rem;
     }
 </style>

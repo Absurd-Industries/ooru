@@ -1,0 +1,96 @@
+---
+/**
+ * Human-readable sitemap at /sitemap. Built from the exact same source as
+ * /sitemap.xml (src/lib/sitemap.ts), grouped by section, and links out to
+ * the machine-readable XML. Grows automatically with the data.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSitemapSections, getSitemapEntries } from "../lib/sitemap";
+
+const sections = getSitemapSections();
+const total = getSitemapEntries().length;
+---
+
+<BaseLayout
+  title="Sitemap"
+  description="Every page on Ooru in one place. Browse by section, or grab the machine-readable sitemap.xml that search engines use."
+  ogImage="/og/default.png"
+  activeTab=""
+>
+  <div class="max-w-4xl mx-auto px-5 sm:px-6 pt-6 pb-16">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-ink mb-2">
+        <i class="ph-duotone ph-tree-structure text-ink mr-2" style="font-size:1.4rem;"></i>Sitemap
+      </h1>
+      <p class="text-sm text-ink max-w-xl leading-relaxed">
+        Every page on Ooru — <strong>{total}</strong> URLs in all. This page and{" "}
+        <a href="/sitemap.xml" class="text-stamp font-semibold hover:underline" style="text-decoration:none;">sitemap.xml</a>{" "}
+        are generated from the same source, so they never drift. Search engines read the XML; humans get this.
+      </p>
+    </div>
+
+    <!-- Sections -->
+    <div class="space-y-8">
+      {
+        sections.map((g) => (
+          <section>
+            <h2 class="font-serif font-bold text-lg text-ink mb-3 flex items-center gap-2">
+              {g.section}
+              <span class="text-xs font-sans font-normal text-stencil">({g.items.length})</span>
+            </h2>
+            <ul class="sitemap-list">
+              {g.items.map((it) => (
+                <li>
+                  <a href={it.path} class="sitemap-link">
+                    <span class="sitemap-label">{it.label}</span>
+                    <span class="sitemap-path">{it.path}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+
+  <style>
+    .sitemap-list {
+      display: grid;
+      gap: 0.15rem;
+    }
+    .sitemap-link {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      color: #1a1a1a;
+      transition:
+        background 0.15s,
+        color 0.15s;
+    }
+    .sitemap-link:hover {
+      background: rgba(250, 243, 232, 0.7);
+      color: #ff5900;
+    }
+    .sitemap-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sitemap-path {
+      font-size: 0.72rem;
+      color: #6b5b4a;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  </style>
+</BaseLayout>

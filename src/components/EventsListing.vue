@@ -4,8 +4,10 @@
  * City filter + search, events rendered as simple date-box microcards.
  */
 
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type { AbsurdEvent } from "../types";
+import { getGeo, cachedGeo } from "../lib/geo";
+import { t } from "../lib/i18n-client";
 
 const props = defineProps<{
   events: AbsurdEvent[];
@@ -14,7 +16,37 @@ const props = defineProps<{
 const searchText = ref("");
 const activeCity = ref("Bengaluru");
 
-const cities = ["Bengaluru", "Mumbai", "Pune", "Online"];
+const cities = ref(["Bengaluru", "Mumbai", "Pune", "Online"]);
+
+// Map common alternate city names to the ones our data uses.
+const CITY_ALIASES: Record<string, string> = {
+  bangalore: "bengaluru",
+  bombay: "mumbai",
+  poona: "pune",
+};
+const normCity = (c: string) => {
+  const k = c.trim().toLowerCase();
+  return CITY_ALIASES[k] ?? k;
+};
+
+// Localize to the visitor's city if we have events there, else "Online".
+function applyDetectedCity(detected: string | null | undefined) {
+  if (!detected) return;
+  const target = normCity(detected);
+  const match = props.events.find((e) => normCity(e.city) === target);
+  if (match) {
+    if (!cities.value.includes(match.city)) cities.value.unshift(match.city);
+    activeCity.value = match.city;
+  } else {
+    activeCity.value = "Online";
+  }
+}
+
+onMounted(() => {
+  const c = cachedGeo();
+  if (c?.city) applyDetectedCity(c.city);
+  else getGeo().then((g) => applyDetectedCity(g?.city));
+});
 
 const filteredEvents = computed(() => {
   let items = [...props.events];
@@ -94,7 +126,7 @@ function spotsLeft(event: AbsurdEvent): number | null {
         <input
           v-model="searchText"
           type="text"
-          placeholder="Search events, venues, tags..."
+          :placeholder='t("listing.searchEvents")'
           class="w-full pl-10 pr-4 py-2.5 rounded-full border border-ink/10 bg-paper text-sm text-ink placeholder:text-kraft-dark focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp/30 transition-colors"
         />
         <button
@@ -159,7 +191,7 @@ function spotsLeft(event: AbsurdEvent): number | null {
               {{ event.attendees }} attending
             </span>
             <span class="text-xs text-stencil">
-              Hosted by <strong class="text-ink">{{ event.hostName }}</strong>
+              {{ t("listing.hostedBy") }} <strong class="text-ink">{{ event.hostName }}</strong>
             </span>
           </div>
         </div>
@@ -169,7 +201,7 @@ function spotsLeft(event: AbsurdEvent): number | null {
     <!-- Empty state -->
     <div v-if="filteredEvents.length === 0" class="py-12 text-center">
       <i class="ph-bold ph-calendar-x text-4xl text-stencil opacity-40 mb-3 block"></i>
-      <h3 class="font-serif font-bold text-lg mb-1">No events found</h3>
+      <h3 class="font-serif font-bold text-lg mb-1">{{ t("listing.noEvents") }}</h3>
       <p class="text-sm text-ink-faint">
         Try a different city or search term.
       </p>

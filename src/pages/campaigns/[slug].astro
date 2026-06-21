@@ -20,6 +20,7 @@ import CampaignDiscussion from "../../components/CampaignDiscussion.vue";
 import CampaignRewards from "../../components/CampaignRewards.vue";
 import { campaigns } from "../../data/campaigns";
 import type { Campaign } from "../../types";
+import { t } from "../../i18n";
 
 // Backing model helpers: reserve 25% now, pay the balance on ship.
 const priceNum = (s: string) => parseInt(String(s).replace(/[^\d]/g, ""), 10) || 0;
@@ -483,7 +484,7 @@ const sectionNav = [
 ];
 
 // SEO: contextual OG image (campaign photo + title) + structured data.
-const ogImagePath = `/og/campaigns/${campaign.slug}.png`;
+const ogImagePath = `/og/campaigns/${campaign.slug}.jpg`;
 const campaignLd = {
   "@context": "https://schema.org",
   "@type": "Product",
@@ -598,7 +599,7 @@ const campaignLd = {
 
             <!-- About This Project -->
             <div class="campaign-section" id="sec-story">
-              <h2 class="font-serif font-bold text-lg mb-4">About This Project</h2>
+              <h2 class="font-serif font-bold text-lg mb-4" data-i18n="campaign.about">{t("campaign.about")}</h2>
               <div class="text-sm leading-relaxed text-ink-light space-y-4">
                 <p>{campaign.tagline}</p>
                 {campaign.richDescription && (
@@ -701,7 +702,7 @@ const campaignLd = {
             {isShowcase ? (
               <div class="campaign-section" id="sec-files">
                 <div class="flex items-center justify-between mb-1">
-                  <h2 class="font-serif font-bold text-lg">Open Source Files</h2>
+                  <h2 class="font-serif font-bold text-lg" data-i18n="campaign.files">{t("campaign.files")}</h2>
                   <Tag variant="funded">
                     <i class="ph-bold ph-scales mr-1" style="font-size: 0.65rem;"></i>
                     {campaign.license}
@@ -713,7 +714,7 @@ const campaignLd = {
               </div>
             ) : (
               <div class="campaign-section">
-                <h2 class="font-serif font-bold text-lg mb-4">Open Source Files</h2>
+                <h2 class="font-serif font-bold text-lg mb-4" data-i18n="campaign.files">{t("campaign.files")}</h2>
                 <Tag variant="funded">
                   <i class="ph-bold ph-scales mr-1" style="font-size: 0.65rem;"></i>
                   {campaign.license}
@@ -729,7 +730,7 @@ const campaignLd = {
             {isShowcase && (
               <div class="campaign-section">
                 <div class="flex items-center justify-between mb-4">
-                  <h2 class="font-serif font-bold text-lg">Bill of Materials</h2>
+                  <h2 class="font-serif font-bold text-lg" data-i18n="campaign.bom">{t("campaign.bom")}</h2>
                   <Tag>
                     <i class="ph-bold ph-table mr-1" style="font-size: 0.65rem;"></i>
                     {bom.length} components
@@ -740,9 +741,9 @@ const campaignLd = {
                   <table class="bom-table">
                     <thead>
                       <tr>
-                        <th>Component</th>
+                        <th data-i18n="campaign.bomComponent">{t("campaign.bomComponent")}</th>
                         <th>Qty</th>
-                        <th class="hidden sm:table-cell">Source</th>
+                        <th class="hidden sm:table-cell" data-i18n="campaign.bomSource">{t("campaign.bomSource")}</th>
                         <th class="text-right">Est. Cost</th>
                       </tr>
                     </thead>
@@ -758,8 +759,8 @@ const campaignLd = {
                       <tr class="total-row">
                         <td colspan="2" class="hidden sm:table-cell"></td>
                         <td class="sm:hidden"></td>
-                        <td class="hidden sm:table-cell text-right font-semibold">Total</td>
-                        <td class="sm:hidden text-right font-semibold">Total</td>
+                        <td class="hidden sm:table-cell text-right font-semibold" data-i18n="campaign.bomTotal">{t("campaign.bomTotal")}</td>
+                        <td class="sm:hidden text-right font-semibold" data-i18n="campaign.bomTotal">{t("campaign.bomTotal")}</td>
                         <td class="text-right font-semibold">~&#8377;2,400</td>
                       </tr>
                     </tbody>
@@ -771,7 +772,7 @@ const campaignLd = {
             <!-- Manufacturing Status (showcase only) -->
             {isShowcase && (
               <div class="campaign-section">
-                <h2 class="font-serif font-bold text-lg mb-5">Manufacturing Status</h2>
+                <h2 class="font-serif font-bold text-lg mb-5" data-i18n="campaign.mfgStatus">{t("campaign.mfgStatus")}</h2>
 
                 {manufacturingSteps.map((step, idx) => (
                   <>
@@ -794,8 +795,8 @@ const campaignLd = {
                         </div>
                         <div class="text-xs text-ink-faint">{step.note}</div>
                       </div>
-                      {step.status === "current" && <Tag variant="stamp">In Progress</Tag>}
-                      {step.status === "done" && <Tag variant="funded">Complete</Tag>}
+                      {step.status === "current" && <Tag variant="stamp"><span data-i18n="campaign.inProgress">{t("campaign.inProgress")}</span></Tag>}
+                      {step.status === "done" && <Tag variant="funded"><span data-i18n="campaign.complete">{t("campaign.complete")}</span></Tag>}
                     </div>
                     {idx < manufacturingSteps.length - 1 && (
                       <div
@@ -823,7 +824,7 @@ const campaignLd = {
 
             <!-- FAQ -->
             <div class="campaign-section" id="sec-faq">
-              <h2 class="font-serif font-bold text-lg mb-4">Frequently Asked Questions</h2>
+              <h2 class="font-serif font-bold text-lg mb-4" data-i18n="campaign.faqTitle">{t("campaign.faqTitle")}</h2>
               <div class="campaign-faq">
                 {faqs.map((f) => (
                   <details class="campaign-faq-item" name="campaign-faq">
@@ -836,13 +837,13 @@ const campaignLd = {
                 ))}
               </div>
               <p class="text-xs text-ink-faint mt-4">
-                Still curious? <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="text-stamp hover:underline" style="text-decoration:none;">Ask the maker on Discord</a>.
+                Still curious? <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="text-stamp hover:underline" style="text-decoration:none;" data-i18n="campaign.askMaker">{t("campaign.askMaker")}</a>.
               </p>
             </div>
 
             <!-- Updates Feed -->
             <div class="campaign-section" id="sec-updates">
-              <h2 class="font-serif font-bold text-lg mb-5">Updates <span class="text-sm font-sans font-normal text-ink-faint ml-1">({updatesList.length})</span></h2>
+              <h2 class="font-serif font-bold text-lg mb-5"><span data-i18n="campaign.updates">{t("campaign.updates")}</span> <span class="text-sm font-sans font-normal text-ink-faint ml-1">({updatesList.length})</span></h2>
 
                 {updatesList.map((update, idx) => (
                   <div class="flex gap-3">
@@ -897,16 +898,16 @@ const campaignLd = {
             <div class="funding-stats">
               <div class="funding-stat">
                 <div class="funding-stat-num">{campaign.percent}%</div>
-                <div class="funding-stat-label">funded</div>
+                <div class="funding-stat-label" data-i18n="campaign.statFunded">{t("campaign.statFunded")}</div>
               </div>
               <div class="funding-stat">
                 <div class="funding-stat-num">{campaign.backers}</div>
-                <div class="funding-stat-label">backers</div>
+                <div class="funding-stat-label" data-i18n="campaign.statBackers">{t("campaign.statBackers")}</div>
               </div>
               {campaign.daysLeft != null && (
                 <div class="funding-stat">
                   <div class="funding-stat-num">{campaign.daysLeft}</div>
-                  <div class="funding-stat-label">days left</div>
+                  <div class="funding-stat-label" data-i18n="campaign.statDaysLeft">{t("campaign.statDaysLeft")}</div>
                 </div>
               )}
             </div>
@@ -949,7 +950,7 @@ const campaignLd = {
         <!-- Creator Card -->
         <Card class="mb-5">
           <div class="p-5">
-            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-ink-faint mb-3">Creator</div>
+            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-ink-faint mb-3" data-i18n="campaign.creator">{t("campaign.creator")}</div>
             <div class="flex items-center gap-3 mb-4">
               <div
                 class="w-12 h-12 flex items-center justify-center text-sm font-bold text-paper flex-shrink-0 oct-sm"
@@ -972,7 +973,7 @@ const campaignLd = {
               </div>
               <div>
                 <div class="creator-stat-num">{creatorStats.backed}</div>
-                <div class="creator-stat-label">projects backed</div>
+                <div class="creator-stat-label" data-i18n="campaign.projectsBacked">{t("campaign.projectsBacked")}</div>
               </div>
             </div>
 
@@ -987,8 +988,8 @@ const campaignLd = {
             </p>
 
             <div class="grid grid-cols-2 gap-2">
-              <a href={`/makers/${campaign.makerSlug}`} class="btn btn-outline btn-sm w-full" style="text-decoration:none;">Profile</a>
-              <button onclick="window.__comingSoon && window.__comingSoon('Contact the maker', 'Direct messaging launches with the next platform update. For now, find the maker on Discord.')" class="btn btn-outline btn-sm w-full">Contact</button>
+              <a href={`/makers/${campaign.makerSlug}`} class="btn btn-outline btn-sm w-full" style="text-decoration:none;" data-i18n="campaign.profile">{t("campaign.profile")}</a>
+              <button onclick="window.__comingSoon && window.__comingSoon('Contact the maker', 'Direct messaging launches with the next platform update. For now, find the maker on Discord.')" class="btn btn-outline btn-sm w-full" data-i18n="nav.contact">{t("nav.contact")}</button>
             </div>
           </div>
         </Card>
@@ -1006,7 +1007,7 @@ const campaignLd = {
           <span class="float-pill-sub">{campaign.backers} backers</span>
         </div>
         <div class="float-pill-right">
-          <span class="float-pill-label">Back This Project</span>
+          <span class="float-pill-label" data-i18n="campaign.back">{t("campaign.back")}</span>
           <i class="ph-bold ph-arrow-up float-pill-chevron" style="font-size:0.7rem;"></i>
         </div>
       </a>
@@ -1014,7 +1015,7 @@ const campaignLd = {
     {campaign.status === "funded" && (
       <div class="float-pill-btn float-pill-btn--funded">
         <div class="float-pill-info">
-          <span class="float-pill-title">Fully funded</span>
+          <span class="float-pill-title" data-i18n="campaign.fullyFunded">{t("campaign.fullyFunded")}</span>
           <span class="float-pill-sub">{campaign.backers} backers</span>
         </div>
         <div class="float-pill-right">

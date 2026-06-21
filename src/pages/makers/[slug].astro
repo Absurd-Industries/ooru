@@ -334,12 +334,30 @@ const wallSeed = comments.map((c, i) => ({
     content: c.text,
     hearts: [5, 3, 7][i] ?? 2,
 }));
+
+// SEO: structured data for the maker (a Person on a ProfilePage).
+const makerLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: maker.name,
+    jobTitle: maker.title,
+    description:
+        maker.bio ??
+        `${maker.name} is a ${maker.title} from ${maker.location} on Ooru.`,
+    address: maker.location,
+    knowsAbout: maker.skills,
+    url: new URL(`/makers/${maker.slug}`, Astro.site).href,
+    ...(maker.links?.website ? { sameAs: [maker.links.website] } : {}),
+};
 ---
 
 <BaseLayout
     title={`${maker.name} - ${maker.title}`}
     description={maker.bio ??
         `${maker.name} is a ${maker.title} from ${maker.location} on Ooru.`}
+    ogImage="/og/makers.png"
+    ogType="profile"
+    jsonLd={makerLd}
     activeTab="makers"
     hideNav
 >

@@ -6,6 +6,7 @@
  */
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { t } from "../../i18n";
 import Card from "../../components/Card.astro";
 ---
 
@@ -19,11 +20,10 @@ import Card from "../../components/Card.astro";
   <div class="max-w-4xl mx-auto px-5 sm:px-6 pt-6 pb-6">
     <div class="mb-2">
       <h1 class="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-ink mb-2">
-        <i class="ph-duotone ph-question text-ink mr-2" style="font-size:1.4rem;"></i>FAQ
+        <i class="ph-duotone ph-question text-ink mr-2" style="font-size:1.4rem;"></i><span data-i18n="section.faq">{t("section.faq")}</span>
       </h1>
-      <p class="text-sm text-ink max-w-lg leading-relaxed" style="font-weight:450;">
-        Got questions? We have answers. If you don't find what you're looking for,
-        drop by our Discord and ask away.
+      <p class="text-sm text-ink max-w-lg leading-relaxed" style="font-weight:450;" data-i18n="page.faq.desc">
+        {t("page.faq.desc")}
       </p>
     </div>
   </div>
@@ -37,89 +37,73 @@ import Card from "../../components/Card.astro";
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-question faq-q-icon"></i>
-              <span>What is Ooru?</span>
+              <span data-i18n="faq.q1">{t("faq.q1")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Ooru is an open-source STEAM platform built by Absurd Industries, based in Bengaluru, India. 'Ooru' means village in Kannada and Telugu - we're building a digital community where makers, tinkerers, engineers, artists, and the endlessly curious come together to build hardware and software in the open. Everything we make ships with full source files.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a1">{t("faq.a1")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-rocket-launch faq-q-icon"></i>
-              <span>How do campaigns work?</span>
+              <span data-i18n="faq.q2">{t("faq.q2")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Makers launch crowdfunding campaigns for open-source hardware projects. Each campaign includes a bill of materials, schematics, firmware, and CAD files. You back a project you believe in, the maker builds it, and you get both the product and the knowledge to build it yourself.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a2">{t("faq.a2")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-hand-palm faq-q-icon"></i>
-              <span>How do requests work?</span>
+              <span data-i18n="faq.q3">{t("faq.q3")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Anyone can describe something that should exist but doesn't. The community upvotes, discusses, and refines the spec. When a maker picks up a request, it becomes a campaign. Your idea could become a real product backed by the community.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a3">{t("faq.a3")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-scales faq-q-icon"></i>
-              <span>What open-source licenses do projects use?</span>
+              <span data-i18n="faq.q4">{t("faq.q4")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Hardware designs use the CERN Open Hardware Licence (CERN-OHL). Software components typically use MIT, GPL, or Apache 2.0. You are free to study, modify, manufacture, and redistribute any project on the platform.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a4">{t("faq.a4")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-users-three faq-q-icon"></i>
-              <span>How do I become a maker?</span>
+              <span data-i18n="faq.q5">{t("faq.q5")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Join the Discord community and introduce yourself. Start by contributing to existing projects or community requests. Share your skills, help refine specs, and when you are ready, launch your own campaign. No gatekeeping. Everyone starts somewhere.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a5">{t("faq.a5")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-megaphone faq-q-icon"></i>
-              <span>How do I request something?</span>
+              <span data-i18n="faq.q6">{t("faq.q6")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Head to the Requests page and describe what the world is missing. Be specific about the problem you want solved. The community will upvote, add context, and help refine your idea into a buildable spec.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a6">{t("faq.a6")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-map-pin faq-q-icon"></i>
-              <span>Is this only in Bengaluru?</span>
+              <span data-i18n="faq.q7">{t("faq.q7")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Our roots are in Bengaluru, and most of our in-person events happen here. But the platform is global. Makers and backers from anywhere in the world can launch campaigns, submit requests, and join the community online.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a7">{t("faq.a7")}</div>
           </details>
 
           <details name="ooru-faq">
             <summary>
               <i class="ph-duotone ph-coin faq-q-icon"></i>
-              <span>How is this funded?</span>
+              <span data-i18n="faq.q8">{t("faq.q8")}</span>
               <i class="ph-bold ph-caret-down faq-icon"></i>
             </summary>
-            <div class="faq-answer">
-              Ooru takes a small platform fee on funded campaigns to cover infrastructure costs. We do not run ads or sell data. The goal is to sustain the platform while keeping everything open and accessible.
-            </div>
+            <div class="faq-answer" data-i18n="faq.a8">{t("faq.a8")}</div>
           </details>
 
         </div>

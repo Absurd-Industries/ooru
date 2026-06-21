@@ -7,6 +7,7 @@
 
 import { ref, computed } from "vue";
 import type { Campaign } from "../types";
+import { t } from "../lib/i18n-client";
 
 const props = defineProps<{
   campaigns: Campaign[];
@@ -88,7 +89,7 @@ function statusTagClass(status: string): string {
         <input
           v-model="searchText"
           type="text"
-          placeholder="Search campaigns..."
+          :placeholder='t("listing.searchCampaigns")'
           class="w-full pl-10 pr-4 py-2.5 rounded-full border border-ink/10 bg-paper text-sm text-ink placeholder:text-kraft-dark focus:outline-none focus:border-stamp focus:ring-1 focus:ring-stamp/30 transition-colors"
         />
         <button
@@ -136,10 +137,10 @@ function statusTagClass(status: string): string {
       <div class="card-content p-10 text-center">
         <i class="ph-bold ph-binoculars text-5xl text-kraft-dark mb-4 block"></i>
         <p class="font-serif font-semibold text-xl text-ink mb-2">
-          No campaigns found
+          {{ t("listing.noCampaigns") }}
         </p>
         <p class="text-ink-faint text-sm">
-          Try a different search term or category filter.
+          {{ t("listing.noCampaignsHint") }}
         </p>
       </div>
     </div>

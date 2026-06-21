@@ -6,6 +6,7 @@
  * current mock profile, and is shaped to drop into the future API.
  */
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { t } from "../lib/i18n-client";
 import {
   currentUser,
   getComments,
@@ -43,6 +44,13 @@ const props = withDefaults(
   }>(),
   { subjectType: "campaign", title: "Discussion" }
 );
+
+// Translate the known section titles; pass through anything custom.
+const titleLabel = computed(() => {
+  if (props.title === "Wall") return t("discussion.wall");
+  if (props.title === "Discussion") return t("discussion.title");
+  return props.title;
+});
 
 const seedKey = (id: number | string) =>
   `seed:${props.subjectType}:${props.subjectId}:${id}`;
@@ -117,7 +125,7 @@ function toggleHeart(key: string) {
 <template>
   <div>
     <h2 class="font-serif font-bold text-lg mb-2">
-      {{ title }}
+      {{ titleLabel }}
       <span class="text-sm font-sans font-normal text-ink-faint ml-1">({{ totalCount }})</span>
     </h2>
 
@@ -131,14 +139,14 @@ function toggleHeart(key: string) {
           <textarea
             v-model="newComment"
             class="comment-textarea"
-            placeholder="Share your thoughts or ask the maker a question..."
+            :placeholder='t("discussion.placeholder")'
             rows="2"
             @keydown.meta.enter="post"
             @keydown.ctrl.enter="post"
           ></textarea>
           <div class="flex items-center justify-between mt-2">
-            <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="text-xs text-stencil hover:text-stamp" style="text-decoration:none;">Or chat on Discord</a>
-            <button class="btn btn-stamp btn-sm" :disabled="!newComment.trim()" :style="!newComment.trim() ? 'opacity:0.4;cursor:not-allowed;' : ''" @click="post">Post Comment</button>
+            <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="text-xs text-stencil hover:text-stamp" style="text-decoration:none;">{{ t("discussion.orDiscord") }}</a>
+            <button class="btn btn-stamp btn-sm" :disabled="!newComment.trim()" :style="!newComment.trim() ? 'opacity:0.4;cursor:not-allowed;' : ''" @click="post">{{ t("discussion.post") }}</button>
           </div>
         </div>
       </div>
@@ -152,7 +160,7 @@ function toggleHeart(key: string) {
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2 mb-1">
               <span class="text-sm font-semibold">{{ me.name }}</span>
-              <span class="dsc-badge">You</span>
+              <span class="dsc-badge">{{ t("discussion.you") }}</span>
               <span class="text-xs text-ink-faint">{{ relativeTime(c.created_at) }}</span>
             </div>
             <p class="text-sm leading-relaxed text-ink-light whitespace-pre-line">{{ c.body }}</p>
@@ -172,7 +180,7 @@ function toggleHeart(key: string) {
                   <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                       <span class="text-sm font-semibold">{{ me.name }}</span>
-                      <span class="dsc-badge">You</span>
+                      <span class="dsc-badge">{{ t("discussion.you") }}</span>
                       <span class="text-xs text-ink-faint">{{ relativeTime(r.created_at) }}</span>
                     </div>
                     <p class="text-sm leading-relaxed text-ink-light whitespace-pre-line">{{ r.body }}</p>
@@ -184,10 +192,10 @@ function toggleHeart(key: string) {
                 </div>
               </div>
               <div v-if="replyingTo === c.id" class="dsc-reply-box">
-                <textarea v-model="replyText" class="comment-textarea" placeholder="Write a reply..." rows="2"></textarea>
+                <textarea v-model="replyText" class="comment-textarea" :placeholder='t("discussion.replyPlaceholder")' rows="2"></textarea>
                 <div class="flex justify-end gap-2 mt-2">
-                  <button class="btn btn-outline btn-sm" @click="replyingTo = null">Cancel</button>
-                  <button class="btn btn-stamp btn-sm" :disabled="!replyText.trim()" :style="!replyText.trim() ? 'opacity:0.4;cursor:not-allowed;' : ''" @click="postReply(c.id)">Reply</button>
+                  <button class="btn btn-outline btn-sm" @click="replyingTo = null">{{ t("discussion.cancel") }}</button>
+                  <button class="btn btn-stamp btn-sm" :disabled="!replyText.trim()" :style="!replyText.trim() ? 'opacity:0.4;cursor:not-allowed;' : ''" @click="postReply(c.id)">{{ t("discussion.reply") }}</button>
                 </div>
               </div>
             </div>
@@ -242,7 +250,7 @@ function toggleHeart(key: string) {
                   <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                       <span class="text-sm font-semibold">{{ me.name }}</span>
-                      <span class="dsc-badge">You</span>
+                      <span class="dsc-badge">{{ t("discussion.you") }}</span>
                       <span class="text-xs text-ink-faint">{{ relativeTime(r.created_at) }}</span>
                     </div>
                     <p class="text-sm leading-relaxed text-ink-light whitespace-pre-line">{{ r.body }}</p>
@@ -251,10 +259,10 @@ function toggleHeart(key: string) {
               </div>
 
               <div v-if="replyingTo === seedKey(comment.id)" class="dsc-reply-box">
-                <textarea v-model="replyText" class="comment-textarea" placeholder="Write a reply..." rows="2"></textarea>
+                <textarea v-model="replyText" class="comment-textarea" :placeholder='t("discussion.replyPlaceholder")' rows="2"></textarea>
                 <div class="flex justify-end gap-2 mt-2">
-                  <button class="btn btn-outline btn-sm" @click="replyingTo = null">Cancel</button>
-                  <button class="btn btn-stamp btn-sm" :disabled="!replyText.trim()" :style="!replyText.trim() ? 'opacity:0.4;cursor:not-allowed;' : ''" @click="postReply(seedKey(comment.id))">Reply</button>
+                  <button class="btn btn-outline btn-sm" @click="replyingTo = null">{{ t("discussion.cancel") }}</button>
+                  <button class="btn btn-stamp btn-sm" :disabled="!replyText.trim()" :style="!replyText.trim() ? 'opacity:0.4;cursor:not-allowed;' : ''" @click="postReply(seedKey(comment.id))">{{ t("discussion.reply") }}</button>
                 </div>
               </div>
             </div>

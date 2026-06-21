@@ -1,0 +1,81 @@
+---
+/**
+ * No-FOUC i18n bootstrap. Goes in <head>. Reads the stored locale, sets
+ * <html lang> (which drives the logo wordmark CSS), and - for non-English -
+ * translates the static DOM before first paint AND after every Astro view
+ * transition (astro:after-swap). Vue islands localize themselves via
+ * i18n-client. English is the rendered default, so English visitors pay nothing.
+ */
+import { dicts } from "../i18n";
+const DICTS = { kn: dicts.kn, te: dicts.te };
+---
+
+<style is:inline>
+  html.i18n-wait body {
+    visibility: hidden;
+  }
+</style>
+<script is:inline define:vars={{ DICTS }}>
+  (function () {
+    var KEY = "ooru.locale";
+    function readLoc() {
+      try {
+        var v = localStorage.getItem(KEY);
+        if (v === "kn" || v === "te" || v === "en") return v;
+      } catch (e) {}
+      return "en";
+    }
+    function tr(el, dict) {
+      var k = el.getAttribute("data-i18n");
+      if (k && dict[k] != null) el.textContent = dict[k];
+      var a = el.getAttribute("data-i18n-attr");
+      if (a)
+        a.split(";").forEach(function (p) {
+          var i = p.indexOf(":");
+          if (i < 0) return;
+          var at = p.slice(0, i).trim();
+          var kk = p.slice(i + 1).trim();
+          if (dict[kk] != null) el.setAttribute(at, dict[kk]);
+        });
+    }
+    // Re-apply for the current locale to whatever DOM is live right now.
+    function apply() {
+      var loc = readLoc();
+      var de = document.documentElement;
+      de.lang = loc; // drives the wordmark CSS
+      if (loc === "en") {
+        de.classList.remove("i18n-wait");
+        return;
+      }
+      var dict = DICTS[loc];
+      if (!dict) {
+        de.classList.remove("i18n-wait");
+        return;
+      }
+      var els = document.querySelectorAll("[data-i18n],[data-i18n-attr]");
+      for (var i = 0; i < els.length; i++) tr(els[i], dict);
+      de.classList.remove("i18n-wait");
+    }
+
+    // Bind view-transition re-apply once (document survives swaps).
+    if (!window.__ooruI18nBound) {
+      window.__ooruI18nBound = true;
+      // Fires after the new DOM is swapped in, before paint - no FOUC.
+      document.addEventListener("astro:after-swap", apply);
+    }
+
+    // Initial load: this script is in <head> before the body exists.
+    var loc = readLoc();
+    document.documentElement.lang = loc;
+    if (loc !== "en" && DICTS[loc]) {
+      document.documentElement.classList.add("i18n-wait");
+      if (document.readyState === "loading")
+        document.addEventListener("DOMContentLoaded", apply, { once: true });
+      else apply();
+      // Safety net so the page can never stay hidden.
+      setTimeout(function () {
+        document.documentElement.classList.remove("i18n-wait");
+      }, 2000);
+    }
+  })();
+</script>
