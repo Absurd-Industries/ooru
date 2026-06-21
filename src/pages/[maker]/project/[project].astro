@@ -5,7 +5,7 @@ import Tag from "../../../components/Tag.astro";
 import GalleryViewer from "../../../components/GalleryViewer.vue";
 import BomTable from "../../../components/BomTable.vue";
 import FilePreview from "../../../components/FilePreview.vue";
-import ModelStage from "../../../components/ModelStage.vue";
+import ModelExperience from "../../../components/ModelExperience.vue";
 import { projects } from "../../../data/projects";
 import { makers } from "../../../data/makers";
 import { campaigns } from "../../../data/campaigns";
@@ -196,7 +196,7 @@ const projectLd = {
                 <i class="ph-duotone ph-cube"></i>
                 3D Model
               </h2>
-              <ModelStage
+              <ModelExperience
                 src={p.modelUrl}
                 alt={`${p.title} 3D model`}
                 dimensions={p.modelDimensions}

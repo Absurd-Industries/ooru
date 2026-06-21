@@ -64,6 +64,9 @@ if (!existsSync(FREECAD)) die(`FreeCAD CLI not found at ${FREECAD}. Set FREECADC
 const cfg = JSON.parse(readFileSync(cfgPath, "utf8"));
 const tol = cfg.tolerance ?? 0.25;
 const yUp = cfg.yUp !== false;
+// Keep one mesh per material (no join/weld merging) so a web viewer can
+// address each part individually for isolation / recolouring.
+const separate = cfg.separate === true;
 const tmpObj = join(tmpdir(), `colorize-${process.pid}.obj`);
 const tmpMtl = `colorize-${process.pid}.mtl`;
 const tmpMtlPath = join(tmpdir(), tmpMtl);
@@ -161,13 +164,12 @@ const rawGlb = glbOut.replace(/\.glb$/i, ".raw.glb");
 const r2 = spawnSync("npx", ["-y", "obj2gltf", "-b", "-i", tmpObj, "-o", rawGlb], { stdio: "inherit" });
 if (r2.status !== 0 || !existsSync(rawGlb)) die("obj2gltf failed.");
 
-// optimize + Draco, keep separate named materials (palette off)
-const r3 = spawnSync(
-  "npx",
-  ["-y", "@gltf-transform/cli", "optimize", rawGlb, glbOut,
-   "--compress", "draco", "--texture-compress", "false", "--palette", "false"],
-  { stdio: "inherit" }
-);
+// optimize + Draco, keep separate named materials (palette off). When
+// `separate` is set, also disable join so each part stays its own mesh.
+const optArgs = ["-y", "@gltf-transform/cli", "optimize", rawGlb, glbOut,
+  "--compress", "draco", "--texture-compress", "false", "--palette", "false"];
+if (separate) optArgs.push("--join", "false", "--weld", "false");
+const r3 = spawnSync("npx", optArgs, { stdio: "inherit" });
 rmSync(tmpObj, { force: true });
 rmSync(tmpMtlPath, { force: true });
 rmSync(rawGlb, { force: true });
