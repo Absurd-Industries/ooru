@@ -150,6 +150,7 @@ export const projects: Project[] = [
       },
     ],
     modelUrl: "/models/cory-dora.glb",
+    modelDimensions: { w: 109, d: 79, h: 36 },
     pcbViewerUrl:
       "https://kicanvas.org/?github=https%3A%2F%2Fgithub.com%2Fbalub%2FCoryDora%2Fblob%2Fmain%2FCoryDora.kicad_pcb",
     firmwareUrl:

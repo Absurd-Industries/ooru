@@ -386,6 +386,8 @@ export interface Project {
   files?: ProjectFile[];
   /** Web 3D model path (.glb) for model-viewer. */
   modelUrl?: string;
+  /** Real-world size of the model in millimetres, for the scale overlay. */
+  modelDimensions?: { w: number; d: number; h: number };
   /** Embedded PCB viewer URL (e.g. KiCanvas). */
   pcbViewerUrl?: string;
   /** Firmware repository or flashing entry point. */

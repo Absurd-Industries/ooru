@@ -10,7 +10,15 @@ export default defineConfig({
 
   integrations: [
     tailwind(),
-    vue(),
+    // Treat <model-viewer> (and any custom element) as a native element so Vue
+    // islands can render it instead of trying to resolve it as a component.
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.includes("-"),
+        },
+      },
+    }),
   ],
 
   vite: {
