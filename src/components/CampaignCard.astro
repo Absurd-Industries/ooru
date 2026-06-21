@@ -39,12 +39,17 @@ const statusVariant =
 const isHot = campaign.percent >= 90 && campaign.status === "live";
 ---
 
-<a
-  href={campaignUrl(campaign.makerSlug, campaign.slug)}
-  class="card card-hover block no-underline text-ink group"
->
+<div class="card card-hover block text-ink group">
   <div class="card-bg"></div>
   <div class="card-content">
+    <!-- Stretched overlay link makes the whole card clickable without nesting
+         anchors (nested <a> is invalid HTML and breaks layout). It lives inside
+         card-content so the project-folio link (z-3) can sit above it. -->
+    <a
+      href={campaignUrl(campaign.makerSlug, campaign.slug)}
+      class="absolute inset-0 no-underline"
+      aria-label={campaign.title}
+    ></a>
     <!-- Image / icon area -->
     {campaign.image ? (
       <div class="m-4 mb-0 rounded-xl overflow-hidden" style="height: 170px;">
@@ -131,8 +136,7 @@ const isHot = campaign.percent >= 90 && campaign.status === "live";
       {campaign.projectSlug && (
         <a
           href={projectUrlBySlug(campaign.projectSlug)}
-          class="flex items-center gap-1.5 mt-3 pt-3 border-t border-ink/5 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
-          onclick="event.stopPropagation()"
+          class="relative z-[3] flex items-center gap-1.5 mt-3 pt-3 border-t border-ink/5 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
           style="text-decoration: none;"
         >
           <i class="ph-bold ph-folder-open" style="font-size: 0.7rem;"></i>
@@ -142,4 +146,4 @@ const isHot = campaign.percent >= 90 && campaign.status === "live";
       )}
     </div>
   </div>
-</a>
+</div>

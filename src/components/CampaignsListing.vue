@@ -148,15 +148,22 @@ function statusTagClass(status: string): string {
 
     <!-- Campaign card grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 card-grid">
-      <a
+      <div
         v-for="(campaign, index) in filteredCampaigns"
         :key="campaign.slug"
-        :href="campaignUrl(campaign.makerSlug, campaign.slug)"
-        class="card card-hover block no-underline text-ink group"
+        class="card card-hover block text-ink group"
         :style="{ animationDelay: index * 0.06 + 's' }"
       >
         <div class="card-bg"></div>
         <div class="card-content">
+          <!-- Stretched overlay link - avoids nesting the project-folio <a>
+               inside the card <a> (invalid HTML, breaks layout). Lives inside
+               card-content so the folio link (z-3) can sit above it. -->
+          <a
+            :href="campaignUrl(campaign.makerSlug, campaign.slug)"
+            class="absolute inset-0 no-underline"
+            :aria-label="campaign.title"
+          ></a>
           <!-- Image / icon area -->
           <div
             v-if="campaign.image"
@@ -269,9 +276,8 @@ function statusTagClass(status: string): string {
             <a
               v-if="campaign.projectSlug"
               :href="projectUrl(campaign.makerSlug, campaign.projectSlug)"
-              class="flex items-center gap-1.5 mt-3 pt-3 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
+              class="relative z-[3] flex items-center gap-1.5 mt-3 pt-3 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
               style="text-decoration: none; border-top: 1px solid rgba(26,26,26,0.05);"
-              @click.stop
             >
               <i class="ph-bold ph-folder-open" style="font-size: 0.7rem"></i>
               Project folio
@@ -279,7 +285,7 @@ function statusTagClass(status: string): string {
             </a>
           </div>
         </div>
-      </a>
+      </div>
     </div>
   </div>
 </template>

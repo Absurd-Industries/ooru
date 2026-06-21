@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Card from "../../components/Card.astro";
 import Tag from "../../components/Tag.astro";
 import { projects } from "../../data/projects";
-import { projectUrl, makerUrl } from "../../lib/urls";
+import { projectUrl } from "../../lib/urls";
 ---
 
 <BaseLayout
@@ -51,15 +51,8 @@ import { projectUrl, makerUrl } from "../../lib/urls";
                 </h2>
                 <p class="text-sm text-stencil leading-relaxed line-clamp-2">{p.tagline}</p>
                 <div class="flex items-center gap-3 mt-3 pt-3 border-t border-ink/5">
-                  <div class="flex items-center gap-1.5 text-xs text-stencil">
-                    <a
-                      href={makerUrl(p.makerSlug)}
-                      class="hover:text-stamp transition-colors font-medium"
-                      onclick="event.stopPropagation()"
-                      style="text-decoration: none;"
-                    >
-                      {p.makerSlug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
-                    </a>
+                  <div class="flex items-center gap-1.5 text-xs text-stencil font-medium">
+                    {p.makerSlug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
                   </div>
                   {p.shopUrl && (
                     <span class="ml-auto text-xs font-bold text-funded">
