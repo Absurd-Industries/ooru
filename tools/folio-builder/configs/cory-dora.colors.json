@@ -1,0 +1,13 @@
+{
+  "_comment": "Per-part colours for CoryDora_Fully_Assembled_v1.2.step, sampled from the shop photo (cream case, purple keycaps, orange knob + gasket). Solids are bucketed by geometry; see tools/step-colorize.mjs.",
+  "tolerance": 0.25,
+  "yUp": true,
+  "fallback": { "name": "interior", "color": "#1B1B1D" },
+  "rules": [
+    { "name": "case", "color": "#E7DCC2", "footprint": "full", "dzMin": 3 },
+    { "name": "gasket", "color": "#F2851F", "footprint": "full", "dzMax": 3 },
+    { "name": "knob", "color": "#F58A21", "dxMin": 12, "dxMax": 20, "dyMin": 12, "dyMax": 20, "zmaxMin": 30 },
+    { "name": "keycap", "color": "#6B4DB3", "dxMin": 15, "dxMax": 21, "dyMin": 15, "dyMax": 21, "dzMin": 6, "dzMax": 11, "zminMin": 18, "volMin": 900 },
+    { "name": "pcb", "color": "#18583F", "dxMin": 80, "dyMin": 55, "dzMax": 3 }
+  ]
+}

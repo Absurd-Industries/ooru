@@ -68,6 +68,30 @@ Requires **FreeCAD.app** (macOS). Override the binary with
 `FREECADCMD=/path/to/freecadcmd`. Uses `npx` to fetch `obj2gltf` + `@gltf-transform/cli`
 on first run.
 
+## `step-colorize.mjs`
+
+Converts a CAD `STEP` **assembly** into a web GLB with **per-part PBR colours**, so
+the model looks like the real product instead of grey clay.
+
+```bash
+node tools/step-colorize.mjs input.step public/models/out.glb \
+  --config tools/folio-builder/configs/cory-dora.colors.json
+```
+
+Why it's separate from `step-to-glb`: a STEP file has no UVs, so you can't wrap a
+product photo onto it - but an assembly is a pile of separate solids, and we *can*
+colour each one. FreeCAD's headless assembly importer segfaults on big files, so we
+read the merged compound and bucket its solids into materials by **geometry**
+(bounding-box size / height / footprint) using rules from the config. Colours are
+sampled from the real photo and stored linear (glTF `baseColorFactor` space) so they
+render correctly. Output is Draco-compressed with named materials preserved.
+
+The config lists ordered rules (first match wins per solid); see
+`configs/cory-dora.colors.json` for the shape and the available bounds
+(`dxMin/dxMax`, `dzMin`, `zmaxMin`, `volMin`, `footprint: "full"`, …).
+
+Requires FreeCAD.app; uses `npx` for `obj2gltf` + `@gltf-transform/cli`.
+
 ## `extract-maker.html`
 
 Zero-setup, single-file maker-profile extractor. Open it in any browser - no server,
