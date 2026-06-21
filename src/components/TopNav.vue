@@ -16,6 +16,7 @@ const props = defineProps<{
 
 const links = [
     { key: "nav.campaigns", href: "/campaigns" },
+    { key: "nav.projects", href: "/projects" },
     { key: "nav.makers", href: "/makers" },
     { key: "nav.requests", href: "/requests" },
     { key: "nav.events", href: "/events" },

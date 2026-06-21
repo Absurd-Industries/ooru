@@ -19,7 +19,16 @@ import { events } from "../data/events";
 import { campaigns } from "../data/campaigns";
 import { requests } from "../data/requests";
 
-const featuredCampaigns = campaigns.filter((c) => c.status === "live").slice(0, 3);
+// Curated homepage showcase - drives both the hero polaroids and the
+// campaign grid cards (the "both card types").
+const showcaseSlugs = [
+  "supersaber-open-lightsaber-kit",
+  "cory-dora-macropad",
+  "lampy-open-source-desk-lamp",
+];
+const featuredCampaigns = showcaseSlugs
+  .map((slug) => campaigns.find((c) => c.slug === slug))
+  .filter((c): c is (typeof campaigns)[number] => Boolean(c));
 
 const featuredRequests = [...requests]
   .filter((r) => r.status === "open")

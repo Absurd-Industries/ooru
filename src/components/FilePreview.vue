@@ -12,7 +12,7 @@ import { ref, computed } from "vue";
 import { logDownload } from "../lib/store";
 import { t } from "../lib/i18n-client";
 
-type FileType = "code" | "csv" | "pdf" | "3d" | "image" | "text";
+type FileType = "code" | "csv" | "pdf" | "3d" | "image" | "text" | "binary";
 
 interface SourceFile {
   name: string;
@@ -36,15 +36,62 @@ const props = defineProps<{
 const active = ref<SourceFile | null>(null);
 const modelLoaded = ref(false);
 
-function open(file: SourceFile) {
+// Lazily-fetched content for remote files (code/csv with a url but no inline content).
+const remoteContent = ref<string | null>(null);
+const remoteLoading = ref(false);
+const remoteError = ref<string | null>(null);
+const MAX_PREVIEW_BYTES = 120_000;
+
+async function open(file: SourceFile) {
   active.value = file;
+  remoteContent.value = null;
+  remoteError.value = null;
   document.documentElement.style.overflow = "hidden";
   if (file.type === "3d") ensureModelViewer();
+  // Fetch remote text for code/csv/text files that ship a url instead of inline content.
+  if (
+    (file.type === "code" || file.type === "csv" || file.type === "text") &&
+    !file.content &&
+    file.url
+  ) {
+    remoteLoading.value = true;
+    try {
+      const res = await fetch(file.url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      let text = await res.text();
+      if (text.length > MAX_PREVIEW_BYTES) {
+        text =
+          text.slice(0, MAX_PREVIEW_BYTES) +
+          "\n\n… preview truncated — download the full file below.";
+      }
+      remoteContent.value = text;
+    } catch (e: unknown) {
+      remoteError.value = e instanceof Error ? e.message : String(e);
+    } finally {
+      remoteLoading.value = false;
+    }
+  }
 }
 function close() {
   active.value = null;
+  remoteContent.value = null;
+  remoteError.value = null;
   document.documentElement.style.overflow = "";
 }
+
+// Effective text content: inline if present, else the fetched remote text.
+const textContent = computed(() => active.value?.content ?? remoteContent.value ?? "");
+
+// PDF served through Google's viewer for reliable inline embedding (GitHub raw
+// PDFs download rather than render inline).
+const pdfSrc = computed(() => {
+  const url = active.value?.url;
+  if (!url) return "";
+  if (/^https?:\/\//.test(url) && !url.startsWith(location.origin)) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+  }
+  return url;
+});
 
 function ensureModelViewer() {
   if (modelLoaded.value || document.querySelector('script[data-model-viewer]')) {
@@ -53,18 +100,18 @@ function ensureModelViewer() {
   }
   const s = document.createElement("script");
   s.type = "module";
-  s.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.0/model-viewer.min.js";
+  s.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js";
   s.setAttribute("data-model-viewer", "");
   document.head.appendChild(s);
   modelLoaded.value = true;
 }
 
-// CSV -> rows for table rendering
+// CSV -> rows for table rendering (inline or fetched content)
 const csvRows = computed(() => {
-  if (!active.value || active.value.type !== "csv" || !active.value.content) return [];
-  return active.value.content
+  if (!active.value || active.value.type !== "csv" || !textContent.value) return [];
+  return textContent.value
     .trim()
-    .split("\n")
+    .split(/\r?\n/)
     .map((line) => line.split(",").map((c) => c.trim()));
 });
 
@@ -123,8 +170,20 @@ function download(file: SourceFile) {
             </div>
 
             <div class="fp-body">
+              <!-- loading remote content -->
+              <div v-if="remoteLoading" class="fp-fallback">
+                <i class="ph-bold ph-circle-notch fp-spin"></i>
+                <p>Loading preview…</p>
+              </div>
+
+              <!-- remote fetch failed -->
+              <div v-else-if="remoteError" class="fp-fallback">
+                <i :class="active.icon"></i>
+                <p>Couldn't load a preview ({{ remoteError }}).<br />Download the file below.</p>
+              </div>
+
               <!-- code / text -->
-              <pre v-if="active.type === 'code' || active.type === 'text'" class="fp-code"><code>{{ active.content }}</code></pre>
+              <pre v-else-if="active.type === 'code' || active.type === 'text'" class="fp-code"><code>{{ textContent }}</code></pre>
 
               <!-- csv table -->
               <div v-else-if="active.type === 'csv'" class="fp-csv-wrap">
@@ -141,7 +200,7 @@ function download(file: SourceFile) {
               </div>
 
               <!-- pdf -->
-              <iframe v-else-if="active.type === 'pdf' && active.url" :src="active.url" class="fp-frame" title="PDF preview"></iframe>
+              <iframe v-else-if="active.type === 'pdf' && active.url" :src="pdfSrc" class="fp-frame" title="PDF preview"></iframe>
 
               <!-- 3d -->
               <model-viewer
@@ -156,10 +215,10 @@ function download(file: SourceFile) {
               <!-- image -->
               <img v-else-if="active.type === 'image' && active.url" :src="active.url" :alt="active.name" class="fp-img" />
 
-              <!-- fallback -->
+              <!-- fallback (binary / unpreviewable) -->
               <div v-else class="fp-fallback">
                 <i :class="active.icon"></i>
-                <p>{{ t("file.noPreview") }}</p>
+                <p>No inline preview for this format.<br />Download it below to open in your tools.</p>
               </div>
             </div>
 
@@ -313,6 +372,8 @@ function download(file: SourceFile) {
 }
 .fp-fallback i { font-size: 2.5rem; opacity: 0.5; }
 .fp-fallback p { font-size: 0.85rem; line-height: 1.5; }
+.fp-spin { animation: fp-spin 0.8s linear infinite; opacity: 0.6; }
+@keyframes fp-spin { to { transform: rotate(360deg); } }
 .fp-foot {
   display: flex;
   align-items: center;

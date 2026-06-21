@@ -132,6 +132,34 @@ export interface Maker {
     website?: string;
     twitter?: string;
   };
+
+  /**
+   * Real, curated chronological timeline. When present, the profile page
+   * renders this instead of the generic derived activity feed.
+   */
+  timeline?: MakerTimelineEntry[];
+
+  /** Slug of the maker's flagship project folio, surfaced on the profile. */
+  featuredProjectSlug?: string;
+
+  /** Slug of the maker's flagship campaign, surfaced on the profile. */
+  featuredCampaignSlug?: string;
+}
+
+/** A single entry in a maker's real timeline. */
+export interface MakerTimelineEntry {
+  /** Human date label, e.g. "Sep 2024". */
+  date: string;
+  /** Short headline. */
+  title: string;
+  /** Optional detail sentence. */
+  body?: string;
+  /** Phosphor icon name without the prefix, e.g. "rocket-launch". */
+  icon?: string;
+  /** Optional internal link this entry points at. */
+  href?: string;
+  /** Emphasise this entry (accent dot + icon). */
+  highlight?: boolean;
 }
 
 // ---------------------------------------------------------------------------

@@ -15,6 +15,8 @@ import ProgressBar from "../../components/ProgressBar.astro";
 import CheerButton from "../../components/CheerButton.vue";
 import CampaignDiscussion from "../../components/CampaignDiscussion.vue";
 import { makers } from "../../data/makers";
+import { projects as allProjects } from "../../data/projects";
+import { campaigns } from "../../data/campaigns";
 import type { Maker } from "../../types";
 
 export function getStaticPaths() {
@@ -144,41 +146,91 @@ const activities = [
     },
 ];
 
-/** Projects list */
-const projects = [
-    {
-        name: showcase.name,
-        description: showcase.description,
-        icon: showcase.icon,
-        status: "Live" as const,
-        percent: showcase.percent,
-        backers: showcase.backers,
-    },
-    ...(maker.projects > 1
-        ? [
-              {
-                  name: `${maker.skills[0]} Monitor`,
-                  description: `Open-source ${maker.skills[0].toLowerCase()} monitoring system with wireless alerts.`,
-                  icon: "chart-line",
-                  status: "Completed" as const,
-                  percent: 100,
-                  backers: Math.round(maker.backers * 0.4),
-              },
-          ]
-        : []),
-    ...(maker.projects > 2
-        ? [
-              {
-                  name: `${maker.skills[1] ?? maker.specialty} Kit`,
-                  description: `Upcoming kit for ${maker.specialty.toLowerCase()} enthusiasts.`,
-                  icon: "package",
-                  status: "Coming Soon" as const,
-                  percent: null as number | null,
-                  backers: 0,
-              },
-          ]
-        : []),
-];
+/** Real linked work, if this maker has any. */
+const featuredProject = maker.featuredProjectSlug
+    ? allProjects.find((p) => p.slug === maker.featuredProjectSlug)
+    : null;
+const featuredCampaign = maker.featuredCampaignSlug
+    ? campaigns.find((c) => c.slug === maker.featuredCampaignSlug)
+    : null;
+const hasRealWork = Boolean(featuredProject || featuredCampaign);
+
+interface ProfileProject {
+    name: string;
+    description: string;
+    iconClass: string;
+    status: string;
+    percent: number | null;
+    href: string;
+}
+
+/** Prefer real linked project/campaign; fall back to derived mock entries. */
+const profileProjects: ProfileProject[] = hasRealWork
+    ? [
+          ...(featuredProject
+              ? [
+                    {
+                        name: featuredProject.title,
+                        description: featuredProject.tagline,
+                        iconClass: featuredProject.icon,
+                        status: "Project Folio",
+                        percent: null,
+                        href: `/projects/${featuredProject.slug}`,
+                    },
+                ]
+              : []),
+          ...(featuredCampaign
+              ? [
+                    {
+                        name: featuredCampaign.title,
+                        description: featuredCampaign.tagline,
+                        iconClass: featuredCampaign.icon,
+                        status:
+                            featuredCampaign.status === "live"
+                                ? "Live"
+                                : featuredCampaign.status === "funded"
+                                  ? "Funded"
+                                  : "Coming Soon",
+                        percent: featuredCampaign.percent,
+                        href: `/campaigns/${featuredCampaign.slug}`,
+                    },
+                ]
+              : []),
+      ]
+    : [
+          {
+              name: showcase.name,
+              description: showcase.description,
+              iconClass: `ph-bold ph-${showcase.icon}`,
+              status: "Live",
+              percent: showcase.percent,
+              href: "/campaigns",
+          },
+          ...(maker.projects > 1
+              ? [
+                    {
+                        name: `${maker.skills[0]} Monitor`,
+                        description: `Open-source ${maker.skills[0].toLowerCase()} monitoring system with wireless alerts.`,
+                        iconClass: "ph-bold ph-chart-line",
+                        status: "Completed",
+                        percent: 100,
+                        href: "/campaigns",
+                    },
+                ]
+              : []),
+          ...(maker.projects > 2
+              ? [
+                    {
+                        name: `${maker.skills[1] ?? maker.specialty} Kit`,
+                        description: `Upcoming kit for ${maker.specialty.toLowerCase()} enthusiasts.`,
+                        iconClass: "ph-bold ph-package",
+                        status: "Coming Soon",
+                        percent: null,
+                        href: "/campaigns",
+                    },
+                ]
+              : []),
+      ];
 
 /** Badges */
 const badges = [
@@ -647,9 +699,9 @@ const makerLd = {
 
                             <div class="space-y-3">
                                 {
-                                    projects.map((project, idx) => (
+                                    profileProjects.map((project, idx) => (
                                         <a
-                                            href="/campaigns"
+                                            href={project.href}
                                             class:list={[
                                                 "project-card group",
                                                 idx === 0 &&
@@ -668,7 +720,7 @@ const makerLd = {
                                             <div class="flex items-center gap-3 mb-2">
                                                 <div class="w-10 h-10 rounded-lg bg-kraft-light flex items-center justify-center flex-shrink-0">
                                                     <i
-                                                        class={`ph-bold ph-${project.icon} text-lg text-stencil group-hover:text-stamp transition-colors`}
+                                                        class={`${project.iconClass} text-lg text-stencil group-hover:text-stamp transition-colors`}
                                                     />
                                                 </div>
                                                 <div class="flex-1 min-w-0">
@@ -682,7 +734,9 @@ const makerLd = {
                                                             "Live"
                                                                 ? "text-stamp"
                                                                 : project.status ===
-                                                                    "Completed"
+                                                                        "Completed" ||
+                                                                    project.status ===
+                                                                        "Funded"
                                                                   ? "text-funded"
                                                                   : "text-stencil",
                                                         ]}
@@ -724,7 +778,34 @@ const makerLd = {
                                 </h2>
                             </div>
                             <div class="space-y-4">
-                                {
+                                {maker.timeline ? (
+                                    maker.timeline.map((e) => (
+                                        <a
+                                            href={e.href || "#"}
+                                            class:list={[
+                                                "mk-tl-entry group",
+                                                e.highlight && "mk-tl-entry--hot",
+                                                !e.href && "mk-tl-entry--static",
+                                            ]}
+                                        >
+                                            <div class="mk-tl-icon">
+                                                <i class={`ph-bold ph-${e.icon || "circle"}`} />
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="mk-tl-date">{e.date}</div>
+                                                <h4 class="mk-tl-title group-hover:text-stamp transition-colors">
+                                                    {e.title}
+                                                </h4>
+                                                {e.body && (
+                                                    <p class="mk-tl-body">{e.body}</p>
+                                                )}
+                                            </div>
+                                            {e.href && (
+                                                <i class="ph-bold ph-arrow-right mk-tl-arrow" />
+                                            )}
+                                        </a>
+                                    ))
+                                ) : (
                                     activities.map((a) => (
                                         <div class="flex items-start gap-3">
                                             <div
@@ -782,7 +863,7 @@ const makerLd = {
                                             </div>
                                         </div>
                                     ))
-                                }
+                                )}
                             </div>
 
                             <!-- Wall (interactive, store-backed) -->
@@ -1281,6 +1362,86 @@ const makerLd = {
     /* Octagonal avatar helper */
     .oct-sm {
         clip-path: url(#rounded-octagon);
+    }
+
+    /* ── Real maker timeline ── */
+    .mk-tl-entry {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 0.85rem 1rem;
+        border-radius: 0.75rem;
+        border: 1.5px solid rgba(26, 26, 26, 0.1);
+        background: rgba(250, 243, 232, 0.4);
+        text-decoration: none;
+        color: #1a1a1a;
+        transition:
+            border-color 0.15s,
+            background 0.15s,
+            transform 0.15s;
+    }
+    .mk-tl-entry:not(.mk-tl-entry--static):hover {
+        border-color: rgba(26, 26, 26, 0.25);
+        background: rgba(250, 243, 232, 0.7);
+        transform: translateY(-1px);
+    }
+    .mk-tl-entry--hot {
+        border-color: #d94800;
+        background: rgba(217, 72, 0, 0.04);
+    }
+    .mk-tl-entry--hot:hover {
+        border-color: #ff5900;
+        background: rgba(217, 72, 0, 0.07);
+    }
+    .mk-tl-entry--static {
+        cursor: default;
+    }
+    .mk-tl-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 0.5rem;
+        background: rgba(26, 26, 26, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1rem;
+        color: #6b5b4a;
+    }
+    .mk-tl-entry--hot .mk-tl-icon {
+        background: rgba(217, 72, 0, 0.1);
+        color: #d94800;
+    }
+    .mk-tl-date {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b5b4a;
+        margin-bottom: 0.15rem;
+    }
+    .mk-tl-title {
+        font-family: "Fraunces", serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        line-height: 1.2;
+        color: #1a1a1a;
+    }
+    .mk-tl-body {
+        font-size: 0.8rem;
+        color: #4a3d2f;
+        line-height: 1.55;
+        margin-top: 0.3rem;
+    }
+    .mk-tl-arrow {
+        font-size: 0.8rem;
+        color: #b8a589;
+        flex-shrink: 0;
+        margin-top: 0.2rem;
+        transition: color 0.15s;
+    }
+    .mk-tl-entry:hover .mk-tl-arrow {
+        color: #d94800;
     }
 
     /* ── Maker Sheet (character-sheet view) ── */

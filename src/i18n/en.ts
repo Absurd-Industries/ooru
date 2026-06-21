@@ -17,6 +17,7 @@ export const en: Record<string, string> = {
 
   // ── Navigation ─────────────────────────────────────────────────────
   "nav.campaigns": "Campaigns",
+  "nav.projects": "Projects",
   "nav.makers": "Makers",
   "nav.requests": "Requests",
   "nav.events": "Events",

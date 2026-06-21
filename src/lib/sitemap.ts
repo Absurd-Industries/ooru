@@ -14,6 +14,7 @@
 import { campaigns } from "../data/campaigns";
 import { makers } from "../data/makers";
 import { requests } from "../data/requests";
+import { projects } from "../data/projects";
 
 export type ChangeFreq = "daily" | "weekly" | "monthly" | "yearly";
 
@@ -33,6 +34,7 @@ export interface SitemapEntry {
 const STATIC_PAGES: SitemapEntry[] = [
   { path: "/", label: "Home", section: "Main pages", changefreq: "daily", priority: 1.0 },
   { path: "/campaigns", label: "Campaigns", section: "Main pages", changefreq: "daily", priority: 0.9 },
+  { path: "/projects", label: "Projects", section: "Main pages", changefreq: "weekly", priority: 0.8 },
   { path: "/requests", label: "Requests", section: "Main pages", changefreq: "daily", priority: 0.8 },
   { path: "/makers", label: "Makers", section: "Main pages", changefreq: "weekly", priority: 0.8 },
   { path: "/events", label: "Events", section: "Main pages", changefreq: "weekly", priority: 0.8 },
@@ -49,6 +51,13 @@ export function getSitemapEntries(): SitemapEntry[] {
       path: `/campaigns/${c.slug}`,
       label: c.title,
       section: "Campaigns",
+      changefreq: "weekly",
+      priority: 0.7,
+    })),
+    ...projects.map((p): SitemapEntry => ({
+      path: `/projects/${p.slug}`,
+      label: p.title,
+      section: "Projects",
       changefreq: "weekly",
       priority: 0.7,
     })),

@@ -11,6 +11,7 @@ export const kn: Record<string, string> = {
 
   // ── Navigation ─────────────────────────────────────────────────────
   "nav.campaigns": "ಅಭಿಯಾನಗಳು",
+  "nav.projects": "ಪ್ರಾಜೆಕ್ಟ್‌ಗಳು",
   "nav.makers": "ಮೇಕರ್‌ಗಳು",
   "nav.requests": "ವಿನಂತಿಗಳು",
   "nav.events": "ಕಾರ್ಯಕ್ರಮಗಳು",

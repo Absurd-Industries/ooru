@@ -11,6 +11,7 @@ export const te: Record<string, string> = {
 
   // ── Navigation ─────────────────────────────────────────────────────
   "nav.campaigns": "ప్రచారాలు",
+  "nav.projects": "ప్రాజెక్టులు",
   "nav.makers": "మేకర్లు",
   "nav.requests": "అభ్యర్థనలు",
   "nav.events": "ఈవెంట్లు",
