@@ -263,6 +263,19 @@ function statusTagClass(status: string): string {
                 backer{{ campaign.backers !== 1 ? "s" : "" }}
               </span>
             </div>
+
+            <!-- Project folio link -->
+            <a
+              v-if="campaign.projectSlug"
+              :href="`/projects/${campaign.projectSlug}`"
+              class="flex items-center gap-1.5 mt-3 pt-3 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
+              style="text-decoration: none; border-top: 1px solid rgba(26,26,26,0.05);"
+              @click.stop
+            >
+              <i class="ph-bold ph-folder-open" style="font-size: 0.7rem"></i>
+              Project folio
+              <i class="ph-bold ph-arrow-right ml-auto" style="font-size: 0.6rem"></i>
+            </a>
           </div>
         </div>
       </a>

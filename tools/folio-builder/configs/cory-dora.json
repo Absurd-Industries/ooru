@@ -1,0 +1,19 @@
+{
+  "slug": "cory-dora",
+  "title": "CoryDora",
+  "repo": "balub/CoryDora",
+  "shop": "https://shop.absurd.industries/products/cory-dora",
+  "makerSlug": "balu-b",
+  "campaignSlug": "cory-dora-macropad",
+  "notion": {
+    "buildGuide": "cc727f8b-e312-492a-9d3b-b8e5530b1656",
+    "onboarding": "12d9d317-7a9b-8016-bcdd-d6904b028f71"
+  },
+  "model": {
+    "stepPath": "Case/v1.2/CoryDora_Fully_Assembled_v1.2.step",
+    "deflection": 0.4,
+    "maxFacets": 140000
+  },
+  "pcbPath": "CoryDora.kicad_pcb",
+  "bomPath": "BOM/CoryDora BOM.csv"
+}

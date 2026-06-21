@@ -65,6 +65,9 @@ export interface Campaign {
   /** Slug of the community request this campaign was born from, if any. */
   bornFromRequest?: string;
 
+  /** Slug of the rich project folio for this campaign, if one exists. */
+  projectSlug?: string;
+
   /** Path or URL to the campaign cover image. */
   image?: string;
 
@@ -252,6 +255,119 @@ export interface Friend {
 
   /** Optional one-liner about the partner. */
   description?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Projects (rich "folio" pages - the magazine-style showcase for a build)
+// ---------------------------------------------------------------------------
+
+/** A single labelled spec, e.g. { label: "MCU", value: "RP2040" }. */
+export interface ProjectSpec {
+  label: string;
+  value: string;
+}
+
+/** One line of a bill of materials, with an optional buy link. */
+export interface ProjectBomItem {
+  /** Component name, e.g. "Hot-swap socket". */
+  part: string;
+  /** Quantity required. */
+  qty: number;
+  /** Reference designators from the schematic, e.g. "D1-D9". */
+  ref?: string;
+  /** Where to buy one, if a public link exists. */
+  buyUrl?: string;
+  /** Vendor label for the buy link, e.g. "stackskb". */
+  buyLabel?: string;
+}
+
+/** A downloadable source file. */
+export interface ProjectFile {
+  /** File name, e.g. "CoryDora.kicad_pcb". */
+  name: string;
+  /** Short format label, e.g. "KiCad", "STEP", "STL". */
+  format: string;
+  /** Phosphor icon class. */
+  icon: string;
+  /** Download URL (typically a GitHub raw/blob link). */
+  url: string;
+}
+
+/** A single step in a build guide or onboarding flow. */
+export interface ProjectStep {
+  /** Step heading, e.g. "Solder the diodes". */
+  title: string;
+  /** Step prose; may contain multiple sentences. */
+  body?: string;
+  /** Local image paths illustrating the step. */
+  images?: string[];
+  /** Embeddable video URL (e.g. YouTube embed). */
+  videoUrl?: string;
+  /** A highlighted caution/tip rendered as a callout. */
+  note?: string;
+}
+
+/** An ordered, illustrated guide (build or onboarding). */
+export interface ProjectGuide {
+  /** Optional intro paragraph above the steps. */
+  intro?: string;
+  steps: ProjectStep[];
+}
+
+/**
+ * A project folio - the richest page we render for a single build. Most
+ * sections are optional so this doubles as a reusable template: populate what
+ * a given project has and the page renders only those sections.
+ */
+export interface Project {
+  /** URL-safe identifier, e.g. "cory-dora". */
+  slug: string;
+  /** Display title. */
+  title: string;
+  /** One-liner pitch. */
+  tagline: string;
+  /** Slug of the maker who built it. */
+  makerSlug: string;
+  /** Slug of the funding campaign for this project, if any. */
+  campaignSlug?: string;
+  /** Lifecycle: shipping (buy now), prototype, or concept. */
+  status: "shipping" | "prototype" | "concept";
+  /** Human license label, e.g. "Open source hardware". */
+  license: string;
+  /** Category label, e.g. "Electronics". */
+  category: string;
+  /** Phosphor icon class for the category glyph. */
+  icon: string;
+  /** Public source repository. */
+  repoUrl?: string;
+  /** Buy/shop URL for shipping projects. */
+  shopUrl?: string;
+  /** Formatted price, e.g. "₹4,949". */
+  priceFormatted?: string;
+  /** Lead images for the hero gallery. */
+  heroImages: string[];
+  /** Additional gallery images. */
+  gallery?: string[];
+  /** Spec strip entries. */
+  specs?: ProjectSpec[];
+  /** Bullet feature list. */
+  features?: string[];
+  /** Visual bill of materials. */
+  bom?: ProjectBomItem[];
+  /** Downloadable source files. */
+  files?: ProjectFile[];
+  /** Web 3D model path (.glb) for model-viewer. */
+  modelUrl?: string;
+  /** Embedded PCB viewer URL (e.g. KiCanvas). */
+  pcbViewerUrl?: string;
+  /** Firmware repository or flashing entry point. */
+  firmwareUrl?: string;
+  /** Step-by-step build guide. */
+  buildGuide?: ProjectGuide;
+  /** Post-purchase onboarding / setup flow. */
+  onboarding?: ProjectGuide;
+  /** Project-specific FAQ. */
+  faqs?: { q: string; a: string }[];
 }
 
 // ---------------------------------------------------------------------------

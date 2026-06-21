@@ -1,0 +1,1236 @@
+{
+  "slug": "cory-dora",
+  "title": "CoryDora",
+  "makerSlug": "balu-b",
+  "campaignSlug": "cory-dora-macropad",
+  "repoUrl": "https://github.com/balub/CoryDora",
+  "shopUrl": "https://shop.absurd.industries/products/cory-dora",
+  "shop": {
+    "price": "0",
+    "title": "CoryDora",
+    "description": "Whether you&#39;re automating scripts, controlling your media, or just jazzing up your desk setup, CoryDora brings a playful and productive twist to your workspace! Control media, setup scripts, write macros and if you discover interesting hacks, send them to us :) Made with ❤️ in Bengaluru, India"
+  },
+  "license": "NOASSERTION",
+  "stars": 41,
+  "description": "A simple QMK compatible 3x3 macropad.",
+  "pcbViewerUrl": "https://kicanvas.org/?github=https%3A%2F%2Fgithub.com%2Fbalub%2FCoryDora%2Fblob%2Fmain%2FCoryDora.kicad_pcb",
+  "modelUrl": "/models/cory-dora.glb",
+  "heroImages": [
+    "/images/projects/cory-dora/repo-1-corydora-front.webp",
+    "/images/projects/cory-dora/repo-2-corydora.webp",
+    "/images/projects/cory-dora/repo-3-corydora-real.webp",
+    "/images/projects/cory-dora/repo-4-cory-dora-deku-shopabsurdindustries-519762.webp",
+    "/images/projects/cory-dora/repo-5-cory-dora-deku-shopabsurdindustries-534888.webp",
+    "/images/projects/cory-dora/repo-6-qmk-badge-dark.webp"
+  ],
+  "bom": [
+    {
+      "Reference": "D1,D2,D3,D4,D5,D6,D7,D8,D9",
+      "Value": "Diode",
+      "Datasheet": "",
+      "Footprint": "ScottoKeebs_Components:Diode_DO-35",
+      "Qty": "9",
+      "DNP": ""
+    },
+    {
+      "Reference": "H1,H2,H3,H4",
+      "Value": "MountingHole",
+      "Datasheet": "~",
+      "Footprint": "MountingHole:MountingHole_2.2mm_M2",
+      "Qty": "4",
+      "DNP": ""
+    },
+    {
+      "Reference": "J1",
+      "Value": "OLED_128x32",
+      "Datasheet": "",
+      "Footprint": "ScottoKeebs_Components:OLED_128x32",
+      "Qty": "1",
+      "DNP": ""
+    },
+    {
+      "Reference": "S1,S2,S3,S4,S5,S6,S7,S8,S9",
+      "Value": "Keyswitch",
+      "Datasheet": "~",
+      "Footprint": "ScottoKeebs_Hotswap:Hotswap_MX_Plated_1.00u",
+      "Qty": "9",
+      "DNP": ""
+    },
+    {
+      "Reference": "SW1",
+      "Value": "RotaryEncoder_Switch",
+      "Datasheet": "~",
+      "Footprint": "Rotary_Encoder:RotaryEncoder_Alps_EC11E-Switch_Vertical_H20mm",
+      "Qty": "1",
+      "DNP": ""
+    },
+    {
+      "Reference": "U1",
+      "Value": "RP2040_Zero",
+      "Datasheet": "",
+      "Footprint": "ScottoKeebs_MCU:RP2040_Zero",
+      "Qty": "1",
+      "DNP": ""
+    }
+  ],
+  "downloads": [
+    {
+      "name": "CoryDora BOM.csv",
+      "path": "BOM/CoryDora BOM.csv",
+      "url": "https://github.com/balub/CoryDora/raw/main/BOM/CoryDora%20BOM.csv"
+    },
+    {
+      "name": "CoryDora_Fully_Assembled_v1.2.f3z",
+      "path": "Case/v1.2/CoryDora_Fully_Assembled_v1.2.f3z",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/CoryDora_Fully_Assembled_v1.2.f3z"
+    },
+    {
+      "name": "CoryDora_Fully_Assembled_v1.2.step",
+      "path": "Case/v1.2/CoryDora_Fully_Assembled_v1.2.step",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/CoryDora_Fully_Assembled_v1.2.step"
+    },
+    {
+      "name": "CoryDora_v1.2.f3d",
+      "path": "Case/v1.2/CoryDora_v1.2.f3d",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/CoryDora_v1.2.f3d"
+    },
+    {
+      "name": "CoryDora_v1.2.step",
+      "path": "Case/v1.2/CoryDora_v1.2.step",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/CoryDora_v1.2.step"
+    },
+    {
+      "name": "CoryDora v1.2.step",
+      "path": "Case/v1.2/PCB/CoryDora v1.2.step",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/PCB/CoryDora%20v1.2.step"
+    },
+    {
+      "name": "Case_Bottom.stl",
+      "path": "Case/v1.2/STLs/Case_Bottom.stl",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/STLs/Case_Bottom.stl"
+    },
+    {
+      "name": "Case_top.stl",
+      "path": "Case/v1.2/STLs/Case_top.stl",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/STLs/Case_top.stl"
+    },
+    {
+      "name": "Case_trim.stl",
+      "path": "Case/v1.2/STLs/Case_trim.stl",
+      "url": "https://github.com/balub/CoryDora/raw/main/Case/v1.2/STLs/Case_trim.stl"
+    },
+    {
+      "name": "CoryDora Schematic.pdf",
+      "path": "CoryDora Schematic.pdf",
+      "url": "https://github.com/balub/CoryDora/raw/main/CoryDora%20Schematic.pdf"
+    },
+    {
+      "name": "CoryDora.kicad_pcb",
+      "path": "CoryDora.kicad_pcb",
+      "url": "https://github.com/balub/CoryDora/raw/main/CoryDora.kicad_pcb"
+    },
+    {
+      "name": "CoryDora.kicad_sch",
+      "path": "CoryDora.kicad_sch",
+      "url": "https://github.com/balub/CoryDora/raw/main/CoryDora.kicad_sch"
+    },
+    {
+      "name": "CoryDora.step",
+      "path": "CoryDora.step",
+      "url": "https://github.com/balub/CoryDora/raw/main/CoryDora.step"
+    },
+    {
+      "name": "CoryDora_v1.2.zip",
+      "path": "Fab/CoryDora_v1.2.zip",
+      "url": "https://github.com/balub/CoryDora/raw/main/Fab/CoryDora_v1.2.zip"
+    },
+    {
+      "name": "v1.0.zip",
+      "path": "Fab/v1.0.zip",
+      "url": "https://github.com/balub/CoryDora/raw/main/Fab/v1.0.zip"
+    },
+    {
+      "name": "v1.1.zip",
+      "path": "Fab/v1.1.zip",
+      "url": "https://github.com/balub/CoryDora/raw/main/Fab/v1.1.zip"
+    },
+    {
+      "name": "v1.2.zip",
+      "path": "Fab/v1.2.zip",
+      "url": "https://github.com/balub/CoryDora/raw/main/Fab/v1.2.zip"
+    }
+  ],
+  "readme": "# CoryDora\n\nA simple open-source, RP2040-based, QMK-compatible 3x3 mechanical macropad.\n\n## Rationale\n\nThe main goal of this project is to have a cheap, easy-to-build, feature-rich numpad which is completely open source.\n\nYou can now buy the CoryDora yourself at the [Absurd Store](https://shop.absurd.industries/products/cory-dora).\nOnboarding instructions are available [here](https://rowan-ninja-baa.notion.site/CoryDora-Onboarding-12d9d3177a9b8016bcddd6904b028f71).\nFull build guide is available [here](https://rowan-ninja-baa.notion.site/CoryDora-v1-1-Build-Guide-cc727f8be312492a9d3bb8e5530b1656).\n\n<p align=\"center\">\n<img src=\"img/cory-dora-deku-shopabsurdindustries-534888.webp\" alt=\"CoryDora v1\" width=\"600\"/>\n<img src=\"img/cory-dora-deku-shopabsurdindustries-519762.webp\" alt=\"CoryDora v1\" width=\"600\"/>\n</p>\n\n## Features:\n\n- Easy to source and build components.\n- Hot swappable keys.\n- QMK compatible.\n- OLED 0.91\" screen.\n- At least 1 rotary encoder\n- Completely open-source.\n\n## Parts list\n**Part**|**Quantity**|**Link to buy online**\n:-----:|:-----:|:-----:\n Hotswap Sockets|9|https://stackskb.com/store/ttc-pokayoke-hotswap-sockets-v2-10000-cycles\n Through hole 1N4148 Diode|9|https://stackskb.com/store/1n4148-through-hole-diode\n RP2040 zero|1|https://robu.in/product/waveshare-rp2040-zero-without-header\n Rotary Encoders|1|https://robu.in/product/m274-360-degree-rotary-encoder-module-brick-sensor/\n 0.91 inch I2C OLED display|1|https://robu.in/product/0-91-inch-128x32-i2c-iic-serial-oled-lcd-display-modulewith-gn\n Mx compatible mechanical switches|9|https://stackskb.com/product-category/switches/linear/\n\n## Firmware\n\nClone [forked QMK](https://github.com/balub/qmk_firmware) repositories and set up the build environment. See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_tools) and the [make instructions](https://docs.qmk.fm/#/getting_started_make_guide) for more information. Brand new to QMK? Start with our [Complete Newbs Guide](https://docs.qmk.fm/#/newbs).\n\n<img src=\"img/qmk-badge-dark.png\" alt=\"QMK\" width=\"145\"/>\n",
+  "buildGuide": [
+    {
+      "id": "ccc80bed-1de8-423c-a9d8-5c765ae65029",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "99c491fb-5cd1-4aff-b3aa-a9932b8c0a6e",
+      "type": "image",
+      "text": "IMG_20240907_052308454.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Ff8401da7-4688-449f-8368-c510cbb3f4bb%2F52f9c343-dee7-4209-bb80-97e84b802348.png?table=block&id=99c491fb-5cd1-4aff-b3aa-a9932b8c0a6e&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-1.webp"
+    },
+    {
+      "id": "5d96dd38-7c36-4212-8cce-1e4191d40968",
+      "type": "sub_header",
+      "text": "Pre-requisites ",
+      "imageUrl": null
+    },
+    {
+      "id": "10cf8073-27e1-490f-a644-d82d64575dcc",
+      "type": "text",
+      "text": "This is a guide for building the CoryDora v1.1 before you start doing so it is recommended you have the following tools:",
+      "imageUrl": null
+    },
+    {
+      "id": "8a77be64-ebad-46f7-ab13-08af8b19e5ac",
+      "type": "bulleted_list",
+      "text": "Soldering Iron",
+      "imageUrl": null
+    },
+    {
+      "id": "bc2842af-c92b-471e-82fc-c241527839d6",
+      "type": "bulleted_list",
+      "text": "Soldering led ( preferably flux core )",
+      "imageUrl": null
+    },
+    {
+      "id": "0fe9d317-7a9b-80f5-8e0a-e9d6190fec18",
+      "type": "bulleted_list",
+      "text": "Screw driver",
+      "imageUrl": null
+    },
+    {
+      "id": "41129cdd-26ec-4b23-84ef-d346a334ecfe",
+      "type": "bulleted_list",
+      "text": "Tweezers",
+      "imageUrl": null
+    },
+    {
+      "id": "dc8035ea-1070-4d97-a6be-34b4c56860a3",
+      "type": "bulleted_list",
+      "text": "Pliers",
+      "imageUrl": null
+    },
+    {
+      "id": "1f7078c1-75e1-4fdc-b47c-6115aba94747",
+      "type": "text",
+      "text": "The CoryDora v1.1 kit makes for a great soldering project so I hope you have fun.",
+      "imageUrl": null
+    },
+    {
+      "id": "cfd29656-f1c4-4796-833b-ff100ea2508f",
+      "type": "sub_header",
+      "text": "Build Guide",
+      "imageUrl": null
+    },
+    {
+      "id": "f413b61b-a07d-4302-aa53-f6d4b8a490cc",
+      "type": "text",
+      "text": "Please follow the following steps in the order while building the CoryDora",
+      "imageUrl": null
+    },
+    {
+      "id": "ebd568c8-cc94-4db4-af99-c8219abf352a",
+      "type": "sub_header",
+      "text": "Inventory",
+      "imageUrl": null
+    },
+    {
+      "id": "1c37ce38-cc21-4855-8a3f-f329b1d69d5d",
+      "type": "text",
+      "text": "Make sure all the parts are present and easy to grab when soldering them onto the board. The parts include:",
+      "imageUrl": null
+    },
+    {
+      "id": "27de6c72-dc17-4cbf-88f0-6edc27bf9885",
+      "type": "toggle",
+      "text": "PCB",
+      "imageUrl": null
+    },
+    {
+      "id": "d2fdd06c-519e-4679-8272-3fba4bb49208",
+      "type": "toggle",
+      "text": "Diodes",
+      "imageUrl": null
+    },
+    {
+      "id": "68d9ded5-f88a-4bcd-83b5-3b42f94d8c7d",
+      "type": "toggle",
+      "text": "RP2040 Microcontroller",
+      "imageUrl": null
+    },
+    {
+      "id": "eb4bee53-c58f-496d-bde0-20d5fe878e7c",
+      "type": "toggle",
+      "text": "Rotary Encoder",
+      "imageUrl": null
+    },
+    {
+      "id": "bb41b60a-1972-488e-89a2-faa5a1398cb4",
+      "type": "toggle",
+      "text": "0.91’’ OLED I2C Display",
+      "imageUrl": null
+    },
+    {
+      "id": "6cb9e21b-cc6c-4682-83a0-442e47541bf9",
+      "type": "toggle",
+      "text": "8 M2 and 8 M2.5 Screws",
+      "imageUrl": null
+    },
+    {
+      "id": "1df23cb4-4a73-4b0a-9790-e18708626cde",
+      "type": "toggle",
+      "text": "3D printed Case Parts",
+      "imageUrl": null
+    },
+    {
+      "id": "1c528490-897d-4fd9-ad95-2741b59c5062",
+      "type": "sub_header",
+      "text": "PCB",
+      "imageUrl": null
+    },
+    {
+      "id": "09a8f39c-6ec4-4f3b-8d69-e378b6e6dc25",
+      "type": "text",
+      "text": "In the kit you are provided the PCB for the CoryDora v1.1, the PCB has hot-swap sockets pre-soldered on them and it is recommended users leave them be.",
+      "imageUrl": null
+    },
+    {
+      "id": "aeaa5f6a-7747-46ba-b272-13c0cd4cf9e7",
+      "type": "sub_sub_header",
+      "text": "Top Side",
+      "imageUrl": null
+    },
+    {
+      "id": "7b6a5217-8adb-4790-94d4-0d40b1c4bedc",
+      "type": "image",
+      "text": "IMG_20240907_035023586.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F0d75197c-4435-41b5-af00-e5e31cf624c9%2FIMG_20240907_035023586.jpg?table=block&id=7b6a5217-8adb-4790-94d4-0d40b1c4bedc&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-2.webp"
+    },
+    {
+      "id": "e34fb7ad-0838-46f5-8887-a2950614500b",
+      "type": "sub_sub_header",
+      "text": "Bottom Side",
+      "imageUrl": null
+    },
+    {
+      "id": "d394d923-ae75-4a23-a7ce-6d40ff394ab2",
+      "type": "image",
+      "text": "IMG_20240907_035002841.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F385f59cb-0c68-4a17-82a2-7d5df4398155%2FIMG_20240907_035002841.jpg?table=block&id=d394d923-ae75-4a23-a7ce-6d40ff394ab2&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-3.webp"
+    },
+    {
+      "id": "b4e5adb2-3828-4a26-98e5-e61caf986a6f",
+      "type": "sub_header",
+      "text": "Soldering The Components",
+      "imageUrl": null
+    },
+    {
+      "id": "60886ffe-a7e4-4340-9899-b4c541345e24",
+      "type": "text",
+      "text": "In this step we will be soldering parts on to the PCB, it is recommended the parts be soldered in the order described here. Not doing so may make soldering other parts down the line a bit difficult. The steps are:",
+      "imageUrl": null
+    },
+    {
+      "id": "1a2d2b36-5724-449f-ab2b-ee1364201775",
+      "type": "sub_sub_header",
+      "text": "Step 1",
+      "imageUrl": null
+    },
+    {
+      "id": "c6897fd3-8ba9-4c67-96d6-8843c2453e2c",
+      "type": "text",
+      "text": "Solder the Diodes onto the PCB. Using a curved surface like a pen bend the diode legs downward as seen in the picture below.",
+      "imageUrl": null
+    },
+    {
+      "id": "3d91d52f-00e7-4a02-ab6e-c8bb3575f75c",
+      "type": "image",
+      "text": "IMG_20240907_035217861.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F4c2f5225-4122-4147-96b3-464a107ab2b6%2FIMG_20240907_035217861.jpg?table=block&id=3d91d52f-00e7-4a02-ab6e-c8bb3575f75c&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-4.webp"
+    },
+    {
+      "id": "c7f69520-7772-4256-96dd-88b3ebe75994",
+      "type": "text",
+      "text": "Every diode has a black line on one side of itself.",
+      "imageUrl": null
+    },
+    {
+      "id": "d0d82e2a-fe41-471a-8b11-39c8d3caf54f",
+      "type": "image",
+      "text": "IMG_20240907_035348040.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F33423a79-98cb-4490-9f1c-827ba761e8a1%2FIMG_20240907_035348040.jpg?table=block&id=d0d82e2a-fe41-471a-8b11-39c8d3caf54f&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-5.webp"
+    },
+    {
+      "id": "3a288d72-1d1d-4fee-bd7b-8977176b44e3",
+      "type": "text",
+      "text": "When inserting the diodes into the PCB make sure the black line on the diode lines up with the line on the diode on the bottom side of the PCB as you can see in the image below. ",
+      "imageUrl": null
+    },
+    {
+      "id": "834ca2f2-4ad4-44c4-b6fa-24fee924cf3a",
+      "type": "image",
+      "text": "IMG_20240907_035253513.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fcce63e45-9866-4bee-a01a-21662edd17a7%2Fdee8e822-dfc7-4a00-bba0-7a83b91854ef.png?table=block&id=834ca2f2-4ad4-44c4-b6fa-24fee924cf3a&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-6.webp"
+    },
+    {
+      "id": "f9fe59d8-d25c-47a5-a485-fc1cc19665e5",
+      "type": "text",
+      "text": "Once all the diodes are inserted into the PCB, please solder all the legs on the top side of the PCB. ",
+      "imageUrl": null
+    },
+    {
+      "id": "75cf7300-1485-498d-bd07-b44216b4780a",
+      "type": "image",
+      "text": "IMG_20240907_035923496.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Ff829e4ec-f7b8-4251-abf1-370399f1106b%2FIMG_20240907_035923496.jpg?table=block&id=75cf7300-1485-498d-bd07-b44216b4780a&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-7.webp"
+    },
+    {
+      "id": "f06d8117-15ab-48a6-bbea-4407f7aabaa5",
+      "type": "image",
+      "text": "IMG_20240907_035754822.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F691e5df9-d811-470b-857f-463661e74274%2FIMG_20240907_035754822.jpg?table=block&id=f06d8117-15ab-48a6-bbea-4407f7aabaa5&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-8.webp"
+    },
+    {
+      "id": "3e636151-99a9-4645-988a-c2ce7debdfd7",
+      "type": "text",
+      "text": "Once complete use a piler to cut the excess diode leads out.",
+      "imageUrl": null
+    },
+    {
+      "id": "0372a1f0-dee3-40cf-ae39-26c37202ff9e",
+      "type": "sub_sub_header",
+      "text": "Step 2",
+      "imageUrl": null
+    },
+    {
+      "id": "38299bd8-5c35-4527-ae24-51d0ae3c2f90",
+      "type": "text",
+      "text": "In this step we need to first solder the male header pins into the RP2040 microcontroller.",
+      "imageUrl": null
+    },
+    {
+      "id": "149013d1-3577-4834-b004-294f5ff20587",
+      "type": "image",
+      "text": "IMG_20240907_040053793.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F104d44ef-593b-4c70-89e0-20d04ea94964%2FIMG_20240907_040053793.jpg?table=block&id=149013d1-3577-4834-b004-294f5ff20587&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-9.webp"
+    },
+    {
+      "id": "1cfb994c-d7ae-40f8-99ff-1dde5cfe6477",
+      "type": "text",
+      "text": "NOTE : The recommended way is to use a breadboard to solder the header pins on the RP2040 however is one is not available it is recommended to place insert both the header pins into the RP2040 and ensuring the pins remain perpendicular manually. ",
+      "imageUrl": null
+    },
+    {
+      "id": "4e2f6920-aaa2-4a22-94c9-f92bd6366262",
+      "type": "text",
+      "text": "In the guide we assume you have a breadboard however the steps remain the same if you don’t use one too, just take care to ensure the pins are straight and don’t bend inwards. Insert the shorter side of the header pins into the RP2040 ( even if the longer side is soldered its not a big problem )",
+      "imageUrl": null
+    },
+    {
+      "id": "d895a7d6-8c0a-4f46-81f4-6dfd409ffcb1",
+      "type": "image",
+      "text": "IMG_20240907_040129790.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fbc441ea7-ddd7-4fe8-9525-3772a085b887%2F4f965279-83b4-476d-a370-79759fd69822.png?table=block&id=d895a7d6-8c0a-4f46-81f4-6dfd409ffcb1&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-10.webp"
+    },
+    {
+      "id": "137fe048-ed45-46ee-88d0-05d8e225b5de",
+      "type": "text",
+      "text": "Once the header pins are inserted into the RP2040, using a soldering iron solder the first and last pins in both rows of the headers respectively. This ensures the header pins are fixed and do not move or come out when soldering the rest of the pins.",
+      "imageUrl": null
+    },
+    {
+      "id": "d19cb559-59af-4ee8-bbac-32d653cb89de",
+      "type": "image",
+      "text": "IMG_20240907_040218942.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fb80b7d48-dde8-4770-a3b6-a7f726399433%2Ff811af4c-eb9f-4a13-acc4-d5ab365314df.png?table=block&id=d19cb559-59af-4ee8-bbac-32d653cb89de&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-11.webp"
+    },
+    {
+      "id": "6e55eb78-8920-4921-97c1-aeeb29947587",
+      "type": "text",
+      "text": "Then proceed to solder the rest of the pins making sure not to apply too much solder on each pin and also ensuring there is no solder bridging occurring between 2 or more pins.",
+      "imageUrl": null
+    },
+    {
+      "id": "0fe9d317-7a9b-80f1-9adf-d9ad1db285cd",
+      "type": "image",
+      "text": "IMG_20240907_040412283.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F452d1c5d-cd19-4fea-ac83-ce2d432315cd%2FIMG_20240907_040412283.jpg?table=block&id=0fe9d317-7a9b-80f1-9adf-d9ad1db285cd&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-12.webp"
+    },
+    {
+      "id": "d1f4f8f6-c10f-4a36-b508-d0498f931d85",
+      "type": "text",
+      "text": " Once fully soldered you can remove the RP2040 from the breadboard and insert it into the bottom side of the PCB.",
+      "imageUrl": null
+    },
+    {
+      "id": "48412dde-1da1-4d2a-a05f-a7ba115f0041",
+      "type": "image",
+      "text": "IMG_20240907_040504122.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fd86c37a4-7b8c-4fa2-8d0a-62873995ab4f%2FIMG_20240907_040504122.jpg?table=block&id=48412dde-1da1-4d2a-a05f-a7ba115f0041&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-13.webp"
+    },
+    {
+      "id": "a0b37acd-eb87-470b-9e82-6d6b941b92ac",
+      "type": "text",
+      "text": "Once fully inserted solder the pins on the top side of the PCB, again soldering the first and last pins first then followed by the rest of the pins one by one.",
+      "imageUrl": null
+    },
+    {
+      "id": "eede6217-4908-4ea2-a2e2-391b3321de6d",
+      "type": "image",
+      "text": "IMG_20240907_040611525.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F9491ce02-36ab-441b-a341-1630f1ab2841%2FIMG_20240907_040611525.jpg?table=block&id=eede6217-4908-4ea2-a2e2-391b3321de6d&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-14.webp"
+    },
+    {
+      "id": "0fe9d317-7a9b-8036-885e-e7a66b2989ca",
+      "type": "image",
+      "text": "IMG_20240907_040755233.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fa651f13a-e2b6-46c6-909d-5ad5cfc27d05%2FIMG_20240907_040755233.jpg?table=block&id=0fe9d317-7a9b-8036-885e-e7a66b2989ca&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-15.webp"
+    },
+    {
+      "id": "a5b11f8c-be45-4180-b08d-0de471d96045",
+      "type": "text",
+      "text": "Once the pins are soldered use the pilers to carefully cut away the exposed headers pins and shorten them. Once this is done take any tape and cover the pins up using them as seen in the image below. This is to ensure the RP2040 pins may not accidentally touch the bottom of the I2C display above.",
+      "imageUrl": null
+    },
+    {
+      "id": "f57b4b45-68ef-4350-86af-38eb5b7ba94a",
+      "type": "image",
+      "text": "IMG_20240907_040946874.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F4f598dde-003f-47d5-a734-9322daad1230%2FIMG_20240907_040946874.jpg?table=block&id=f57b4b45-68ef-4350-86af-38eb5b7ba94a&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-16.webp"
+    },
+    {
+      "id": "e98d5467-3572-4303-a01a-51b2568acf5e",
+      "type": "text",
+      "text": "With this everything on the bottom side of the PCB is soldered.",
+      "imageUrl": null
+    },
+    {
+      "id": "e2e29891-da31-4889-92e8-688d65050d86",
+      "type": "sub_sub_header",
+      "text": "Step 3",
+      "imageUrl": null
+    },
+    {
+      "id": "362d6cd8-f25e-410e-8fa0-2627452cd0ca",
+      "type": "text",
+      "text": "On the top side of the PCB insert the I2C display into the respective pins ensuring the display is in the correct orientation.",
+      "imageUrl": null
+    },
+    {
+      "id": "3a0e5e3f-3997-4778-babb-d0283ddc772d",
+      "type": "image",
+      "text": "IMG_20240907_041123995.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F2f38faff-5a14-4523-85c1-9008761b5e2b%2FIMG_20240907_041123995.jpg?table=block&id=3a0e5e3f-3997-4778-babb-d0283ddc772d&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-17.webp"
+    },
+    {
+      "id": "76a1d4a9-60a2-4e9f-ac19-69316ec04581",
+      "type": "text",
+      "text": "After ensuring once again the display is in the correct orientation and the pins are in the correct locations, solder the pins on the bottom side of the PCB.",
+      "imageUrl": null
+    },
+    {
+      "id": "ce3edd23-1709-4d78-a6a9-927ee6ecbfd1",
+      "type": "image",
+      "text": "IMG_20240907_041224862.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fe36514ef-b1ba-4887-b7ac-c99cd6233046%2FIMG_20240907_041224862.jpg?table=block&id=ce3edd23-1709-4d78-a6a9-927ee6ecbfd1&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-18.webp"
+    },
+    {
+      "id": "4301e0c5-dbc0-4d64-ae6b-7be48ede87ec",
+      "type": "text",
+      "text": "Using pliers please cut away and shorten the header pins sticking out.",
+      "imageUrl": null
+    },
+    {
+      "id": "b56d5216-79bf-413d-8e06-9b3e6cdac99b",
+      "type": "sub_sub_header",
+      "text": "Step 4",
+      "imageUrl": null
+    },
+    {
+      "id": "4d8e7834-45b3-47af-a09b-4bf8327076c1",
+      "type": "text",
+      "text": "Lastly insert the rotary encoders into the PCB in the correct way and solder it on the bottom side of the PCB.",
+      "imageUrl": null
+    },
+    {
+      "id": "2d4c0715-8e00-4cdf-86d5-ff4637a1c53c",
+      "type": "image",
+      "text": "IMG_20240907_041342825.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F6b944954-320c-4c57-98fe-8e412298da1f%2FIMG_20240907_041342825.jpg?table=block&id=2d4c0715-8e00-4cdf-86d5-ff4637a1c53c&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-19.webp"
+    },
+    {
+      "id": "307163e5-8702-4d73-acf3-68923a5be23a",
+      "type": "image",
+      "text": "IMG_20240907_041412993.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fa7b90acb-4f3f-4130-9e19-7b6636bb3e7e%2FIMG_20240907_041412993.jpg?table=block&id=307163e5-8702-4d73-acf3-68923a5be23a&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-20.webp"
+    },
+    {
+      "id": "ca18afd9-ae40-41b8-8f6e-1ee29eb846f2",
+      "type": "text",
+      "text": "This completes all the soldering required to be done. The PCB should look like the image below fully populated with parts.",
+      "imageUrl": null
+    },
+    {
+      "id": "6edfc14e-70a9-44f8-acb7-29a00893952a",
+      "type": "text",
+      "text": "Top Side",
+      "imageUrl": null
+    },
+    {
+      "id": "0fe9d317-7a9b-804b-83bc-d292abe07abe",
+      "type": "image",
+      "text": "IMG_20240907_041436521.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F2bb8d638-8885-4231-b1f7-fe85835c81c1%2FIMG_20240907_041436521.jpg?table=block&id=0fe9d317-7a9b-804b-83bc-d292abe07abe&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-21.webp"
+    },
+    {
+      "id": "3febc6e1-da2d-4d2b-875b-b507a457a1db",
+      "type": "text",
+      "text": "Bottom Side",
+      "imageUrl": null
+    },
+    {
+      "id": "d234df50-da5d-4edc-949d-e51b894195fa",
+      "type": "image",
+      "text": "IMG_20240907_041453791.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Ffd08898d-0678-4297-ab86-d283d3e3bbc1%2FIMG_20240907_041453791.jpg?table=block&id=d234df50-da5d-4edc-949d-e51b894195fa&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-22.webp"
+    },
+    {
+      "id": "9891a1dd-ceb3-445b-b029-244317268699",
+      "type": "sub_header",
+      "text": "Firmware Flashing",
+      "imageUrl": null
+    },
+    {
+      "id": "fa80dfad-e0b1-469a-ad67-b8465d5c8106",
+      "type": "text",
+      "text": "Once the CoryDora PCB has been fully assembled the next step is to flash the firmware into it, there are 2 ways you can do so.",
+      "imageUrl": null
+    },
+    {
+      "id": "ea6b9e37-27a3-4ff6-9321-27fef304ee0b",
+      "type": "toggle",
+      "text": "Using QMK",
+      "imageUrl": null
+    },
+    {
+      "id": "e70597d9-9ff1-4f0c-a90f-a07f6bf42713",
+      "type": "toggle",
+      "text": "Downloading and pasting firmware",
+      "imageUrl": null
+    },
+    {
+      "id": "1d57b1d3-cdd4-4de8-96d0-af83539621d3",
+      "type": "sub_sub_header",
+      "text": "Firmware Flashing Video Guide",
+      "imageUrl": null
+    },
+    {
+      "id": "f1c709b0-42b7-4f15-ba4f-fb679e5ab341",
+      "type": "toggle",
+      "text": "Using QMK",
+      "imageUrl": null
+    },
+    {
+      "id": "48e3be87-9488-4a27-ac4b-52adff2246ff",
+      "type": "toggle",
+      "text": "Downloading and pasting firmware",
+      "imageUrl": null
+    },
+    {
+      "id": "6f94121d-26fc-4e00-b528-0251b31329ca",
+      "type": "sub_header",
+      "text": "Final Assembly",
+      "imageUrl": null
+    },
+    {
+      "id": "dfbb965c-5766-41fd-80cd-fee54784e850",
+      "type": "text",
+      "text": "Once the PCB has been fully soldered the next step is to assemble it inside the case. The case has 3 parts the base, the trim and the top piece.",
+      "imageUrl": null
+    },
+    {
+      "id": "0fe9d317-7a9b-80c0-80ee-e9f145d59c6b",
+      "type": "sub_sub_header",
+      "text": "Step 1",
+      "imageUrl": null
+    },
+    {
+      "id": "8b480266-9d13-4267-92f5-3a0312275749",
+      "type": "text",
+      "text": "Take the base piece and insert the PCB into it ensuring the USB-C port of the RP2040 is facing the top side of the case or the part with the opening.",
+      "imageUrl": null
+    },
+    {
+      "id": "6b8f74e2-707d-49a9-bca4-7b0e469cc429",
+      "type": "image",
+      "text": "IMG_20240907_042505092.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fe858b7e8-9b85-4e59-8892-dccb16dfb731%2FIMG_20240907_042505092.jpg?table=block&id=6b8f74e2-707d-49a9-bca4-7b0e469cc429&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-23.webp"
+    },
+    {
+      "id": "0fe9d317-7a9b-8055-8cf1-d87b4774bef7",
+      "type": "sub_sub_header",
+      "text": "Step 2",
+      "imageUrl": null
+    },
+    {
+      "id": "61c17595-eabc-4796-9bdb-f44aee899004",
+      "type": "text",
+      "text": "Once inserted in the correct orientation, align the holes on the PCB with that of the holes on the case and insert the smaller screws into all the corresponding holes.\nNOTE : Do not over tighten the screws, do it just until you can feel the PCB firmly attached and not moving.",
+      "imageUrl": null
+    },
+    {
+      "id": "676bcf2d-c98c-43bb-96d5-9ebcb2ef0b6c",
+      "type": "image",
+      "text": "IMG_20240907_050331494.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F70c383bf-cb12-4b6d-aa8d-ccfc2066265c%2FIMG_20240907_050331494.jpg?table=block&id=676bcf2d-c98c-43bb-96d5-9ebcb2ef0b6c&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-24.webp"
+    },
+    {
+      "id": "c2d61cc4-ee7e-409d-befd-99fcbdc74289",
+      "type": "sub_sub_header",
+      "text": "Step 3",
+      "imageUrl": null
+    },
+    {
+      "id": "98032fa6-2b93-458a-b494-0e5b94ba8b32",
+      "type": "text",
+      "text": "Once the PCB is firmly attached to the base of the case, next put the case trim on the base piece as shown on the image below.\n",
+      "imageUrl": null
+    },
+    {
+      "id": "1e1e2578-1ce8-4396-92cd-61b88e1e7a94",
+      "type": "image",
+      "text": "IMG_20240907_050410768.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fa483506a-f991-44c3-9ff5-0d62d881c8e0%2FIMG_20240907_050410768.jpg?table=block&id=1e1e2578-1ce8-4396-92cd-61b88e1e7a94&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-25.webp"
+    },
+    {
+      "id": "6a1c69fc-2b8a-4654-8a6e-ddeb03caa7c7",
+      "type": "image",
+      "text": "IMG_20240907_050418869.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fc8d84237-0603-4779-99ef-a1bc590b6308%2FIMG_20240907_050418869.jpg?table=block&id=6a1c69fc-2b8a-4654-8a6e-ddeb03caa7c7&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-26.webp"
+    },
+    {
+      "id": "0fe9d317-7a9b-80d2-bbcd-c31c05178f49",
+      "type": "sub_sub_header",
+      "text": "Step 4",
+      "imageUrl": null
+    },
+    {
+      "id": "32a67058-a772-4902-a713-2b4d796fae4d",
+      "type": "text",
+      "text": "Lastly, take the top case piece and then gently insert the switches into the relevant location.",
+      "imageUrl": null
+    },
+    {
+      "id": "a135d15f-71c7-43d2-ade1-4c453dbadb62",
+      "type": "image",
+      "text": "IMG_20240907_051747687.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F6c95f59a-04ce-49c3-95ad-65fadc08e977%2FIMG_20240907_051747687.jpg?table=block&id=a135d15f-71c7-43d2-ade1-4c453dbadb62&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-27.webp"
+    },
+    {
+      "id": "b8fd2ba3-e203-40e0-9da6-4586b31076d2",
+      "type": "text",
+      "text": "NOTE :  Ensure the pins of the switches are towards of the bottom when being inserted into the case.",
+      "imageUrl": null
+    },
+    {
+      "id": "b401cdf4-df59-4eea-a08e-53fad3fa21ba",
+      "type": "image",
+      "text": "IMG_20240907_051757457.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Ffa0465b5-6457-476d-b9d1-56db6ca393fa%2FIMG_20240907_051757457.jpg?table=block&id=b401cdf4-df59-4eea-a08e-53fad3fa21ba&cache=v2",
+      "localImage": "/images/projects/cory-dora/guide-28.webp"
+    },
+    {
+      "id": "72a02f40-08b1-4fdd-9772-6240b6ea8e3c",
+      "type": "sub_sub_header",
+      "text": "Step 5",
+      "imageUrl": null
+    },
+    {
+      "id": "0fe9d317-7a9b-80cc-b1d9-c6dd2b8425c5",
+      "type": "text",
+      "text": "Now place the top piece of the case on top of the trim ensuring the holes on the four corners line up and the pins of the switches neatly get inserted into the hot-swap sockets. Once all the switches are firmly inserted into the hot-swap sockets you can then screw the top piece and trim into the bottom case using the 4 larger screws. ",
+      "imageUrl": null
+    },
+    {
+      "id": "ef29e924-f66b-4cb7-a114-e207020bb5cc",
+      "type": "text",
+      "text": "NOTE : Do not over tighten the screws, do it just until you can feel the Top piece firmly attached and not moving.",
+      "imageUrl": null
+    }
+  ],
+  "onboarding": [
+    {
+      "id": "12d9d317-7a9b-8060-b9b3-e7d98d42d392",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80e6-8c5a-f8f35460cd16",
+      "type": "text",
+      "text": "Welcome to your new CoryDora! This document guides you through the initial setup and customization process. Before we dive in, there's a bit of assembly required to complete your CoryDora. Let's get started with the first steps to make your CoryDora truly your own.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8021-914f-edf0134198b3",
+      "type": "sub_header",
+      "text": "Basic Assembly",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80e3-a8eb-e1befd32b9b3",
+      "type": "text",
+      "text": "Your package contains the following items:",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8006-8ba5-cdc248a8e228",
+      "type": "bulleted_list",
+      "text": "An unpopulated CoryDora",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-802e-a8c7-f8a5b5f7e383",
+      "type": "bulleted_list",
+      "text": "Mechanical switches",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80f1-8e65-e3369c443093",
+      "type": "bulleted_list",
+      "text": "Keycaps",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8042-9e32-ca335563859f",
+      "type": "text",
+      "text": "First, remove the CoryDora from its packaging material. You should now have an unpopulated CoryDora without any switches installed, as shown in the image below.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80ad-bcfb-f13622d2d82c",
+      "type": "image",
+      "text": "IMG_20241028_185922892.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fc20c44c3-56d5-41aa-8254-36fac8eb758d%2FIMG_20241028_185922892.jpg?table=block&id=12d9d317-7a9b-80ad-bcfb-f13622d2d82c&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-1.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-8043-a315-dc522af464ba",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80b5-a352-dcc577df9030",
+      "type": "sub_sub_header",
+      "text": "Insert the Switches",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80f3-9c31-f8343dcd1a8b",
+      "type": "text",
+      "text": "Once you have everything unpacked, insert the switches into the case. Ensure the pins on the switches are aligned with the holes on the PCB when placing them into the case.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80ca-9a55-cb52c13cbde9",
+      "type": "column_list",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-800f-b9b7-ea609bc17c8b",
+      "type": "column",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8082-9078-cbe09c2ce973",
+      "type": "image",
+      "text": "IMG_20241028_190045097.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F948b8f07-b97f-4811-bada-cf9a61883a04%2FIMG_20241028_190045097.jpg?table=block&id=12d9d317-7a9b-8082-9078-cbe09c2ce973&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-2.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-8037-a483-cbb62061b7a7",
+      "type": "text",
+      "text": "When inserting the switches, ensure that their pins align with the holes in the PCB.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8064-ae2d-d12bd4b2a824",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80c3-99cf-e15826a36185",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80fe-97e7-f475c1102dd9",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-805d-a1b7-eb93945326ee",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8067-9486-c4082453720d",
+      "type": "column",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80b3-8add-dff3a96f60e8",
+      "type": "video",
+      "text": "WhatsApp Video 2024-10-28 at 21.45.17_2ce26648.mp4",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-802a-a479-edad5f72bd72",
+      "type": "text",
+      "text": "NOTE: Insert the switches gently into the case ensuring the pins do not get bent like you see in the images below.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8059-a689-c520f64159d4",
+      "type": "column_list",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80ca-afc5-f6ba84977a3a",
+      "type": "column",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8030-8ef7-cf2258364c34",
+      "type": "image",
+      "text": "IMG_20240909_134458268.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F89a658b1-6bb8-440b-9c99-f0ff1d9cee0b%2FIMG_20240909_134458268.jpg?table=block&id=12d9d317-7a9b-8030-8ef7-cf2258364c34&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-3.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-8046-bbe8-dc15d2d03543",
+      "type": "column",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80f9-8f3b-daed7391325c",
+      "type": "image",
+      "text": "IMG_20240909_134653455.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F42ffb560-e22d-431f-8412-c5e0801d9849%2FIMG_20240909_134653455.jpg?table=block&id=12d9d317-7a9b-80f9-8f3b-daed7391325c&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-4.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-801a-ac56-fafdc89bc2e0",
+      "type": "column",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-801f-9440-f7e970f55e01",
+      "type": "image",
+      "text": "IMG_20240909_134532380.jpg",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F52266f3b-c5ef-4d52-bfc8-44cc7538e3bf%2FIMG_20240909_134532380.jpg?table=block&id=12d9d317-7a9b-801f-9440-f7e970f55e01&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-5.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-80ad-b5ca-eafaddc18563",
+      "type": "text",
+      "text": "If some pins get bent, use pliers or tweezers to straighten them. It's important to note: don't use the pliers to bend the pin back, as this would add stress to the pin. Instead, use the pliers to gently press the pin back into a straight position, as demonstrated in the video..",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80fb-b9ee-d2bee02c4404",
+      "type": "video",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80fb-aa2f-e48c6a6be167",
+      "type": "sub_sub_header",
+      "text": "Complete Assembly",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8045-9ebe-fca8f0b659db",
+      "type": "text",
+      "text": "Insert all switches into the case as demonstrated in the video below.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-807b-a9a3-e5d0224af1f8",
+      "type": "video",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80d4-950b-d6c549cd5f9e",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-805c-bacd-c839c75ac582",
+      "type": "text",
+      "text": "After inserting all the switches into the case, proceed to attach the keycaps to them as demonstrated below.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-809a-9580-d8d58215d0b9",
+      "type": "video",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-801d-929b-d31b8251907e",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80c4-8653-ca8cb2338ac8",
+      "type": "text",
+      "text": "That's it! You have now completed assembling the CoryDora. Next, learn how to make the CoryDora your own using VIA. Here are some videos you can watch to understand what via is.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8094-a650-d383be5a753a",
+      "type": "video",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-801c-bffe-c36a0acda899",
+      "type": "video",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8064-a95a-ffde378757a2",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80b4-9d59-ce39f8beef12",
+      "type": "sub_header",
+      "text": "Reconfiguring CoryDora with VIA",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-801b-aaba-e75184b26829",
+      "type": "sub_sub_header",
+      "text": "Video Guide",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8014-994a-cb0b2bb9caa0",
+      "type": "video",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-800d-bbf0-d4364adfc0a3",
+      "type": "text",
+      "text": "Note: The version here is missing the encoder but everything else is the same.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-800c-9ed7-f8a5f2340d86",
+      "type": "text",
+      "text": "To remap the keys on your CoryDora to function as you desire, you can use a tool called VIA. Here's how to use VIA with your CoryDora:",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8049-8b8e-d09efd13aeb4",
+      "type": "bulleted_list",
+      "text": "Plug in CoryDora to your machine.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80a5-96ee-e63f9f48bcc6",
+      "type": "bulleted_list",
+      "text": "Go to usevia.app.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80da-a2cf-d4e0b8667147",
+      "type": "bulleted_list",
+      "text": "Click on Authorize Device and select CoryDora in the window that will pop-up .",
+      "imageUrl": null
+    },
+    {
+      "id": "520c0c98-6a4e-4091-a210-e6a34e1dd3fb",
+      "type": "image",
+      "text": "Screenshot (67).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fb4f8611e-73c7-4d36-bbe0-61163231e5c1%2FScreenshot_(67).png?table=block&id=520c0c98-6a4e-4091-a210-e6a34e1dd3fb&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-6.webp"
+    },
+    {
+      "id": "6f5ed9ac-d302-433f-9240-5aad6db05b01",
+      "type": "image",
+      "text": "Screenshot (68).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fcd42ab82-5f6d-4b90-8b56-3bfbbb385147%2FScreenshot_(68).png?table=block&id=6f5ed9ac-d302-433f-9240-5aad6db05b01&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-7.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-807d-98e4-f9aa8f98df28",
+      "type": "bulleted_list",
+      "text": "Clone the qmk_firmware repo from here.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8023-a90a-cc62552bc3f9",
+      "type": "bulleted_list",
+      "text": "Navigate to keyboards/handwired/corydora you'll find a via.json file there or you can download it from here.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-800f-ac4e-f1828f9d1fee",
+      "type": "bulleted_list",
+      "text": "Back in via navigate to the settings menu by clicking on the gear icon.",
+      "imageUrl": null
+    },
+    {
+      "id": "45d9def4-a8b5-496d-838f-f8f6a181cb05",
+      "type": "image",
+      "text": "Screenshot (69).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F21c6ba4d-fad2-4284-af07-67478487f095%2FScreenshot_(69).png?table=block&id=45d9def4-a8b5-496d-838f-f8f6a181cb05&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-8.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-80c3-9bd5-f51dbaeb2d8e",
+      "type": "bulleted_list",
+      "text": "Once there enable the Show Design Tab button, this will result in a new tab Design appearing.",
+      "imageUrl": null
+    },
+    {
+      "id": "b948ff83-b7f6-4d13-903b-a5729097bae1",
+      "type": "image",
+      "text": "Screenshot (70).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F28728bc7-d6df-48fc-a195-13ffed74bb77%2FScreenshot_(70).png?table=block&id=b948ff83-b7f6-4d13-903b-a5729097bae1&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-9.webp"
+    },
+    {
+      "id": "befbadb2-9d3d-4792-afc5-4d4a2d9c6e3b",
+      "type": "image",
+      "text": "Screenshot (71).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fc6541014-e14f-42b1-975e-020150c6ab5f%2FScreenshot_(71).png?table=block&id=befbadb2-9d3d-4792-afc5-4d4a2d9c6e3b&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-10.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-80a5-832d-d958b627ebdf",
+      "type": "bulleted_list",
+      "text": "In the Design tab click on the Load button in the Load Draft Definitions menu option and navigate to and select the via.json for CoryDora file in the qmk_firmware you cloned earlier.",
+      "imageUrl": null
+    },
+    {
+      "id": "f2c794a5-e620-4780-8e69-3a22508c126a",
+      "type": "image",
+      "text": "Screenshot (72).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F89468c23-f767-4b98-8af5-da80f956238f%2FScreenshot_(72).png?table=block&id=f2c794a5-e620-4780-8e69-3a22508c126a&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-11.webp"
+    },
+    {
+      "id": "bbc130b4-620f-4b80-8d3d-708a9508b6c2",
+      "type": "image",
+      "text": "Screenshot (73).png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2F65387701-616d-4468-99af-6227f1f6636c%2FScreenshot_(73).png?table=block&id=bbc130b4-620f-4b80-8d3d-708a9508b6c2&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-12.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-8071-a45d-edd99046caa8",
+      "type": "bulleted_list",
+      "text": "Once the via.json file has been selected and loaded you’ll notice the following appear on your screen.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8030-a14e-df6787fd3c55",
+      "type": "image",
+      "text": "image.png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Ff68164d8-68f5-497a-8e9c-9f1ea7be0e12%2Fimage.png?table=block&id=12d9d317-7a9b-8030-a14e-df6787fd3c55&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-13.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-80ba-b9e0-c522fc70ff22",
+      "type": "bulleted_list",
+      "text": "You can now navigate to the first Configure tab and remap the keys to anything you wish.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8073-b45b-e4a3bde1089c",
+      "type": "image",
+      "text": "image.png",
+      "imageUrl": "https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Faf455b8c-b5e0-4967-9a65-230f3da0e2b3%2Fee74b469-cb0c-43d1-bf38-a9afb4916fa8%2Fimage.png?table=block&id=12d9d317-7a9b-8073-b45b-e4a3bde1089c&cache=v2",
+      "localImage": "/images/projects/cory-dora/onboard-14.webp"
+    },
+    {
+      "id": "12d9d317-7a9b-8044-8274-e6a96220cbd5",
+      "type": "text",
+      "text": "NOTE : The CoryDora firmware has not been merged into the officially into the QMK repo ( yet, PR will be opened soon ), until then every time you open via you’ll have to manually navigate to and load in the via.json file if the configs do not load automatically. This will be fixed once the CoryDora firmware has been merged into the official QMK repo.",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-80d7-a2fd-ebccf3c0d830",
+      "type": "transclusion_container",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-8075-86f2-c938118c3dfa",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    },
+    {
+      "id": "12d9d317-7a9b-808f-ba67-d9d8c3436a8f",
+      "type": "text",
+      "text": "",
+      "imageUrl": null
+    }
+  ]
+}

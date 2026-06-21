@@ -1,0 +1,169 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+// Development-only dashboard. No private data - only public sources.
+// Decide on gating (password, IP, env flag) before going live.
+---
+
+<BaseLayout
+  title="Dev Tools"
+  description="Internal tooling dashboard for Ooru development."
+  noindex={true}
+  activeTab=""
+>
+  <div class="max-w-3xl mx-auto px-5 sm:px-6 pt-8 pb-24">
+    <div class="mb-8">
+      <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-stamp bg-stamp/10 px-3 py-1 rounded-full mb-4">
+        <i class="ph-bold ph-wrench"></i>
+        Dev only
+      </div>
+      <h1 class="font-serif font-black text-3xl sm:text-4xl text-ink mb-2">Tooling Dashboard</h1>
+      <p class="text-ink-light text-sm leading-relaxed max-w-lg">
+        Scrapes and generates from <strong>public data only</strong>. No tokens, no private URLs.
+        These tools help build project folios and maker profiles without manual copy-paste.
+        Decide on gating before go-live.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+
+      <!-- Extract Maker -->
+      <a href="/dev/extract-maker" class="dev-card" style="text-decoration:none;">
+        <div class="dev-card-icon">
+          <i class="ph-duotone ph-user-circle-plus"></i>
+        </div>
+        <div class="dev-card-body">
+          <h2 class="dev-card-title">Extract Maker Profile</h2>
+          <p class="dev-card-desc">
+            Paste a GitHub, personal site, or Shopify product URL. Get a paste-ready
+            <code>makers.ts</code> block (and optionally a <code>campaigns.ts</code> block for shop pages).
+            Server-side fetch - no CORS proxy needed.
+          </p>
+        </div>
+        <i class="ph-bold ph-arrow-right dev-card-arrow"></i>
+      </a>
+
+      <!-- Build Folio -->
+      <a href="/dev/build-folio" class="dev-card" style="text-decoration:none;">
+        <div class="dev-card-icon">
+          <i class="ph-duotone ph-folder-open"></i>
+        </div>
+        <div class="dev-card-body">
+          <h2 class="dev-card-title">Build Project Folio</h2>
+          <p class="dev-card-desc">
+            Paste a GitHub repo + optional Notion build-guide and shop URL. Preview the scraped
+            content, copy the <code>projects.ts</code> block, and get the exact CLI command to
+            run <code>tools/folio-builder/build.mjs</code> for asset download and CAD conversion.
+          </p>
+        </div>
+        <i class="ph-bold ph-arrow-right dev-card-arrow"></i>
+      </a>
+
+      <!-- CLI Tools note -->
+      <div class="dev-divider">CLI tools (run locally - need FreeCAD + cwebp)</div>
+
+      <div class="dev-card dev-card--static">
+        <div class="dev-card-icon">
+          <i class="ph-duotone ph-terminal-window"></i>
+        </div>
+        <div class="dev-card-body">
+          <h2 class="dev-card-title">folio-builder/build.mjs</h2>
+          <p class="dev-card-desc">Downloads + converts all images and the STEP model. Run locally.</p>
+          <code class="dev-code">node tools/folio-builder/build.mjs &lt;slug&gt;</code>
+        </div>
+      </div>
+
+      <div class="dev-card dev-card--static">
+        <div class="dev-card-icon">
+          <i class="ph-duotone ph-cube"></i>
+        </div>
+        <div class="dev-card-body">
+          <h2 class="dev-card-title">step-to-glb.mjs</h2>
+          <p class="dev-card-desc">STEP to Draco-compressed GLB via FreeCAD + gltf-transform.</p>
+          <code class="dev-code">node tools/step-to-glb.mjs input.step public/models/out.glb</code>
+        </div>
+      </div>
+
+      <div class="dev-card dev-card--static">
+        <div class="dev-card-icon">
+          <i class="ph-duotone ph-file-html"></i>
+        </div>
+        <div class="dev-card-body">
+          <h2 class="dev-card-title">extract-maker.html</h2>
+          <p class="dev-card-desc">Zero-setup portable version of the extract-maker tool. Open <code>tools/extract-maker.html</code> directly in any browser.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .dev-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(250, 243, 232, 0.6);
+    border: 1.5px solid rgba(26, 26, 26, 0.1);
+    border-radius: 0.875rem;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .dev-card:not(.dev-card--static):hover {
+    border-color: #D94800;
+    background: rgba(217, 72, 0, 0.04);
+    transform: translateY(-1px);
+  }
+  .dev-card:not(.dev-card--static):hover .dev-card-title { color: #D94800; }
+  .dev-card--static { cursor: default; opacity: 0.75; }
+  .dev-card-icon {
+    font-size: 1.5rem;
+    color: #6B5B4A;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    transition: color 0.15s;
+  }
+  .dev-card:not(.dev-card--static):hover .dev-card-icon { color: #D94800; }
+  .dev-card-body { flex: 1 1 0; min-width: 0; }
+  .dev-card-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1A1A1A;
+    margin-bottom: 0.35rem;
+    transition: color 0.15s;
+  }
+  .dev-card-desc { font-size: 0.825rem; color: #4A3D2F; line-height: 1.6; }
+  .dev-card-desc code { font-size: 0.78rem; background: rgba(26,26,26,0.07); padding: 0.1rem 0.35rem; border-radius: 0.25rem; }
+  .dev-card-arrow { font-size: 0.9rem; color: #6B5B4A; flex-shrink: 0; margin-top: 0.25rem; }
+  .dev-code {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    background: rgba(26,26,26,0.06);
+    border: 1px solid rgba(26,26,26,0.08);
+    border-radius: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    color: #1A1A1A;
+    font-family: monospace;
+    overflow-x: auto;
+  }
+  .dev-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6B5B4A;
+    margin: 0.5rem 0;
+  }
+  .dev-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(26,26,26,0.1);
+  }
+</style>

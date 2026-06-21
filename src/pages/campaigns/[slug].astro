@@ -942,6 +942,20 @@ const campaignLd = {
           </div>
         </Card>
 
+        <!-- Project folio cross-link -->
+        {campaign.projectSlug && (
+          <a href={`/projects/${campaign.projectSlug}`} class="folio-link-card mb-5" style="text-decoration:none;">
+            <div class="folio-link-icon">
+              <i class="ph-duotone ph-folder-open"></i>
+            </div>
+            <div class="folio-link-body">
+              <div class="folio-link-title">Project Folio</div>
+              <div class="folio-link-sub">Build guide, 3D model, BOM &amp; source files</div>
+            </div>
+            <i class="ph-bold ph-arrow-right folio-link-arrow"></i>
+          </a>
+        )}
+
         <!-- Rewards rail (right side on desktop, stacks on mobile) -->
         {campaign.status === "live" && (
           <CampaignRewards tiers={tiers} campaignSlug={campaign.slug} client:visible />
@@ -1210,6 +1224,29 @@ const campaignLd = {
   .oct-sm {
     clip-path: url(#rounded-octagon);
   }
+
+  /* Project folio cross-link card */
+  .folio-link-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: rgba(26, 26, 26, 0.04);
+    border: 1.5px solid rgba(26, 26, 26, 0.1);
+    border-radius: 0.875rem;
+    transition: all 0.15s;
+  }
+  .folio-link-card:hover {
+    border-color: #D94800;
+    background: rgba(217, 72, 0, 0.05);
+    transform: translateY(-1px);
+  }
+  .folio-link-icon { font-size: 1.4rem; color: #6B5B4A; flex-shrink: 0; transition: color 0.15s; }
+  .folio-link-card:hover .folio-link-icon { color: #D94800; }
+  .folio-link-body { flex: 1 1 0; min-width: 0; }
+  .folio-link-title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 0.95rem; color: #1A1A1A; }
+  .folio-link-sub { font-size: 0.7rem; color: #6B5B4A; margin-top: 0.1rem; }
+  .folio-link-arrow { font-size: 0.85rem; color: #6B5B4A; flex-shrink: 0; }
 
   /* BOM table */
   .bom-table {

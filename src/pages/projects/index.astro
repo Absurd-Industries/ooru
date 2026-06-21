@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Card from "../../components/Card.astro";
+import Tag from "../../components/Tag.astro";
+import { projects } from "../../data/projects";
+---
+
+<BaseLayout
+  title="Projects"
+  description="Deep-dive into open hardware builds - schematics, 3D models, step-by-step build guides, and everything you need to make your own."
+  ogImage="/og/campaigns.png"
+  activeTab="campaigns"
+>
+  <section class="pt-6 pb-6 sm:pt-8 sm:pb-8">
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
+      <h1 class="font-serif font-bold text-3xl sm:text-4xl text-ink mb-2">
+        <i class="ph-duotone ph-folder-open text-ink mr-2" style="font-size:1.4rem;"></i>
+        Project Folios
+      </h1>
+      <p class="text-ink text-base sm:text-lg max-w-xl leading-relaxed">
+        Every schematic, 3D model, build guide, and part number. Open hardware documented the way it should be.
+      </p>
+    </div>
+  </section>
+
+  <section class="pb-16 sm:pb-20">
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projects.map((p) => (
+          <a href={`/projects/${p.slug}`} class="block group" style="text-decoration: none;">
+            <Card class="h-full transition-transform duration-200 group-hover:-translate-y-1">
+              {p.heroImages[0] && (
+                <div class="aspect-video overflow-hidden" style="border-radius: 0.875rem 0.875rem 0 0;">
+                  <img
+                    src={p.heroImages[0]}
+                    alt={p.title}
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              <div class="p-4">
+                <div class="flex flex-wrap gap-1.5 mb-2">
+                  <Tag variant={p.status === "shipping" ? "funded" : "default"}>
+                    {p.status === "shipping" ? "Shipping" : p.status === "prototype" ? "Prototype" : "Concept"}
+                  </Tag>
+                  <Tag>{p.category}</Tag>
+                </div>
+                <h2 class="font-serif font-bold text-lg leading-tight mb-1 text-ink group-hover:text-stamp transition-colors">
+                  {p.title}
+                </h2>
+                <p class="text-sm text-stencil leading-relaxed line-clamp-2">{p.tagline}</p>
+                <div class="flex items-center gap-3 mt-3 pt-3 border-t border-ink/5">
+                  <div class="flex items-center gap-1.5 text-xs text-stencil">
+                    <a
+                      href={`/makers/${p.makerSlug}`}
+                      class="hover:text-stamp transition-colors font-medium"
+                      onclick="event.stopPropagation()"
+                      style="text-decoration: none;"
+                    >
+                      {p.makerSlug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                    </a>
+                  </div>
+                  {p.shopUrl && (
+                    <span class="ml-auto text-xs font-bold text-funded">
+                      {p.priceFormatted}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

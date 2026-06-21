@@ -40,6 +40,7 @@ export const campaigns: Campaign[] = [
     raisedFormatted: "₹4,94,900",
     backers: 100,
     license: "GPL-3.0",
+    projectSlug: "cory-dora",
     image: "/images/campaigns/cory-dora.jpg",
   },
   {
