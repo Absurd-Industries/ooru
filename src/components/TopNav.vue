@@ -38,8 +38,8 @@ function isActive(href: string): boolean {
                         >ooru<span class="brand-dot">.</span
                         ><span class="text-xs">build</span></span
                     >
-                    <span class="wm-alt wm-kn">ಊರು</span>
-                    <span class="wm-alt wm-te">ఊరు</span>
+                    <span class="wm-alt wm-kn">ಊರು<span class="brand-dot">.</span><span class="text-xs">build</span></span>
+                    <span class="wm-alt wm-te">ఊరు<span class="brand-dot">.</span><span class="text-xs">build</span></span>
                 </span>
             </a>
 

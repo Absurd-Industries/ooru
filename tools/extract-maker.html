@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maker Profile Extractor - ooru.build tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;700&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --kraft: #D4B896; --ink: #1A1A1A; --stamp: #FF5900;
+    --paper: #FAF3E8; --stencil: #6B5B4A; --kraftlt: #E7D8BD;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--kraft);
+    font-family: 'DM Sans', Helvetica, sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+  .logo {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: -1px;
+    text-decoration: none;
+    color: var(--ink);
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+  .logo .dot { color: var(--stamp); }
+  .logo .build { font-size: 0.7em; }
+  .eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--stencil);
+    margin-bottom: 2rem;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .card {
+    background: var(--paper);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(26,26,26,0.12);
+  }
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--stencil);
+    margin-bottom: 0.4rem;
+  }
+  input[type="url"], input[type="text"], textarea, select {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1.5px solid var(--kraft);
+    border-radius: 8px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--stamp); }
+  textarea { resize: vertical; font-family: 'DM Sans', monospace; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  .field { margin-bottom: 1rem; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--stamp); color: white; }
+  .btn-outline { background: transparent; border: 2px solid var(--ink); color: var(--ink); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  pre {
+    background: var(--ink);
+    color: #e8dcc8;
+    border-radius: 10px;
+    padding: 1.25rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .section-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .tag {
+    display: inline-block;
+    background: var(--kraftlt);
+    border-radius: 6px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--stencil);
+    margin: 0.2rem 0.2rem 0 0;
+  }
+  .status {
+    font-size: 0.8rem;
+    color: var(--stencil);
+    margin-top: 0.5rem;
+    min-height: 1.2em;
+  }
+  .status.error { color: #b00; }
+  .status.ok { color: #2A5F41; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .skills-list { display: flex; flex-wrap: wrap; margin-top: 0.3rem; }
+  .url-row { display: flex; gap: 0.75rem; }
+  .url-row input { flex: 1; }
+  #tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+  .tab {
+    padding: 0.4rem 0.9rem; border-radius: 6px; cursor: pointer;
+    font-size: 0.8rem; font-weight: 700; border: 2px solid transparent;
+    background: var(--kraftlt); color: var(--stencil);
+  }
+  .tab.active { background: var(--ink); color: var(--paper); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="logo">ooru<span class="dot">.</span><span class="build">build</span></a>
+  <div class="eyebrow">tools / extract-maker</div>
+
+  <h1>Maker Profile Extractor</h1>
+  <p style="color:var(--stencil);margin-bottom:2rem;font-size:0.95rem;">
+    Paste any URL (maker site, product page, GitHub) to derive a profile skeleton.
+    Review and edit the fields, then copy the TypeScript block into <code>src/data/makers.ts</code>.
+  </p>
+
+  <!-- Step 1: Fetch -->
+  <div class="card">
+    <div class="section-title">1. Fetch a page</div>
+    <div class="field">
+      <label>URL to scrape</label>
+      <div class="url-row">
+        <input type="url" id="url" placeholder="https://balubabu.dev/" autocomplete="off">
+        <button class="btn btn-primary" id="fetchBtn" onclick="doFetch()">Extract</button>
+      </div>
+    </div>
+    <div class="status" id="fetchStatus"></div>
+    <details style="margin-top:1rem;">
+      <summary style="cursor:pointer;font-size:0.8rem;color:var(--stencil);">How it works</summary>
+      <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--stencil);line-height:1.6;">
+        Fetches via <code>api.allorigins.win</code> (public CORS proxy) so no server needed.
+        Parsed fields are pre-filled below - review and adjust before copying.
+        <strong>Product pages</strong> (Shopify, etc.) also work - generates a campaign skeleton too.
+      </p>
+    </details>
+  </div>
+
+  <!-- Step 2: Edit fields -->
+  <div class="card" id="editCard" style="display:none">
+    <div class="section-title">2. Review &amp; edit</div>
+
+    <div id="tabs">
+      <div class="tab active" onclick="switchTab('maker')">Maker Profile</div>
+      <div class="tab" onclick="switchTab('campaign')">Campaign</div>
+    </div>
+
+    <div id="panel-maker" class="panel active">
+      <div class="row">
+        <div class="field"><label>Name</label><input type="text" id="f-name" placeholder="Balu B"></div>
+        <div class="field"><label>Slug</label><input type="text" id="f-slug" placeholder="balu-b"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Title / Role</label><input type="text" id="f-title" placeholder="Maker & Engineer"></div>
+        <div class="field"><label>Location</label><input type="text" id="f-location" placeholder="Bengaluru, India"></div>
+      </div>
+      <div class="field"><label>Bio (1-2 sentences)</label><textarea id="f-bio" rows="2"></textarea></div>
+      <div class="row">
+        <div class="field"><label>Specialty</label>
+          <select id="f-specialty">
+            <option>Electronics</option><option>Firmware</option><option>Product Design</option>
+            <option>Audio</option><option>Education</option><option>Robotics</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Avatar colour</label><input type="text" id="f-color" placeholder="#1B6B5E"></div>
+      </div>
+      <div class="field"><label>Skills (comma-separated)</label><input type="text" id="f-skills" placeholder="QMK, PCB Design, Open Hardware"></div>
+      <div class="row">
+        <div class="field"><label>GitHub URL</label><input type="url" id="f-github" placeholder="https://github.com/..."></div>
+        <div class="field"><label>Website URL</label><input type="url" id="f-website" placeholder="https://..."></div>
+      </div>
+      <div class="field"><label>Twitter / X URL</label><input type="url" id="f-twitter" placeholder="https://twitter.com/..."></div>
+    </div>
+
+    <div id="panel-campaign" class="panel">
+      <div class="field"><label>Campaign title</label><input type="text" id="c-title" placeholder="CoryDora - Open Source Macropad"></div>
+      <div class="field"><label>Tagline (1 sentence)</label><input type="text" id="c-tagline" placeholder="A 3x3 QMK macropad. Hotswap, USB-C. Made in Bengaluru."></div>
+      <div class="row">
+        <div class="field"><label>Slug</label><input type="text" id="c-slug" placeholder="cory-dora-macropad"></div>
+        <div class="field"><label>Category</label>
+          <select id="c-category">
+            <option>Electronics</option><option>Agriculture</option><option>Education</option>
+            <option>IoT</option><option>Tools</option><option>Audio</option><option>Sustainability</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Price (₹)</label><input type="text" id="c-price" placeholder="4949"></div>
+        <div class="field"><label>Status</label>
+          <select id="c-status"><option>live</option><option>funded</option><option>coming</option></select>
+        </div>
+      </div>
+      <div class="field"><label>License</label><input type="text" id="c-license" placeholder="GPL-3.0"></div>
+    </div>
+
+    <div class="actions" style="margin-top:1rem;">
+      <button class="btn btn-primary" onclick="generate()">Generate TypeScript</button>
+      <button class="btn btn-outline" onclick="clear_fields()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Output -->
+  <div class="card" id="outputCard" style="display:none">
+    <div class="section-title">3. Copy into your data files</div>
+    <pre id="outputPre"></pre>
+    <div class="actions" style="margin-top:1rem;">
+      <button class="btn btn-primary" onclick="copyOutput()">Copy to clipboard</button>
+    </div>
+    <div class="status" id="copyStatus"></div>
+  </div>
+</div>
+
+<script>
+const PROXY = 'https://api.allorigins.win/get?url=';
+const COLORS = ['#1B6B5E','#2B4C7E','#B74803','#3D348B','#9B2335','#0F6B5E','#1B4965','#C2452D'];
+
+function slugify(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function pickColor(name) {
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff;
+  return COLORS[Math.abs(h) % COLORS.length];
+}
+
+function setStatus(id, msg, type = '') {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + type;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['maker','campaign'][i] === tab));
+  document.getElementById('panel-maker').classList.toggle('active', tab === 'maker');
+  document.getElementById('panel-campaign').classList.toggle('active', tab === 'campaign');
+}
+
+function extractMeta(doc, prop) {
+  return (doc.querySelector(`meta[property="${prop}"]`) || doc.querySelector(`meta[name="${prop}"]`) || {})
+    .getAttribute?.('content') || '';
+}
+
+function extractLinks(doc) {
+  const links = {};
+  const hrefs = [...doc.querySelectorAll('a[href]')].map(a => a.href).filter(Boolean);
+  for (const h of hrefs) {
+    if (/github\.com\/[^/]+\/?$/.test(h)) links.github = h.replace(/\/$/, '');
+    if (/twitter\.com\/|x\.com\//.test(h) && !/intent|share/.test(h)) links.twitter = h.replace(/\/$/, '');
+    if (/linkedin\.com\/in\//.test(h)) links.linkedin = h.replace(/\/$/, '');
+  }
+  return links;
+}
+
+function guessSkills(text) {
+  const keywords = [
+    'QMK','PCB','KiCad','Arduino','Raspberry Pi','ESP32','STM32','FPGA','LoRa',
+    'Fusion 360','SolidWorks','3D Print','CNC','Laser Cut','Rust','Embedded',
+    'React','Vue','TypeScript','Python','Go','Firmware','RF','Audio','DSP',
+    'Open Hardware','Open Source','CAD','ROS','IoT','Bluetooth','USB',
+  ];
+  const found = keywords.filter(k => new RegExp(k, 'i').test(text));
+  return found.slice(0, 6);
+}
+
+function guessSpecialty(skills, text) {
+  if (/firmware|rust|stm|esp32|fpga/i.test(text)) return 'Firmware';
+  if (/audio|dsp|eurorack|speaker/i.test(text)) return 'Audio';
+  if (/educator|curriculum|teach/i.test(text)) return 'Education';
+  if (/robot|ros|agri/i.test(text)) return 'Robotics';
+  if (/product design|fusion|solidworks/i.test(text)) return 'Product Design';
+  return 'Electronics';
+}
+
+async function doFetch() {
+  const url = document.getElementById('url').value.trim();
+  if (!url) { setStatus('fetchStatus', 'Paste a URL first.', 'error'); return; }
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true;
+  setStatus('fetchStatus', 'Fetching...');
+  try {
+    const res = await fetch(PROXY + encodeURIComponent(url));
+    if (!res.ok) throw new Error('Proxy error ' + res.status);
+    const { contents, status } = await res.json();
+    if (status?.http_code >= 400) throw new Error('Page returned ' + status.http_code);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(contents, 'text/html');
+
+    // Resolve relative URLs in the parsed doc
+    const base = doc.createElement('base');
+    base.href = url;
+    doc.head.prepend(base);
+
+    const title = (doc.querySelector('title') || {}).textContent || '';
+    const desc = extractMeta(doc, 'description') || extractMeta(doc, 'og:description') || '';
+    const ogTitle = extractMeta(doc, 'og:title') || title;
+    const bodyText = (doc.body || {}).innerText || doc.body?.textContent || '';
+    const links = extractLinks(doc);
+
+    // Heuristic: is this a product page?
+    const isProduct = /price|₹|Rs\.|buy|add.to.cart|shopify/i.test(bodyText);
+
+    // Maker fields
+    const h1 = (doc.querySelector('h1') || {}).textContent?.trim() || '';
+    const nameGuess = h1.split(/[\-|–]/)[0].trim() || ogTitle.split(/[\-|–]/)[0].trim();
+    const skills = guessSkills(bodyText);
+    const specialty = guessSpecialty(skills, bodyText);
+
+    // Location
+    const locMatch = bodyText.match(/(?:based in|from|located in|Bengaluru|Bangalore|Chennai|Mumbai|Delhi|India|Japan|Germany|USA|France)/i);
+    const location = locMatch ? (locMatch[0].match(/^(?:based in|from|located in)/i) ? '' : locMatch[0]) : '';
+
+    // Fill maker fields
+    document.getElementById('f-name').value = nameGuess;
+    document.getElementById('f-slug').value = slugify(nameGuess);
+    document.getElementById('f-bio').value = desc.slice(0, 160);
+    document.getElementById('f-skills').value = skills.join(', ');
+    document.getElementById('f-specialty').value = specialty;
+    document.getElementById('f-color').value = pickColor(nameGuess);
+    document.getElementById('f-location').value = location;
+    if (links.github) document.getElementById('f-github').value = links.github;
+    if (links.twitter) document.getElementById('f-twitter').value = links.twitter;
+    document.getElementById('f-website').value = url.replace(/\/$/, '');
+
+    // Campaign fields (product page)
+    if (isProduct) {
+      const priceMatch = bodyText.match(/(?:Rs\.|₹)\s*[\d,]+/);
+      const price = priceMatch ? priceMatch[0].replace(/[₹Rs.\s,]/g, '') : '';
+      document.getElementById('c-title').value = ogTitle.split('–')[0].trim();
+      document.getElementById('c-tagline').value = desc.slice(0, 120);
+      document.getElementById('c-slug').value = slugify(ogTitle.split('–')[0].trim());
+      document.getElementById('c-price').value = price;
+    }
+
+    document.getElementById('editCard').style.display = 'block';
+    setStatus('fetchStatus', `Extracted from ${new URL(url).hostname} - review the fields below.`, 'ok');
+    document.getElementById('editCard').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    setStatus('fetchStatus', 'Error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+function generate() {
+  const name = v('f-name') || 'Unknown Maker';
+  const slug = v('f-slug') || slugify(name);
+  const skills = v('f-skills').split(',').map(s => s.trim()).filter(Boolean).slice(0, 6);
+  const links = {};
+  if (v('f-github')) links.github = v('f-github');
+  if (v('f-website')) links.website = v('f-website');
+  if (v('f-twitter')) links.twitter = v('f-twitter');
+
+  const maker = {
+    slug,
+    name,
+    title: v('f-title') || 'Maker',
+    location: v('f-location') || 'India',
+    avatarColor: v('f-color') || pickColor(name),
+    avatar: `/images/makers/${slug}.jpg`,
+    skills: skills.length ? skills : ['Open Hardware'],
+    projects: 1,
+    backers: 0,
+    specialty: v('f-specialty') || 'Electronics',
+    bio: v('f-bio') || '',
+    ...(Object.keys(links).length ? { links } : {}),
+  };
+
+  let out = `// makers.ts entry\n`;
+  out += `{\n`;
+  for (const [k, val] of Object.entries(maker)) {
+    if (Array.isArray(val)) {
+      out += `  ${k}: [${val.map(s => `"${s}"`).join(', ')}],\n`;
+    } else if (typeof val === 'object') {
+      out += `  ${k}: {\n`;
+      for (const [lk, lv] of Object.entries(val)) out += `    ${lk}: "${lv}",\n`;
+      out += `  },\n`;
+    } else {
+      out += `  ${k}: ${typeof val === 'number' ? val : `"${val}"`},\n`;
+    }
+  }
+  out += `},\n`;
+
+  // Campaign block if filled
+  const ctitle = v('c-title');
+  if (ctitle) {
+    const price = parseInt(v('c-price') || '0', 10);
+    const campaign = {
+      slug: v('c-slug') || slugify(ctitle),
+      title: ctitle,
+      tagline: v('c-tagline') || '',
+      icon: 'ph-bold ph-cube',
+      makerName: name,
+      makerSlug: slug,
+      location: v('f-location') || 'India',
+      avatarColor: v('f-color') || pickColor(name),
+      category: v('c-category') || 'Electronics',
+      status: v('c-status') || 'live',
+      percent: 0,
+      goalINR: price * 100 || 200000,
+      goalFormatted: price ? `₹${price.toLocaleString('en-IN')}` : '₹2,00,000',
+      raisedFormatted: '₹0',
+      backers: 0,
+      license: v('c-license') || 'GPL-3.0',
+      image: `/images/campaigns/${v('c-slug') || slugify(ctitle)}.jpg`,
+    };
+    out += `\n// campaigns.ts entry\n{\n`;
+    for (const [k, val] of Object.entries(campaign)) {
+      out += `  ${k}: ${typeof val === 'number' ? val : `"${val}"`},\n`;
+    }
+    out += `},\n`;
+  }
+
+  document.getElementById('outputPre').textContent = out;
+  document.getElementById('outputCard').style.display = 'block';
+  document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyOutput() {
+  const text = document.getElementById('outputPre').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    setStatus('copyStatus', 'Copied!', 'ok');
+    setTimeout(() => setStatus('copyStatus', ''), 2000);
+  });
+}
+
+function clear_fields() {
+  ['f-name','f-slug','f-title','f-location','f-bio','f-skills','f-color',
+   'f-github','f-website','f-twitter','c-title','c-tagline','c-slug','c-price','c-license']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('outputCard').style.display = 'none';
+}
+
+document.getElementById('url').addEventListener('keydown', e => { if (e.key === 'Enter') doFetch(); });
+</script>
+</body>
+</html>

@@ -24,8 +24,8 @@ export const dicts: Record<Locale, Record<string, string>> = { en, kn, te };
 /** Locale-aware brand wordmark text (the logo). */
 export const WORDMARK: Record<Locale, string> = {
   en: "ooru.build",
-  kn: "ಊರು",
-  te: "ఊరు",
+  kn: "ಊರು.build",
+  te: "ఊరు.build",
 };
 
 export function isLocale(x: unknown): x is Locale {

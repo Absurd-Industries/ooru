@@ -101,16 +101,24 @@ def octagon(cx, cy, s):
 def polaroid(b64data, x, y, w, rot, caption=None):
     """A cream polaroid: photo on top, optional project-name caption below."""
     photo = w - 24
-    cap_h = 52 if caption else 26
+    cap_h = 26
+    cap = ""
+    if caption:
+        # wrap to at most 2 lines; pick font size that fits
+        maxc = max(10, int(w / 11))
+        lines = wrap(caption, maxc)[:2]
+        fsize = 21 if len(lines) == 1 else 18
+        line_h = fsize + 5
+        cap_h = 18 + len(lines) * line_h + 8
+        cap_y = y + photo + 18 + fsize
+        spans = "".join(
+            f'<tspan x="{x + w/2:.0f}" dy="{0 if i==0 else line_h}">{esc(l)}</tspan>'
+            for i, l in enumerate(lines))
+        cap = (f'<text x="{x + w/2:.0f}" y="{cap_y:.0f}" {SERIF} '
+               f'font-size="{fsize}" fill="{INK}" text-anchor="middle">{spans}</text>')
     total = photo + 24 + cap_h
     cx, cy = x + w / 2, y + total / 2
     cid = uid()
-    cap = ""
-    if caption:
-        maxc = max(10, int(w / 12))
-        txt = caption if len(caption) <= maxc else caption[: maxc - 1].rstrip() + "…"
-        cap = (f'<text x="{x + w/2:.0f}" y="{y + photo + 12 + 33:.0f}" {SERIF} '
-               f'font-size="23" fill="{INK}" text-anchor="middle">{esc(txt)}</text>')
     return f'''<g transform="rotate({rot} {cx:.0f} {cy:.0f})">
     <rect x="{x}" y="{y}" width="{w}" height="{total}" rx="12" fill="{PAPER}" filter="url(#psh)"/>
     <clipPath id="{cid}"><rect x="{x+12}" y="{y+12}" width="{photo}" height="{photo}" rx="7"/></clipPath>
