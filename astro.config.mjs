@@ -1,12 +1,17 @@
 // @ts-check
-import { defineConfig } from "astro/config";
+import { defineConfig, passthroughImageService } from "astro/config";
 import vue from "@astrojs/vue";
 import tailwind from "@astrojs/tailwind";
 import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({ imageService: "passthrough" }),
   site: "https://ooru.build",
+
+  // The site uses plain <img> (no astro:assets), so skip sharp entirely. This
+  // keeps sharp + its fs/child_process deps out of the Cloudflare Worker bundle
+  // (which otherwise fails to deploy: "Could not resolve fs/child_process").
+  image: { service: passthroughImageService() },
 
   integrations: [
     tailwind(),
