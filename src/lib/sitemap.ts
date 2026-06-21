@@ -15,6 +15,7 @@ import { campaigns } from "../data/campaigns";
 import { makers } from "../data/makers";
 import { requests } from "../data/requests";
 import { projects } from "../data/projects";
+import { makerUrl, campaignUrl, projectUrl } from "./urls";
 
 export type ChangeFreq = "daily" | "weekly" | "monthly" | "yearly";
 
@@ -48,21 +49,21 @@ export function getSitemapEntries(): SitemapEntry[] {
   return [
     ...STATIC_PAGES,
     ...campaigns.map((c): SitemapEntry => ({
-      path: `/campaigns/${c.slug}`,
+      path: campaignUrl(c.makerSlug, c.slug),
       label: c.title,
       section: "Campaigns",
       changefreq: "weekly",
       priority: 0.7,
     })),
     ...projects.map((p): SitemapEntry => ({
-      path: `/projects/${p.slug}`,
+      path: projectUrl(p.makerSlug, p.slug),
       label: p.title,
       section: "Projects",
       changefreq: "weekly",
       priority: 0.7,
     })),
     ...makers.map((m): SitemapEntry => ({
-      path: `/makers/${m.slug}`,
+      path: makerUrl(m.slug),
       label: m.name,
       section: "Makers",
       changefreq: "weekly",

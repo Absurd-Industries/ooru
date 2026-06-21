@@ -13,6 +13,7 @@
 
 import Tag from "./Tag.astro";
 import ProgressBar from "./ProgressBar.astro";
+import { campaignUrl, projectUrlBySlug } from "../lib/urls";
 import type { Campaign } from "../types";
 
 interface Props {
@@ -39,7 +40,7 @@ const isHot = campaign.percent >= 90 && campaign.status === "live";
 ---
 
 <a
-  href={`/campaigns/${campaign.slug}`}
+  href={campaignUrl(campaign.makerSlug, campaign.slug)}
   class="card card-hover block no-underline text-ink group"
 >
   <div class="card-bg"></div>
@@ -129,7 +130,7 @@ const isHot = campaign.percent >= 90 && campaign.status === "live";
       <!-- Project folio link -->
       {campaign.projectSlug && (
         <a
-          href={`/projects/${campaign.projectSlug}`}
+          href={projectUrlBySlug(campaign.projectSlug)}
           class="flex items-center gap-1.5 mt-3 pt-3 border-t border-ink/5 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
           onclick="event.stopPropagation()"
           style="text-decoration: none;"

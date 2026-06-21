@@ -4,11 +4,13 @@
  * shown on the right of the homepage hero (desktop only). Each links to
  * its campaign.
  */
+import { campaignUrl } from "../lib/urls";
 interface PolaroidCampaign {
   slug: string;
   title: string;
   image?: string;
   makerName: string;
+  makerSlug: string;
   icon: string;
   avatarColor: string;
 }
@@ -41,7 +43,7 @@ const cards = campaigns.slice(0, 3);
         .filter(Boolean)
         .join(";");
       return (
-        <a href={`/campaigns/${c.slug}`} class="polaroid" style={pos} title={c.title}>
+        <a href={campaignUrl(c.makerSlug, c.slug)} class="polaroid" style={pos} title={c.title}>
           <div class="polaroid-photo">
             {c.image ? (
               <img src={c.image} alt={c.title} loading="lazy" width="220" height="220" />

@@ -2,12 +2,12 @@ import type { Project } from "../types/index";
 
 export const projects: Project[] = [
   {
-    slug: "cory-dora",
+    slug: "corydora",
     title: "CoryDora",
     tagline:
       "A fully open-source 3x3 QMK macropad with hotswap switches and USB-C. Made in Bengaluru.",
-    makerSlug: "balu-b",
-    campaignSlug: "cory-dora-macropad",
+    makerSlug: "balub",
+    campaignSlug: "corydora",
     status: "shipping",
     license: "Open source hardware",
     category: "Electronics",

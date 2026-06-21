@@ -9,6 +9,7 @@ import { ref, computed } from "vue";
 import type { Maker } from "../types";
 import SearchFilter from "./SearchFilter.vue";
 import { t } from "../lib/i18n-client";
+import { makerUrl } from "../lib/urls";
 
 const props = defineProps<{
   makers: Maker[];
@@ -109,7 +110,7 @@ function getInitial(name: string): string {
       <a
         v-for="maker in filteredMakers"
         :key="maker.slug"
-        :href="`/makers/${maker.slug}`"
+        :href="makerUrl(maker.slug)"
         class="id-card no-underline block group"
         :style="{ '--card-bg': maker.avatarColor }"
       >
@@ -171,7 +172,7 @@ function getInitial(name: string): string {
       <a
         v-for="maker in filteredMakers"
         :key="maker.slug"
-        :href="`/makers/${maker.slug}`"
+        :href="makerUrl(maker.slug)"
         class="square-tile group no-underline"
       >
         <div class="square-tile-img-wrap">
@@ -201,7 +202,7 @@ function getInitial(name: string): string {
       <a
         v-for="maker in filteredMakers"
         :key="maker.slug"
-        :href="`/makers/${maker.slug}`"
+        :href="makerUrl(maker.slug)"
         class="table-row no-underline text-ink group"
       >
         <img

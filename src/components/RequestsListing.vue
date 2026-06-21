@@ -9,6 +9,7 @@
 import { ref, computed } from "vue";
 import type { Request } from "../types";
 import { t } from "../lib/i18n-client";
+import { makerUrl, campaignUrlBySlug } from "../lib/urls";
 
 const props = defineProps<{
   requests: Request[];
@@ -278,7 +279,7 @@ function makerDisplayName(makerSlug: string): string {
               <span>
                 Claimed by
                 <a
-                  :href="`/makers/${req.claimedBy}`"
+                  :href="makerUrl(req.claimedBy)"
                   class="underline"
                   style="color: #2a5f41"
                 >
@@ -287,7 +288,7 @@ function makerDisplayName(makerSlug: string): string {
               </span>
               <a
                 v-if="req.campaignSlug"
-                :href="`/campaigns/${req.campaignSlug}`"
+                :href="campaignUrlBySlug(req.campaignSlug)"
                 class="tag tag-funded ml-1 no-underline"
               >
                 View Campaign
@@ -310,7 +311,7 @@ function makerDisplayName(makerSlug: string): string {
               <span class="text-xs text-ink-faint">
                 by
                 <a
-                  :href="`/makers/${req.authorSlug}`"
+                  :href="makerUrl(req.authorSlug)"
                   class="font-semibold text-ink hover:text-stamp transition-colors no-underline"
                 >
                   {{ req.authorName }}

@@ -17,11 +17,21 @@ import CampaignDiscussion from "../../components/CampaignDiscussion.vue";
 import { makers } from "../../data/makers";
 import { projects as allProjects } from "../../data/projects";
 import { campaigns } from "../../data/campaigns";
+import {
+    makerUrl,
+    makerProjectsUrl,
+    makerCampaignsUrl,
+    campaignUrl,
+    projectUrl,
+    MAKERS_URL,
+    assertMakerSlugs,
+} from "../../lib/urls";
 import type { Maker } from "../../types";
 
 export function getStaticPaths() {
+    assertMakerSlugs(makers.map((m) => m.slug));
     return makers.map((maker) => ({
-        params: { slug: maker.slug },
+        params: { maker: maker.slug },
         props: { maker },
     }));
 }
@@ -175,7 +185,7 @@ const profileProjects: ProfileProject[] = hasRealWork
                         iconClass: featuredProject.icon,
                         status: "Project Folio",
                         percent: null,
-                        href: `/projects/${featuredProject.slug}`,
+                        href: projectUrl(maker.slug, featuredProject.slug),
                     },
                 ]
               : []),
@@ -192,7 +202,7 @@ const profileProjects: ProfileProject[] = hasRealWork
                                   ? "Funded"
                                   : "Coming Soon",
                         percent: featuredCampaign.percent,
-                        href: `/campaigns/${featuredCampaign.slug}`,
+                        href: campaignUrl(maker.slug, featuredCampaign.slug),
                     },
                 ]
               : []),
@@ -398,7 +408,7 @@ const makerLd = {
         `${maker.name} is a ${maker.title} from ${maker.location} on Ooru.`,
     address: maker.location,
     knowsAbout: maker.skills,
-    url: new URL(`/makers/${maker.slug}`, Astro.site).href,
+    url: new URL(makerUrl(maker.slug), Astro.site).href,
     ...(maker.links?.website ? { sameAs: [maker.links.website] } : {}),
 };
 ---
@@ -416,7 +426,7 @@ const makerLd = {
     <section class="pt-6 pb-0 sm:pt-8">
         <div class="max-w-5xl mx-auto px-5 sm:px-6">
             <div class="flex items-center justify-between">
-                <a href="/makers" class="back-btn">
+                <a href={MAKERS_URL} class="back-btn">
                     <i class="ph-bold ph-arrow-left"></i>
                     Makers
                 </a>
@@ -691,11 +701,18 @@ const makerLd = {
 
                         <!-- ── ALL PROJECTS ── -->
                         <div id="projects" class="profile-section">
-                            <h2
-                                class="font-serif font-bold text-xl sm:text-2xl tracking-tight mb-5"
-                            >
-                                Projects
-                            </h2>
+                            <div class="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                                <h2
+                                    class="font-serif font-bold text-xl sm:text-2xl tracking-tight"
+                                >
+                                    Projects
+                                </h2>
+                                <div class="flex items-center gap-3 text-sm font-semibold">
+                                    <a href={makerProjectsUrl(maker.slug)} class="text-stamp hover:underline" style="text-decoration:none;">All projects</a>
+                                    <span class="text-ink-faint">·</span>
+                                    <a href={makerCampaignsUrl(maker.slug)} class="text-stamp hover:underline" style="text-decoration:none;">Campaigns</a>
+                                </div>
+                            </div>
 
                             <div class="space-y-3">
                                 {

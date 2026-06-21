@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CampaignCard from "../../components/CampaignCard.astro";
+import { makers } from "../../data/makers";
+import { campaigns } from "../../data/campaigns";
+import { makerUrl, assertMakerSlugs } from "../../lib/urls";
+import type { Maker } from "../../types";
+
+export function getStaticPaths() {
+  assertMakerSlugs(makers.map((m) => m.slug));
+  return makers.map((maker) => ({ params: { maker: maker.slug }, props: { maker } }));
+}
+
+const { maker } = Astro.props as { maker: Maker };
+const mine = campaigns.filter((c) => c.makerSlug === maker.slug);
+---
+
+<BaseLayout
+  title={`${maker.name} - Campaigns`}
+  description={`Crowdfunding campaigns by ${maker.name} on Ooru.`}
+  ogImage="/og/campaigns.png"
+  activeTab="campaigns"
+>
+  <section class="pt-6 pb-6 sm:pt-8 sm:pb-8">
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
+      <a href={makerUrl(maker.slug)} class="inline-flex items-center gap-1.5 text-xs font-semibold text-stencil hover:text-stamp mb-4" style="text-decoration:none;">
+        <i class="ph-bold ph-arrow-left"></i> {maker.name}
+      </a>
+      <h1 class="font-serif font-bold text-3xl sm:text-4xl text-ink mb-2">
+        <i class="ph-duotone ph-rocket-launch text-ink mr-2" style="font-size:1.4rem;"></i>
+        Campaigns by {maker.name}
+      </h1>
+      <p class="text-ink text-base sm:text-lg max-w-xl leading-relaxed">
+        {mine.length} campaign{mine.length === 1 ? "" : "s"} from this maker.
+      </p>
+    </div>
+  </section>
+
+  <section class="pb-16 sm:pb-20">
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
+      {mine.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {mine.map((campaign) => <CampaignCard campaign={campaign} />)}
+        </div>
+      ) : (
+        <p class="text-stencil text-sm">No campaigns yet.</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>

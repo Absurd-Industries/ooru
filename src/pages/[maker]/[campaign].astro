@@ -19,6 +19,7 @@ import FilePreview from "../../components/FilePreview.vue";
 import CampaignDiscussion from "../../components/CampaignDiscussion.vue";
 import CampaignRewards from "../../components/CampaignRewards.vue";
 import { campaigns } from "../../data/campaigns";
+import { makerUrl, projectUrlBySlug, campaignUrl, CAMPAIGNS_URL } from "../../lib/urls";
 import type { Campaign } from "../../types";
 import { t } from "../../i18n";
 
@@ -29,7 +30,7 @@ const depositOf = (price: string) => Math.round(priceNum(price) * 0.25);
 
 export function getStaticPaths() {
   return campaigns.map((campaign) => ({
-    params: { slug: campaign.slug },
+    params: { maker: campaign.makerSlug, campaign: campaign.slug },
     props: { campaign },
   }));
 }
@@ -493,7 +494,7 @@ const campaignLd = {
   image: new URL(ogImagePath, Astro.site).href,
   category: campaign.category,
   brand: { "@type": "Brand", name: campaign.makerName },
-  url: new URL(`/campaigns/${campaign.slug}`, Astro.site).href,
+  url: new URL(campaignUrl(campaign.makerSlug, campaign.slug), Astro.site).href,
   license:
     "https://spdx.org/licenses/" + campaign.license.replace(/\s+/g, "") + ".html",
 };
@@ -531,7 +532,7 @@ const campaignLd = {
                     <i class:list={[campaign.icon, "text-7xl sm:text-8xl text-stencil opacity-40"]}></i>
                   </div>
                 )}
-                <a href="/campaigns" class="hero-overlay-btn hero-overlay-btn--back" title="Back to campaigns">
+                <a href={CAMPAIGNS_URL} class="hero-overlay-btn hero-overlay-btn--back" title="Back to campaigns">
                   <i class="ph-bold ph-arrow-left"></i>
                 </a>
                 <button class="hero-overlay-btn hero-overlay-btn--share share-float-btn" title="Copy link">
@@ -557,7 +558,7 @@ const campaignLd = {
 
               <div class="flex flex-wrap items-center gap-3 text-sm text-ink-faint">
                 <span>
-                  by <a href={`/makers/${campaign.makerSlug}`} class="font-semibold text-ink hover:text-stamp transition-colors" style="text-decoration:none;">{campaign.makerName}</a>
+                  by <a href={makerUrl(campaign.makerSlug)} class="font-semibold text-ink hover:text-stamp transition-colors" style="text-decoration:none;">{campaign.makerName}</a>
                 </span>
                 <span class="flex items-center gap-1">
                   <i class="ph-bold ph-map-pin text-xs"></i>
@@ -944,7 +945,7 @@ const campaignLd = {
 
         <!-- Project folio cross-link -->
         {campaign.projectSlug && (
-          <a href={`/projects/${campaign.projectSlug}`} class="folio-link-card mb-5" style="text-decoration:none;">
+          <a href={projectUrlBySlug(campaign.projectSlug)} class="folio-link-card mb-5" style="text-decoration:none;">
             <div class="folio-link-icon">
               <i class="ph-duotone ph-folder-open"></i>
             </div>
@@ -1002,7 +1003,7 @@ const campaignLd = {
             </p>
 
             <div class="grid grid-cols-2 gap-2">
-              <a href={`/makers/${campaign.makerSlug}`} class="btn btn-outline btn-sm w-full" style="text-decoration:none;" data-i18n="campaign.profile">{t("campaign.profile")}</a>
+              <a href={makerUrl(campaign.makerSlug)} class="btn btn-outline btn-sm w-full" style="text-decoration:none;" data-i18n="campaign.profile">{t("campaign.profile")}</a>
               <button onclick="window.__comingSoon && window.__comingSoon('Contact the maker', 'Direct messaging launches with the next platform update. For now, find the maker on Discord.')" class="btn btn-outline btn-sm w-full" data-i18n="nav.contact">{t("nav.contact")}</button>
             </div>
           </div>

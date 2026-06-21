@@ -8,6 +8,7 @@
 import { ref, computed } from "vue";
 import type { Campaign } from "../types";
 import { t } from "../lib/i18n-client";
+import { campaignUrl, projectUrl } from "../lib/urls";
 
 const props = defineProps<{
   campaigns: Campaign[];
@@ -150,7 +151,7 @@ function statusTagClass(status: string): string {
       <a
         v-for="(campaign, index) in filteredCampaigns"
         :key="campaign.slug"
-        :href="`/campaigns/${campaign.slug}`"
+        :href="campaignUrl(campaign.makerSlug, campaign.slug)"
         class="card card-hover block no-underline text-ink group"
         :style="{ animationDelay: index * 0.06 + 's' }"
       >
@@ -267,7 +268,7 @@ function statusTagClass(status: string): string {
             <!-- Project folio link -->
             <a
               v-if="campaign.projectSlug"
-              :href="`/projects/${campaign.projectSlug}`"
+              :href="projectUrl(campaign.makerSlug, campaign.projectSlug)"
               class="flex items-center gap-1.5 mt-3 pt-3 text-xs font-semibold text-stencil hover:text-stamp transition-colors"
               style="text-decoration: none; border-top: 1px solid rgba(26,26,26,0.05);"
               @click.stop

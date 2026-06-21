@@ -13,6 +13,7 @@ import Card from "../../components/Card.astro";
 import Tag from "../../components/Tag.astro";
 import { requests } from "../../data/requests";
 import { makers } from "../../data/makers";
+import { makerUrl, campaignUrlBySlug } from "../../lib/urls";
 import type { Request } from "../../types";
 
 export function getStaticPaths() {
@@ -350,7 +351,7 @@ const relatedRequests = requests
             <!-- Meta -->
             <p class="text-sm text-ink-faint mb-5">
               Submitted by <a
-                href={`/makers/${request.authorSlug}`}
+                href={makerUrl(request.authorSlug)}
                 class="text-ink font-semibold no-underline hover:text-stamp transition-colors"
               >
                 {authorDisplayName}
@@ -639,7 +640,7 @@ const relatedRequests = requests
                 <p class="text-sm text-ink-light mb-3">
                   Claimed by{" "}
                   <a
-                    href={`/makers/${request.claimedBy}`}
+                    href={makerUrl(request.claimedBy)}
                     class="font-semibold text-ink no-underline hover:text-stamp transition-colors"
                   >
                     {claimedByName}
@@ -647,7 +648,7 @@ const relatedRequests = requests
                 </p>
                 {request.campaignSlug && (
                   <a
-                    href={`/campaigns/${request.campaignSlug}`}
+                    href={campaignUrlBySlug(request.campaignSlug)}
                     class="btn btn-sm w-full justify-center no-underline"
                     style="background: #2A5F41; color: #FAF3E8;"
                   >

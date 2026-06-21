@@ -23,13 +23,13 @@ export const campaigns: Campaign[] = [
     image: "/images/campaigns/lampy.jpg",
   },
   {
-    slug: "cory-dora-macropad",
+    slug: "corydora",
     title: "CoryDora - Open Source Macropad",
     tagline:
       "A fully open-source 3×3 QMK macropad with hotswap switches and USB-C. Made in Bengaluru.",
     icon: "ph-bold ph-keyboard",
     makerName: "Balu B",
-    makerSlug: "balu-b",
+    makerSlug: "balub",
     location: "Bengaluru, India",
     avatarColor: "#1B6B5E",
     category: "Electronics",
@@ -40,7 +40,7 @@ export const campaigns: Campaign[] = [
     raisedFormatted: "₹4,94,900",
     backers: 100,
     license: "GPL-3.0",
-    projectSlug: "cory-dora",
+    projectSlug: "corydora",
     image: "/images/campaigns/cory-dora.jpg",
   },
   {

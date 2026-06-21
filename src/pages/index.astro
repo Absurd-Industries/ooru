@@ -18,12 +18,13 @@ import { makers } from "../data/makers";
 import { events } from "../data/events";
 import { campaigns } from "../data/campaigns";
 import { requests } from "../data/requests";
+import { makerUrl } from "../lib/urls";
 
 // Curated homepage showcase - drives both the hero polaroids and the
 // campaign grid cards (the "both card types").
 const showcaseSlugs = [
   "supersaber-open-lightsaber-kit",
-  "cory-dora-macropad",
+  "corydora",
   "lampy-open-source-desk-lamp",
 ];
 const featuredCampaigns = showcaseSlugs
@@ -155,7 +156,7 @@ const upcomingEvents = [...events]
         </p>
         <div class="maker-list">
           {featuredMakers.map((maker) => (
-            <a href={`/makers/${maker.slug}`} class="maker-list-row group no-underline">
+            <a href={makerUrl(maker.slug)} class="maker-list-row group no-underline">
               {maker.avatar ? (
                 <img src={maker.avatar} alt={maker.name} class="maker-list-avatar" loading="lazy" />
               ) : (

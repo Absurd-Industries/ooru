@@ -1,17 +1,21 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Card from "../../components/Card.astro";
-import Tag from "../../components/Tag.astro";
-import GalleryViewer from "../../components/GalleryViewer.vue";
-import BomTable from "../../components/BomTable.vue";
-import FilePreview from "../../components/FilePreview.vue";
-import { projects } from "../../data/projects";
-import { makers } from "../../data/makers";
-import { campaigns } from "../../data/campaigns";
-import type { Project } from "../../types";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Card from "../../../components/Card.astro";
+import Tag from "../../../components/Tag.astro";
+import GalleryViewer from "../../../components/GalleryViewer.vue";
+import BomTable from "../../../components/BomTable.vue";
+import FilePreview from "../../../components/FilePreview.vue";
+import { projects } from "../../../data/projects";
+import { makers } from "../../../data/makers";
+import { campaigns } from "../../../data/campaigns";
+import { makerUrl, campaignUrl, PROJECTS_URL } from "../../../lib/urls";
+import type { Project } from "../../../types";
 
 export function getStaticPaths() {
-  return projects.map((p) => ({ params: { slug: p.slug }, props: { project: p } }));
+  return projects.map((p) => ({
+    params: { maker: p.makerSlug, project: p.slug },
+    props: { project: p },
+  }));
 }
 
 interface Props { project: Project; }
@@ -60,7 +64,7 @@ const projectLd = {
   name: p.title,
   description: p.tagline,
   category: p.category,
-  url: new URL(`/projects/${p.slug}`, Astro.site).href,
+  url: new URL(`/${p.makerSlug}/project/${p.slug}`, Astro.site).href,
   ...(p.shopUrl ? { offers: { "@type": "Offer", url: p.shopUrl } } : {}),
 };
 ---
@@ -81,7 +85,7 @@ const projectLd = {
     ) : p.heroImages[0] ? (
       <img src={p.heroImages[0]} alt={p.title} class="w-full h-full object-cover" />
     ) : null}
-    <a href="/projects" class="hero-overlay-btn hero-overlay-btn--back" title="Back to projects">
+    <a href={PROJECTS_URL} class="hero-overlay-btn hero-overlay-btn--back" title="Back to projects">
       <i class="ph-bold ph-arrow-left"></i>
     </a>
     <button class="hero-overlay-btn hero-overlay-btn--share share-btn" title="Copy link">
@@ -391,7 +395,7 @@ const projectLd = {
               </a>
             )}
             {campaign && (
-              <a href={`/campaigns/${campaign.slug}`} class="btn btn-outline w-full btn-sm mt-2" style="text-decoration:none;">
+              <a href={campaignUrl(campaign.makerSlug, campaign.slug)} class="btn btn-outline w-full btn-sm mt-2" style="text-decoration:none;">
                 <i class="ph-bold ph-rocket-launch mr-2"></i>Campaign page
               </a>
             )}
@@ -442,7 +446,7 @@ const projectLd = {
               )}
 
               <div class="grid grid-cols-2 gap-2">
-                <a href={`/makers/${maker.slug}`} class="btn btn-outline btn-sm w-full" style="text-decoration:none;">Profile</a>
+                <a href={makerUrl(maker.slug)} class="btn btn-outline btn-sm w-full" style="text-decoration:none;">Profile</a>
                 {maker.links?.github ? (
                   <a href={maker.links.github} target="_blank" rel="noopener" class="btn btn-outline btn-sm w-full" style="text-decoration:none;">
                     <i class="fab fa-github mr-1"></i>GitHub

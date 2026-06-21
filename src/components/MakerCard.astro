@@ -10,6 +10,7 @@
 
 import type { Maker } from "../types";
 import Tag from "./Tag.astro";
+import { makerUrl } from "../lib/urls";
 
 interface Props {
   maker: Maker;
@@ -58,7 +59,7 @@ const initial = maker.name.charAt(0).toUpperCase();
 ---
 
 <a
-  href={`/makers/${maker.slug}`}
+  href={makerUrl(maker.slug)}
   class="card card-hover id-card no-underline text-ink block group"
 >
   <div class="card-bg"></div>
