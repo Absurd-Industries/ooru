@@ -61,14 +61,17 @@ const total = getSitemapEntries().length;
       gap: 0.15rem;
     }
     .sitemap-link {
+      /* Mobile: stack label over path so a long path wraps instead of
+         overflowing - while keeping the padded "button" look + hover. */
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 1rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.1rem;
       padding: 0.5rem 0.75rem;
       border-radius: 0.5rem;
       text-decoration: none;
       color: #1a1a1a;
+      max-width: 100%;
       transition:
         background 0.15s,
         color 0.15s;
@@ -81,16 +84,37 @@ const total = getSitemapEntries().length;
       font-size: 0.9rem;
       font-weight: 600;
       min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      max-width: 100%;
+      overflow-wrap: anywhere;
     }
     .sitemap-path {
       font-size: 0.72rem;
       color: #6b5b4a;
       font-family: ui-monospace, "SF Mono", Menlo, monospace;
-      white-space: nowrap;
-      flex-shrink: 0;
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: anywhere; /* break long URLs rather than overflow */
+    }
+
+    /* Desktop: back to a single row - label left (ellipsis), path right. */
+    @media (min-width: 640px) {
+      .sitemap-link {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .sitemap-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow-wrap: normal;
+      }
+      .sitemap-path {
+        white-space: nowrap;
+        flex-shrink: 0;
+        overflow-wrap: normal;
+      }
     }
   </style>
 </BaseLayout>
