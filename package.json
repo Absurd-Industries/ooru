@@ -2,7 +2,7 @@
   "name": "absurd-industries",
   "type": "module",
   "version": "0.1.0",
-  "description": "Open source STEAM community platform — campaigns, makers, requests, events, and more.",
+  "description": "Open source STEAM community platform - campaigns, makers, requests, events, and more.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
