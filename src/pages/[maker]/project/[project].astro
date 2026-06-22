@@ -6,6 +6,7 @@ import GalleryViewer from "../../../components/GalleryViewer.vue";
 import BomTable from "../../../components/BomTable.vue";
 import FilePreview from "../../../components/FilePreview.vue";
 import ModelExperience from "../../../components/ModelExperience.vue";
+import CampaignDiscussion from "../../../components/CampaignDiscussion.vue";
 import { projects } from "../../../data/projects";
 import { makers } from "../../../data/makers";
 import { campaigns } from "../../../data/campaigns";
@@ -69,13 +70,14 @@ const statusVariant = p.status === "shipping" ? "funded" : "default";
 
 const sectionNav = [
     p.specs?.length ? { id: "specs", label: "Specs" } : null,
-    p.modelUrl ? { id: "model", label: "3D Model" } : null,
-    p.pcbViewerUrl ? { id: "pcb", label: "PCB" } : null,
-    p.bom?.length ? { id: "bom", label: "BOM" } : null,
+    p.modelUrl ? { id: "model", label: "3D View" } : null,
+    p.pcbViewerUrl ? { id: "pcb", label: "Schematic" } : null,
+    p.bom?.length ? { id: "bom", label: "Materials" } : null,
     p.files?.length ? { id: "files", label: "Files" } : null,
     p.buildGuide ? { id: "build", label: "Build Guide" } : null,
     p.onboarding ? { id: "onboarding", label: "Onboarding" } : null,
     p.faqs?.length ? { id: "faq", label: "FAQ" } : null,
+    { id: "discussion", label: "Discussion" },
 ].filter(Boolean) as { id: string; label: string }[];
 
 const projectLd = {
@@ -95,7 +97,7 @@ const projectLd = {
     ogImage={`/og/campaigns/${p.campaignSlug ?? p.slug}.jpg`}
     ogType="article"
     jsonLd={projectLd}
-    activeTab="campaigns"
+    activeTab="projects"
     hideNav
 >
     <!-- ── Hero ────────────────────────────────────────────────────────── -->
@@ -284,7 +286,7 @@ const projectLd = {
                             <div class="folio-section" id="sec-model">
                                 <h2 class="folio-h2">
                                     <i class="ph-duotone ph-cube" />
-                                    3D Model
+                                    3D View
                                 </h2>
                                 <ModelExperience
                                     src={p.modelUrl}
@@ -302,7 +304,7 @@ const projectLd = {
                             <div class="folio-section" id="sec-pcb">
                                 <h2 class="folio-h2">
                                     <i class="ph-duotone ph-circuit-board" />
-                                    PCB Design
+                                    Schematic
                                 </h2>
                                 <div
                                     class="viewer-frame"
@@ -338,9 +340,9 @@ const projectLd = {
                                 <div class="flex items-center justify-between mb-4">
                                     <h2 class="folio-h2 mb-0">
                                         <i class="ph-duotone ph-list-checks" />
-                                        Bill of Materials
+                                        Materials
                                     </h2>
-                                    <Tag>{p.bom.length} parts</Tag>
+                                    <Tag>{p.bom.length} items</Tag>
                                 </div>
                                 <BomTable items={p.bom} client:visible />
                             </div>
@@ -353,7 +355,7 @@ const projectLd = {
                             <div class="folio-section" id="sec-files">
                                 <h2 class="folio-h2">
                                     <i class="ph-duotone ph-folder-open" />
-                                    Source Files
+                                    Files
                                 </h2>
                                 <p class="text-xs text-stencil mb-4">
                                     Click any file to preview it - read the
@@ -522,6 +524,17 @@ const projectLd = {
                             </div>
                         )
                     }
+
+                    <!-- ── Discussion ──────────────────────────────────────── -->
+                    <div class="folio-section" id="sec-discussion">
+                        <CampaignDiscussion
+                            subjectType="project"
+                            subjectId={p.slug}
+                            makerName={maker?.name ?? "the maker"}
+                            title="Discussion"
+                            client:visible
+                        />
+                    </div>
                 </Card>
             </div>
 

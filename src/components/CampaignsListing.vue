@@ -5,7 +5,7 @@
  * the Astro page and manages client-side filtering.
  */
 
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type { Campaign } from "../types";
 import { t } from "../lib/i18n-client";
 import { campaignUrl, projectUrl } from "../lib/urls";
@@ -18,6 +18,20 @@ const props = defineProps<{
 const searchText = ref("");
 const activeCategory = ref("All");
 const activeStatus = ref("All");
+// Maker filter, driven by the ?maker= query param (e.g. /campaigns?maker=balub)
+const makerFilter = ref("");
+const makerName = computed(() => {
+  if (!makerFilter.value) return "";
+  return props.campaigns.find((c) => c.makerSlug === makerFilter.value)?.makerName || makerFilter.value;
+});
+onMounted(() => {
+  const m = new URLSearchParams(window.location.search).get("maker");
+  if (m) makerFilter.value = m;
+});
+function clearMaker() {
+  makerFilter.value = "";
+  history.replaceState(null, "", "/campaigns");
+}
 
 // --- Constants ---
 const categories = [
@@ -41,6 +55,11 @@ const statuses = [
 // --- Computed ---
 const filteredCampaigns = computed(() => {
   let items = [...props.campaigns];
+
+  // Maker filter (from ?maker=)
+  if (makerFilter.value) {
+    items = items.filter((c) => c.makerSlug === makerFilter.value);
+  }
 
   // Category filter
   if (activeCategory.value !== "All") {
@@ -83,6 +102,15 @@ function statusTagClass(status: string): string {
 
 <template>
   <div>
+    <!-- Active maker filter (from ?maker=) -->
+    <div v-if="makerFilter" class="maker-chip-row">
+      <span class="maker-chip">
+        <i class="ph-bold ph-user"></i>
+        Campaigns by {{ makerName }}
+        <button class="maker-chip-x" @click="clearMaker" aria-label="Show all campaigns"><i class="ph-bold ph-x"></i></button>
+      </span>
+    </div>
+
     <!-- Search bar (hides on scroll down) -->
     <div class="search-wrap">
       <div class="relative max-w-md">
@@ -161,7 +189,7 @@ function statusTagClass(status: string): string {
                card-content so the folio link (z-3) can sit above it. -->
           <a
             :href="campaignUrl(campaign.makerSlug, campaign.slug)"
-            class="absolute inset-0 no-underline"
+            class="absolute inset-0 z-[2] no-underline"
             :aria-label="campaign.title"
           ></a>
           <!-- Image / icon area -->
@@ -294,6 +322,37 @@ function statusTagClass(status: string): string {
 .search-wrap {
   padding: 0.75rem 0;
 }
+
+/* Maker filter chip (from ?maker=) */
+.maker-chip-row { margin-bottom: 0.5rem; }
+.maker-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.4rem 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(26, 26, 26, 0.06);
+  border: 1.5px solid rgba(26, 26, 26, 0.12);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.maker-chip > i { color: #6b5b4a; font-size: 0.8rem; }
+.maker-chip-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(26, 26, 26, 0.1);
+  color: #4a3d2f;
+  cursor: pointer;
+  font-size: 0.6rem;
+  transition: background 0.15s, color 0.15s;
+}
+.maker-chip-x:hover { background: #d94800; color: #faf3e8; }
 
 /* Filter pills - matches requests page style */
 .filter-pill {

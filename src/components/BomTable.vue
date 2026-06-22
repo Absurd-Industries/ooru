@@ -74,12 +74,12 @@ function caret(key: SortKey) {
                 <input
                     v-model="query"
                     type="text"
-                    placeholder="Filter parts..."
+                    placeholder="Filter items..."
                 />
             </div>
             <div class="bom-total">
-                <strong>{{ items.length }}</strong> lines ·
-                <strong>{{ totalParts }}</strong> parts
+                <strong>{{ items.length }}</strong> items ·
+                <strong>{{ totalParts }}</strong> total
             </div>
         </div>
 
@@ -88,7 +88,7 @@ function caret(key: SortKey) {
                 <thead>
                     <tr>
                         <th class="bom-th" @click="setSort('part')">
-                            <span>Part</span><i :class="caret('part')"></i>
+                            <span>Item</span><i :class="caret('part')"></i>
                         </th>
                         <th class="bom-th bom-th--qty" @click="setSort('qty')">
                             <span>Qty</span><i :class="caret('qty')"></i>

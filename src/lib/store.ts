@@ -24,7 +24,7 @@ export interface Profile {
   created_at: number;
 }
 
-export type SubjectType = "campaign" | "request" | "maker" | "update";
+export type SubjectType = "campaign" | "request" | "maker" | "update" | "project";
 export type TargetType = "comment" | "campaign" | "request" | "update" | "maker";
 export type ReactionKind = "heart" | "upvote";
 

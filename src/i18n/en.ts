@@ -199,8 +199,8 @@ export const en: Record<string, string> = {
   // ── Campaign detail page (static section labels) ───────────────────
   "campaign.about": "About This Project",
   "campaign.files": "Open Source Files",
-  "campaign.bom": "Bill of Materials",
-  "campaign.bomComponent": "Component",
+  "campaign.bom": "Materials",
+  "campaign.bomComponent": "Item",
   "campaign.bomSource": "Source",
   "campaign.bomTotal": "Total",
   "campaign.mfgStatus": "Manufacturing Status",

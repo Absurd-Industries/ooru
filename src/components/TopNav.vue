@@ -160,12 +160,13 @@ function isActive(href: string): boolean {
         color 0.15s,
         background 0.15s;
 }
+/* hover = subtle orange text; active (current page) = filled pill */
 .topnav-link:hover {
     color: #ff5900;
-    background: rgba(250, 243, 232, 0.6);
 }
 .topnav-link.active {
     color: #ff5900;
+    background: rgba(250, 243, 232, 0.7);
 }
 
 .topnav-discord {

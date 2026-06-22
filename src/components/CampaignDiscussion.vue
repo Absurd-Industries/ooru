@@ -37,7 +37,7 @@ interface SeedComment extends SeedPerson {
 const props = withDefaults(
   defineProps<{
     subjectId: string;
-    subjectType?: "campaign" | "maker" | "request" | "update";
+    subjectType?: "campaign" | "maker" | "request" | "update" | "project";
     title?: string;
     seed?: SeedComment[];
     makerName?: string;
@@ -275,21 +275,22 @@ function toggleHeart(key: string) {
 
 <style scoped>
 .dsc-avatar {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #faf3e8;
+  /* octagon to match the maker/creator avatars across the site */
   clip-path: url(#rounded-octagon);
 }
 .dsc-avatar--sm {
-  width: 1.75rem;
-  height: 1.75rem;
-  font-size: 0.62rem;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.64rem;
 }
 .dsc-entry {
   padding: 1rem 0;

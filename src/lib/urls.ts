@@ -23,8 +23,9 @@ import { projects } from "../data/projects";
 
 // ── Builders ──────────────────────────────────────────────────────────
 export const makerUrl = (makerSlug: string): string => `/${makerSlug}`;
-export const makerProjectsUrl = (makerSlug: string): string => `/${makerSlug}/projects`;
-export const makerCampaignsUrl = (makerSlug: string): string => `/${makerSlug}/campaigns`;
+// A maker's projects/campaigns are the global listings filtered by ?maker=
+export const makerProjectsUrl = (makerSlug: string): string => `/projects?maker=${makerSlug}`;
+export const makerCampaignsUrl = (makerSlug: string): string => `/campaigns?maker=${makerSlug}`;
 export const campaignUrl = (makerSlug: string, campaignSlug: string): string =>
   `/${makerSlug}/${campaignSlug}`;
 export const projectUrl = (makerSlug: string, projectSlug: string): string =>

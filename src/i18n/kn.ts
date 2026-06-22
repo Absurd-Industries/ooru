@@ -193,8 +193,8 @@ export const kn: Record<string, string> = {
   // ── Campaign detail page (static section labels) ───────────────────
   "campaign.about": "ಈ ಯೋಜನೆಯ ಬಗ್ಗೆ",
   "campaign.files": "ಮುಕ್ತ-ಮೂಲ ಫೈಲ್‌ಗಳು",
-  "campaign.bom": "ಸಾಮಗ್ರಿಗಳ ಪಟ್ಟಿ",
-  "campaign.bomComponent": "ಘಟಕ",
+  "campaign.bom": "ಸಾಮಗ್ರಿಗಳು",
+  "campaign.bomComponent": "ವಸ್ತು",
   "campaign.bomSource": "ಮೂಲ",
   "campaign.bomTotal": "ಒಟ್ಟು",
   "campaign.mfgStatus": "ತಯಾರಿಕೆ ಸ್ಥಿತಿ",

@@ -21,7 +21,7 @@ import { makers } from "../../data/makers";
 >
   <!-- Header -->
   <section class="pt-6 pb-8 sm:pt-8 sm:pb-10">
-    <div class="max-w-5xl mx-auto px-5 sm:px-6">
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
       <div class="max-w-2xl">
         <h1 class="font-serif font-bold text-3xl sm:text-4xl tracking-tight mb-2">
           <i class="ph-duotone ph-users-three text-ink mr-2" style="font-size:1.4rem;"></i><span data-i18n="section.makers">{t("section.makers")}</span>
@@ -35,7 +35,7 @@ import { makers } from "../../data/makers";
 
   <!-- Listing - Vue island handles search/filter + renders ID cards -->
   <section class="pb-12 sm:pb-16">
-    <div class="max-w-5xl mx-auto px-5 sm:px-6">
+    <div class="max-w-6xl mx-auto px-5 sm:px-6">
       <MakersListing makers={makers} client:load />
 
       <!-- Static fallback grid (visible only without JS) -->
@@ -53,15 +53,18 @@ import { makers } from "../../data/makers";
   <section class="pb-14 sm:pb-20">
     <div class="max-w-4xl mx-auto px-5 sm:px-6">
       <Card variant="dark">
-        <div class="px-6 py-10 sm:px-10 sm:py-12 text-center text-paper">
-          <i class="ph-bold ph-soldering-iron text-4xl text-stamp mb-4 block"></i>
-          <h2 class="font-serif font-bold text-2xl sm:text-3xl tracking-tight mb-3" data-i18n="page.makers.becomeTitle">{t("page.makers.becomeTitle")}</h2>
-          <p class="text-sm sm:text-base text-kraft max-w-md mx-auto mb-6 leading-relaxed" data-i18n="page.makers.becomeDesc">
-            {t("page.makers.becomeDesc")}
-          </p>
-          <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="btn btn-stamp">
-            <span data-i18n="page.makers.becomeCta">{t("page.makers.becomeCta")}</span>
-          </a>
+        <div class="px-6 py-10 sm:px-10 sm:py-12 text-center text-paper relative overflow-hidden">
+          <img src="/images/graphics/tools-circle.png" class="tools-emblem cta-emblem" alt="" aria-hidden="true" />
+          <div class="relative z-10">
+            <i class="ph-bold ph-soldering-iron text-4xl text-stamp mb-4 block"></i>
+            <h2 class="font-serif font-bold text-2xl sm:text-3xl tracking-tight mb-3" data-i18n="page.makers.becomeTitle">{t("page.makers.becomeTitle")}</h2>
+            <p class="text-sm sm:text-base text-kraft max-w-md mx-auto mb-6 leading-relaxed" data-i18n="page.makers.becomeDesc">
+              {t("page.makers.becomeDesc")}
+            </p>
+            <a href="https://discord.gg/DUSUtguG2H" target="_blank" rel="noopener" class="btn btn-stamp">
+              <span data-i18n="page.makers.becomeCta">{t("page.makers.becomeCta")}</span>
+            </a>
+          </div>
         </div>
       </Card>
     </div>

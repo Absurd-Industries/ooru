@@ -3,32 +3,46 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Card from "../../components/Card.astro";
 import Tag from "../../components/Tag.astro";
 import { projects } from "../../data/projects";
+import { makers } from "../../data/makers";
 import { projectUrl } from "../../lib/urls";
+
+// slug -> display name, for the maker label + the ?maker= filter chip
+const makerNames = Object.fromEntries(makers.map((m) => [m.slug, m.name]));
+const nameFor = (slug: string) => makerNames[slug] ?? slug;
 ---
 
 <BaseLayout
   title="Projects"
-  description="Deep-dive into open hardware builds - schematics, 3D models, step-by-step build guides, and everything you need to make your own."
+  description="Deep-dive into open hardware builds - schematics, 3D views, step-by-step build guides, and everything you need to make your own."
   ogImage="/og/campaigns.png"
-  activeTab="campaigns"
+  activeTab="projects"
 >
   <section class="pt-6 pb-6 sm:pt-8 sm:pb-8">
     <div class="max-w-6xl mx-auto px-5 sm:px-6">
       <h1 class="font-serif font-bold text-3xl sm:text-4xl text-ink mb-2">
         <i class="ph-duotone ph-folder-open text-ink mr-2" style="font-size:1.4rem;"></i>
-        Project Folios
+        Projects
       </h1>
       <p class="text-ink text-base sm:text-lg max-w-xl leading-relaxed">
-        Every schematic, 3D model, build guide, and part number. Open hardware documented the way it should be.
+        Every schematic, 3D view, build guide, and part number. Open hardware documented the way it should be.
       </p>
+
+      <!-- Maker filter chip (shown via ?maker=) -->
+      <div id="proj-maker-chip" class="maker-chip-row mt-3 hidden">
+        <span class="maker-chip">
+          <i class="ph-bold ph-user"></i>
+          Projects by <strong id="proj-maker-name"></strong>
+          <a href="/projects" class="maker-chip-x" aria-label="Show all projects"><i class="ph-bold ph-x"></i></a>
+        </span>
+      </div>
     </div>
   </section>
 
   <section class="pb-16 sm:pb-20">
     <div class="max-w-6xl mx-auto px-5 sm:px-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div id="proj-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((p) => (
-          <a href={projectUrl(p.makerSlug, p.slug)} class="block group" style="text-decoration: none;">
+          <a href={projectUrl(p.makerSlug, p.slug)} class="proj-card block group" data-maker={p.makerSlug} style="text-decoration: none;">
             <Card class="h-full transition-transform duration-200 group-hover:-translate-y-1">
               {p.heroImages[0] && (
                 <div class="aspect-video overflow-hidden" style="border-radius: 0.875rem 0.875rem 0 0;">
@@ -52,7 +66,7 @@ import { projectUrl } from "../../lib/urls";
                 <p class="text-sm text-stencil leading-relaxed line-clamp-2">{p.tagline}</p>
                 <div class="flex items-center gap-3 mt-3 pt-3 border-t border-ink/5">
                   <div class="flex items-center gap-1.5 text-xs text-stencil font-medium">
-                    {p.makerSlug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                    {nameFor(p.makerSlug)}
                   </div>
                   {p.shopUrl && (
                     <span class="ml-auto text-xs font-bold text-funded">
@@ -65,6 +79,44 @@ import { projectUrl } from "../../lib/urls";
           </a>
         ))}
       </div>
+      <p id="proj-empty" class="text-stencil text-sm hidden">No projects from this maker yet.</p>
     </div>
   </section>
+
+  <style>
+    .maker-chip-row { margin-bottom: 0.25rem; }
+    .maker-chip {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.4rem 0.3rem 0.7rem; border-radius: 999px;
+      background: rgba(26, 26, 26, 0.06); border: 1.5px solid rgba(26, 26, 26, 0.12);
+      font-size: 0.8rem; font-weight: 600; color: #1a1a1a;
+    }
+    .maker-chip > i { color: #6b5b4a; font-size: 0.8rem; }
+    .maker-chip-x {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 999px; border: none;
+      background: rgba(26, 26, 26, 0.1); color: #4a3d2f; cursor: pointer;
+      font-size: 0.6rem; text-decoration: none; transition: background 0.15s, color 0.15s;
+    }
+    .maker-chip-x:hover { background: #d94800; color: #faf3e8; }
+  </style>
+
+  <script define:vars={{ makerNames }}>
+    (function () {
+      const maker = new URLSearchParams(location.search).get("maker");
+      if (!maker) return;
+      const chip = document.getElementById("proj-maker-chip");
+      const nameEl = document.getElementById("proj-maker-name");
+      const empty = document.getElementById("proj-empty");
+      if (nameEl) nameEl.textContent = makerNames[maker] || maker;
+      if (chip) chip.classList.remove("hidden");
+      let shown = 0;
+      document.querySelectorAll(".proj-card").forEach((card) => {
+        const match = card.getAttribute("data-maker") === maker;
+        card.style.display = match ? "" : "none";
+        if (match) shown++;
+      });
+      if (empty && shown === 0) empty.classList.remove("hidden");
+    })();
+  </script>
 </BaseLayout>

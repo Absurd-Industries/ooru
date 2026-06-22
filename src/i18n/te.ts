@@ -193,8 +193,8 @@ export const te: Record<string, string> = {
   // ── Campaign detail page (static section labels) ───────────────────
   "campaign.about": "ఈ ప్రాజెక్ట్ గురించి",
   "campaign.files": "ఓపెన్-సోర్స్ ఫైళ్లు",
-  "campaign.bom": "పదార్థాల జాబితా",
-  "campaign.bomComponent": "భాగం",
+  "campaign.bom": "పదార్థాలు",
+  "campaign.bomComponent": "వస్తువు",
   "campaign.bomSource": "మూలం",
   "campaign.bomTotal": "మొత్తం",
   "campaign.mfgStatus": "తయారీ స్థితి",

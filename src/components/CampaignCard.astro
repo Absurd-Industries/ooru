@@ -47,7 +47,7 @@ const isHot = campaign.percent >= 90 && campaign.status === "live";
          card-content so the project-folio link (z-3) can sit above it. -->
     <a
       href={campaignUrl(campaign.makerSlug, campaign.slug)}
-      class="absolute inset-0 no-underline"
+      class="absolute inset-0 z-[2] no-underline"
       aria-label={campaign.title}
     ></a>
     <!-- Image / icon area -->

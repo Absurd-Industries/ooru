@@ -1,74 +1,11 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Card from "../../components/Card.astro";
-import Tag from "../../components/Tag.astro";
+// A maker's projects now live on the global /projects listing, filtered by
+// ?maker=. This route 301-redirects there so old links keep working.
 import { makers } from "../../data/makers";
-import { projects } from "../../data/projects";
-import { makerUrl, projectUrl, assertMakerSlugs } from "../../lib/urls";
-import type { Maker } from "../../types";
 
 export function getStaticPaths() {
-  assertMakerSlugs(makers.map((m) => m.slug));
-  return makers.map((maker) => ({ params: { maker: maker.slug }, props: { maker } }));
+  return makers.map((m) => ({ params: { maker: m.slug } }));
 }
 
-const { maker } = Astro.props as { maker: Maker };
-const mine = projects.filter((p) => p.makerSlug === maker.slug);
+return Astro.redirect(`/projects?maker=${Astro.params.maker}`, 301);
 ---
-
-<BaseLayout
-  title={`${maker.name} - Projects`}
-  description={`Open-hardware project folios by ${maker.name} on Ooru.`}
-  ogImage="/og/campaigns.png"
-  activeTab="campaigns"
->
-  <section class="pt-6 pb-6 sm:pt-8 sm:pb-8">
-    <div class="max-w-6xl mx-auto px-5 sm:px-6">
-      <a href={makerUrl(maker.slug)} class="inline-flex items-center gap-1.5 text-xs font-semibold text-stencil hover:text-stamp mb-4" style="text-decoration:none;">
-        <i class="ph-bold ph-arrow-left"></i> {maker.name}
-      </a>
-      <h1 class="font-serif font-bold text-3xl sm:text-4xl text-ink mb-2">
-        <i class="ph-duotone ph-folder-open text-ink mr-2" style="font-size:1.4rem;"></i>
-        Projects by {maker.name}
-      </h1>
-      <p class="text-ink text-base sm:text-lg max-w-xl leading-relaxed">
-        {mine.length} project folio{mine.length === 1 ? "" : "s"} from this maker.
-      </p>
-    </div>
-  </section>
-
-  <section class="pb-16 sm:pb-20">
-    <div class="max-w-6xl mx-auto px-5 sm:px-6">
-      {mine.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mine.map((p) => (
-            <a href={projectUrl(p.makerSlug, p.slug)} class="block group" style="text-decoration: none;">
-              <Card class="h-full transition-transform duration-200 group-hover:-translate-y-1">
-                {p.heroImages[0] && (
-                  <div class="aspect-video overflow-hidden" style="border-radius: 0.875rem 0.875rem 0 0;">
-                    <img src={p.heroImages[0]} alt={p.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                  </div>
-                )}
-                <div class="p-4">
-                  <div class="flex flex-wrap gap-1.5 mb-2">
-                    <Tag variant={p.status === "shipping" ? "funded" : "default"}>
-                      {p.status === "shipping" ? "Shipping" : p.status === "prototype" ? "Prototype" : "Concept"}
-                    </Tag>
-                    <Tag>{p.category}</Tag>
-                  </div>
-                  <h2 class="font-serif font-bold text-lg leading-tight mb-1 text-ink group-hover:text-stamp transition-colors">{p.title}</h2>
-                  <p class="text-sm text-stencil leading-relaxed line-clamp-2">{p.tagline}</p>
-                  {p.shopUrl && p.priceFormatted && (
-                    <div class="mt-3 pt-3 border-t border-ink/5 text-xs font-bold text-funded">{p.priceFormatted}</div>
-                  )}
-                </div>
-              </Card>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p class="text-stencil text-sm">No project folios yet.</p>
-      )}
-    </div>
-  </section>
-</BaseLayout>
