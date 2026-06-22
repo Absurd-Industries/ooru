@@ -160,7 +160,7 @@ onMounted(() => {
   S.value = { renderer, composer, bloom, scene, camera, controls,
     meshes: {}, edges: {}, baseColor: {},
     switchBaseY: 0, keycapBaseY: 0, insertActive: false, pressActive: false,
-    tween: null, raf: 0 };
+    tween: null, raf: 0, ready: false, lastAspect: w / h };
 
   // HDR env (fills the PBR reflections)
   new RGBELoader().load("/hdr/studio.hdr", (hdr) => {
@@ -206,14 +206,24 @@ onMounted(() => {
 
     S.value.dims = buildDims(size); scene.add(S.value.dims);
     applyStep(0, true);
+    S.value.ready = true;
     loading.value = false;
   }, undefined, () => { failed.value = true; loading.value = false; });
 
   const ro = new ResizeObserver(() => {
     if (!S.value) return;
     const ww = wrap.clientWidth, hh = wrap.clientHeight; if (!ww || !hh) return;
-    S.value.camera.aspect = ww / hh; S.value.camera.updateProjectionMatrix();
-    S.value.renderer.setSize(ww, hh); S.value.composer.setSize(ww, hh);
+    const st = S.value;
+    const aspect = ww / hh;
+    st.camera.aspect = aspect; st.camera.updateProjectionMatrix();
+    st.renderer.setSize(ww, hh); st.composer.setSize(ww, hh);
+    // Refit only on a big aspect change (orientation flip / first real size),
+    // not on minor mobile URL-bar height jitter, so we don't yank mid-orbit.
+    if (st.ready && Math.abs(aspect - (st.lastAspect ?? aspect)) / (st.lastAspect ?? aspect) > 0.25) {
+      if (mode.value === "tour") applyStep(tourIndex.value, true);
+      else selectPart(activePart.value);
+    }
+    st.lastAspect = aspect;
   });
   ro.observe(wrap); S.value._ro = ro;
 
@@ -327,14 +337,35 @@ function updateAnnos(v: THREE.Vector3) {
   annos.value = out;
 }
 
-// ── camera framing ──
-function frameCam(cam: { pos: number[]; target: number[] }) {
+// ── camera framing (aspect-aware so it fits on narrow / portrait screens) ──
+function radiusOf(parts?: string[]): number {
+  const st = S.value; const box = new THREE.Box3();
+  const list = parts && parts.length ? parts.map((n) => st.meshes[n]).filter(Boolean) : Object.values(st.meshes);
+  list.forEach((m: any) => box.expandByObject(m));
+  return Math.max(box.getSize(new THREE.Vector3()).length() / 2, 18);
+}
+// distance needed to fit a sphere of radius r given the current vertical AND
+// horizontal FOV - on a narrow viewport the horizontal FOV dominates, so we
+// pull back rather than cropping the model.
+function fitDistance(r: number): number {
+  const st = S.value;
+  const vfov = (st.camera.fov * Math.PI) / 180;
+  const hfov = 2 * Math.atan(Math.tan(vfov / 2) * st.camera.aspect);
+  return Math.max(r / Math.sin(vfov / 2), r / Math.sin(hfov / 2));
+}
+// keep the captured composition (angle + target) but never closer than what fits
+type Cam = { pos: [number, number, number]; target: [number, number, number] };
+function framedTo(cam: Cam, r: number) {
+  const target = new THREE.Vector3(...cam.target);
+  const dir = new THREE.Vector3(...cam.pos).sub(target);
+  const hard = dir.length(); dir.normalize();
+  const dist = Math.max(hard, fitDistance(r) * 1.12);
+  return { pos: target.clone().add(dir.multiplyScalar(dist)), target };
+}
+function frameCam(cam: Cam, r: number) {
   const st = S.value; if (!st) return;
-  st.tween = {
-    from: st.camera.position.clone(), to: new THREE.Vector3(...cam.pos),
-    tFrom: st.controls.target.clone(), tTo: new THREE.Vector3(...cam.target),
-    start: performance.now(), dur: 950,
-  };
+  const f = framedTo(cam, r);
+  st.tween = { from: st.camera.position.clone(), to: f.pos, tFrom: st.controls.target.clone(), tTo: f.target, start: performance.now(), dur: 950 };
 }
 function frameBox(meshNames: string[]) { // for the customiser: a 3/4 angle on a part
   const st = S.value; if (!st) return;
@@ -342,9 +373,8 @@ function frameBox(meshNames: string[]) { // for the customiser: a 3/4 angle on a
   meshNames.map((n) => st.meshes[n]).filter(Boolean).forEach((m: any) => box.expandByObject(m));
   const c = box.getCenter(new THREE.Vector3());
   const r = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 22);
-  const dist = (r / Math.sin((st.camera.fov * Math.PI) / 180 / 2)) * 1.25;
   const dir = new THREE.Vector3(0.55, 0.5, 1).normalize();
-  st.tween = { from: st.camera.position.clone(), to: c.clone().add(dir.multiplyScalar(dist)),
+  st.tween = { from: st.camera.position.clone(), to: c.clone().add(dir.multiplyScalar(fitDistance(r) * 1.2)),
     tFrom: st.controls.target.clone(), tTo: c.clone(), start: performance.now(), dur: 850 };
 }
 
@@ -357,8 +387,9 @@ function applyStep(i: number, instant = false) {
   if (st.dims) st.dims.visible = !!step.dims;
   st.insertActive = !!step.insert;
   st.pressActive = !!step.press;
-  if (instant) { st.camera.position.set(...step.cam.pos); st.controls.target.set(...step.cam.target); }
-  else frameCam(step.cam);
+  const r = radiusOf(step.show);
+  if (instant) { const f = framedTo(step.cam, r); st.camera.position.copy(f.pos); st.controls.target.copy(f.target); }
+  else frameCam(step.cam, r);
 }
 function nextStep() { applyStep(tourIndex.value + 1); }
 function prevStep() { applyStep(tourIndex.value - 1); }
@@ -490,11 +521,29 @@ onBeforeUnmount(() => {
 <style scoped>
 .mx-wrap { width: 100%; }
 .mx-stage { position: relative; width: 100%; height: 480px; border-radius: 0.75rem; overflow: hidden; background: #12141a; }
+@media (max-width: 640px) {
+  .mx-stage { height: 78vw; min-height: 320px; max-height: 460px; }
+  .mx-ui--tl, .mx-ui--tr { top: 8px; }
+  .mx-ui--tl { left: 8px; gap: 0.25rem; }
+  .mx-ui--tr { right: 8px; }
+  .mx-ui--bottom { left: 8px; right: 8px; bottom: 8px; gap: 0.5rem; }
+  .mx-mode { padding: 0.32rem 0.6rem; font-size: 0.72rem; }
+  .mx-step { max-width: none; padding: 0.55rem 0.7rem; }
+  .mx-step-title { font-size: 0.9rem; }
+  .mx-step-text { font-size: 0.72rem; }
+  .mx-nav-btn { width: 34px; height: 34px; }
+  /* keep part tabs on one scrollable row instead of wrapping over the model */
+  .mx-parts { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
+  .mx-parts::-webkit-scrollbar { display: none; }
+  .mx-part-tab { flex: 0 0 auto; }
+  .mx-debug { width: 160px; font-size: 0.66rem; }
+  .mx-scale { font-size: 0.58rem; top: 8px; padding: 0.18rem 0.5rem; }
+}
 .mx-vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2;
   background: radial-gradient(ellipse 75% 75% at 50% 42%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%); }
 .mx-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #cbb89a; pointer-events: none; z-index: 3; }
 .mx-anno { position: absolute; transform: translate(-50%, -150%); z-index: 3; background: rgba(10,10,12,0.9); color: #faf3e8; font-size: 0.68rem; font-weight: 700; padding: 0.18rem 0.5rem; border-radius: 999px; white-space: nowrap; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
-.mx-scale { position: absolute; bottom: 10px; right: 10px; z-index: 4; display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(10,10,12,0.55); color: #faf3e8; font-size: 0.66rem; font-weight: 700; padding: 0.22rem 0.6rem; border-radius: 999px; pointer-events: none; backdrop-filter: blur(6px); }
+.mx-scale { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 4; display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(10,10,12,0.55); color: #faf3e8; font-size: 0.66rem; font-weight: 700; padding: 0.22rem 0.6rem; border-radius: 999px; pointer-events: none; backdrop-filter: blur(6px); }
 
 .mx-ui { position: absolute; z-index: 4; }
 .mx-ui--tl { top: 10px; left: 10px; display: flex; gap: 0.35rem; }
