@@ -172,6 +172,7 @@ interface ProfileProject {
     image?: string;
     status: string;
     percent: number | null;
+    price?: string;
     href: string;
 }
 
@@ -185,6 +186,7 @@ const projectCards: ProfileProject[] = featuredProject
               image: featuredProject.heroImages?.[0],
               status: "Project",
               percent: null,
+              price: featuredProject.priceFormatted,
               href: projectUrl(maker.slug, featuredProject.slug),
           },
       ]
@@ -725,6 +727,9 @@ const makerLd = {
                                             <div class="proj-vcard-body">
                                                 <h3 class="proj-vcard-title group-hover:text-stamp transition-colors">{project.name}</h3>
                                                 <p class="proj-vcard-desc line-clamp-2">{project.description}</p>
+                                                {project.price && (
+                                                    <div class="mt-2 text-sm font-bold text-funded">{project.price}</div>
+                                                )}
                                             </div>
                                         </a>
                                     ))}

@@ -14,6 +14,7 @@
 import Tag from "./Tag.astro";
 import ProgressBar from "./ProgressBar.astro";
 import { campaignUrl, projectUrlBySlug } from "../lib/urls";
+import { makerAvatar } from "../lib/makers";
 import type { Campaign } from "../types";
 
 interface Props {
@@ -105,12 +106,22 @@ const isHot = campaign.percent >= 90 && campaign.status === "live";
 
       <!-- Maker info -->
       <div class="flex items-center gap-2 mb-4">
-        <div
-          class="w-6 h-6 flex items-center justify-center text-xs font-bold text-paper"
-          style={`background: ${campaign.avatarColor}; clip-path: url(#rounded-octagon);`}
-        >
-          {campaign.makerName.charAt(0)}
-        </div>
+        {makerAvatar(campaign.makerSlug) ? (
+          <img
+            src={makerAvatar(campaign.makerSlug)}
+            alt={campaign.makerName}
+            class="w-6 h-6 object-cover"
+            style="clip-path: url(#rounded-octagon);"
+            loading="lazy"
+          />
+        ) : (
+          <div
+            class="w-6 h-6 flex items-center justify-center text-xs font-bold text-paper"
+            style={`background: ${campaign.avatarColor}; clip-path: url(#rounded-octagon);`}
+          >
+            {campaign.makerName.charAt(0)}
+          </div>
+        )}
         <span class="text-sm font-medium text-ink">{campaign.makerName}</span>
         <span class="text-xs text-ink-faint">&middot; {campaign.location}</span>
       </div>

@@ -9,6 +9,7 @@ import { ref, computed, onMounted } from "vue";
 import type { Campaign } from "../types";
 import { t } from "../lib/i18n-client";
 import { campaignUrl, projectUrl } from "../lib/urls";
+import { makerAvatar } from "../lib/makers";
 
 const props = defineProps<{
   campaigns: Campaign[];
@@ -259,7 +260,16 @@ function statusTagClass(status: string): string {
 
             <!-- Maker info -->
             <div class="flex items-center gap-2 mb-4">
+              <img
+                v-if="makerAvatar(campaign.makerSlug)"
+                :src="makerAvatar(campaign.makerSlug)"
+                :alt="campaign.makerName"
+                class="w-6 h-6 object-cover"
+                style="clip-path: url(#rounded-octagon)"
+                loading="lazy"
+              />
               <div
+                v-else
                 class="w-6 h-6 flex items-center justify-center text-xs font-bold text-paper"
                 :style="{ background: campaign.avatarColor, clipPath: 'url(#rounded-octagon)' }"
               >

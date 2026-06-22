@@ -5,6 +5,7 @@ import Tag from "../../components/Tag.astro";
 import { projects } from "../../data/projects";
 import { makers } from "../../data/makers";
 import { projectUrl } from "../../lib/urls";
+import { makerAvatar } from "../../lib/makers";
 
 // slug -> display name, for the maker label + the ?maker= filter chip
 const makerNames = Object.fromEntries(makers.map((m) => [m.slug, m.name]));
@@ -64,12 +65,19 @@ const nameFor = (slug: string) => makerNames[slug] ?? slug;
                   {p.title}
                 </h2>
                 <p class="text-sm text-stencil leading-relaxed line-clamp-2">{p.tagline}</p>
-                <div class="flex items-center gap-3 mt-3 pt-3 border-t border-ink/5">
-                  <div class="flex items-center gap-1.5 text-xs text-stencil font-medium">
-                    {nameFor(p.makerSlug)}
-                  </div>
-                  {p.shopUrl && (
-                    <span class="ml-auto text-xs font-bold text-funded">
+                <div class="flex items-center gap-2 mt-3 pt-3 border-t border-ink/5">
+                  {makerAvatar(p.makerSlug) && (
+                    <img
+                      src={makerAvatar(p.makerSlug)}
+                      alt={nameFor(p.makerSlug)}
+                      class="w-5 h-5 object-cover flex-shrink-0"
+                      style="clip-path: url(#rounded-octagon);"
+                      loading="lazy"
+                    />
+                  )}
+                  <span class="text-xs text-stencil font-medium truncate">{nameFor(p.makerSlug)}</span>
+                  {p.priceFormatted && (
+                    <span class="ml-auto text-xs font-bold text-funded flex-shrink-0">
                       {p.priceFormatted}
                     </span>
                   )}

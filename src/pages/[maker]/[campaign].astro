@@ -25,6 +25,7 @@ import {
     campaignUrl,
     CAMPAIGNS_URL,
 } from "../../lib/urls";
+import { makerAvatar } from "../../lib/makers";
 import type { Campaign } from "../../types";
 import { t } from "../../i18n";
 
@@ -1444,17 +1445,24 @@ const campaignLd = {
                             {t("campaign.creator")}
                         </div>
                         <div class="flex items-center gap-3 mb-4">
-                            <div
-                                class="w-12 h-12 flex items-center justify-center text-sm font-bold text-paper flex-shrink-0 oct-sm"
-                                style={`background: ${campaign.avatarColor}`}
-                            >
-                                {
-                                    campaign.makerName
+                            {makerAvatar(campaign.makerSlug) ? (
+                                <img
+                                    src={makerAvatar(campaign.makerSlug)}
+                                    alt={campaign.makerName}
+                                    class="w-12 h-12 object-cover flex-shrink-0 oct-sm"
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <div
+                                    class="w-12 h-12 flex items-center justify-center text-sm font-bold text-paper flex-shrink-0 oct-sm"
+                                    style={`background: ${campaign.avatarColor}`}
+                                >
+                                    {campaign.makerName
                                         .split(" ")
                                         .map((w) => w[0])
-                                        .join("")
-                                }
-                            </div>
+                                        .join("")}
+                                </div>
+                            )}
                             <div class="min-w-0">
                                 <div
                                     class="font-semibold text-sm leading-tight"
