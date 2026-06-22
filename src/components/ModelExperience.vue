@@ -85,6 +85,7 @@ function colorFor(meshName: string): string | THREE.Color {
 }
 
 const mode = ref<"tour" | "customize">("tour");
+const quality = ref<"simple" | "cinematic">("simple");
 const tourIndex = ref(0);
 const activePart = ref(PARTS[0].id);
 const chosen = ref<Record<string, string>>(Object.fromEntries(PARTS.map((p) => [p.id, p.options[0].color])));
@@ -137,7 +138,7 @@ onMounted(() => {
   Object.assign(key.shadow.camera as THREE.OrthographicCamera, { left: -200, right: 200, top: 200, bottom: -200 });
   scene.add(key);
   // hemisphere keeps the shadow side readable (better than pure-black ambient)
-  scene.add(new THREE.HemisphereLight(0xf3e6cf, 0x14161c, 0.55));
+  const hemi = new THREE.HemisphereLight(0xf3e6cf, 0x14161c, 0.55); scene.add(hemi);
   const fill = new THREE.DirectionalLight(0xaec6ff, 0.5); fill.position.set(-160, 80, -30); scene.add(fill);
   const rimA = new THREE.DirectionalLight(0xff8a45, 0.8); rimA.position.set(120, 40, -200); scene.add(rimA);
   const rimB = new THREE.DirectionalLight(0x49d6de, 0.55); rimB.position.set(-150, 30, -160); scene.add(rimB);
@@ -158,9 +159,11 @@ onMounted(() => {
   composer.addPass(new OutputPass());
 
   S.value = { renderer, composer, bloom, scene, camera, controls,
+    key, hemi, fill, rimA, rimB,
     meshes: {}, edges: {}, baseColor: {},
     switchBaseY: 0, keycapBaseY: 0, insertActive: false, pressActive: false,
     tween: null, raf: 0, ready: false, lastAspect: w / h };
+  applyQuality(); // start in the simple look
 
   // HDR env (fills the PBR reflections)
   new RGBELoader().load("/hdr/studio.hdr", (hdr) => {
@@ -289,6 +292,25 @@ function cassetteTexture(): THREE.Texture {
   x.beginPath(); x.moveTo(0, 188); x.lineTo(512, 188); x.stroke();
   x.beginPath(); x.moveTo(0, 326); x.lineTo(512, 326); x.stroke();
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 5); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+// ── render quality: simple (clean, even) vs cinematic (fog + bloom + rims) ──
+function applyQuality() {
+  const st = S.value; if (!st) return;
+  const cine = quality.value === "cinematic";
+  st.scene.fog = cine ? new THREE.FogExp2(0x0f1116, 0.0016) : null;
+  st.scene.background = new THREE.Color(cine ? 0x12141a : 0x2e323b);
+  st.bloom.enabled = cine;
+  st.key.intensity = cine ? 2.7 : 2.3;
+  st.hemi.intensity = cine ? 0.45 : 0.95;
+  st.fill.intensity = cine ? 0.5 : 0.55;
+  st.rimA.intensity = cine ? 0.9 : 0.15;
+  st.rimB.intensity = cine ? 0.6 : 0.1;
+  st.renderer.toneMappingExposure = cine ? 1.15 : 1.1;
+}
+function toggleQuality() {
+  quality.value = quality.value === "simple" ? "cinematic" : "simple";
+  applyQuality();
 }
 
 // ── dimension lines ──
@@ -466,14 +488,10 @@ onBeforeUnmount(() => {
         <button class="mx-mode" :class="{ active: mode === 'customize' }" @click="enterCustomize"><i class="ph-bold ph-paint-brush-broad"></i> Customise</button>
       </div>
 
-      <!-- top-right: debug toggle -->
+      <!-- top-right: cinematic + debug toggles -->
       <div class="mx-ui mx-ui--tr">
+        <button class="mx-mini" :class="{ active: quality === 'cinematic' }" @click="toggleQuality" :title="quality === 'cinematic' ? 'Cinematic lighting on' : 'Cinematic lighting off'"><i class="ph-bold ph-sparkle"></i></button>
         <button class="mx-mini" :class="{ active: debugOn }" @click="debugOn = !debugOn" title="Camera debug"><i class="ph-bold ph-bug"></i></button>
-      </div>
-
-      <!-- scale chip -->
-      <div v-if="dimensions" class="mx-scale">
-        <i class="ph-bold ph-ruler"></i> {{ Math.round(dimensions.w) }} × {{ Math.round(dimensions.d) }} × {{ Math.round(dimensions.h) }} mm
       </div>
 
       <!-- bottom overlay: tour text + nav, or customise controls -->
@@ -547,7 +565,7 @@ onBeforeUnmount(() => {
 
 .mx-ui { position: absolute; z-index: 4; }
 .mx-ui--tl { top: 10px; left: 10px; display: flex; gap: 0.35rem; }
-.mx-ui--tr { top: 10px; right: 10px; }
+.mx-ui--tr { top: 10px; right: 10px; display: flex; gap: 0.35rem; }
 .mx-ui--bottom { left: 10px; right: 10px; bottom: 10px; display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; }
 
 .mx-mode { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; border-radius: 999px; border: 1.5px solid rgba(255,255,255,0.16); background: rgba(10,10,12,0.55); color: #f3ece0; font-size: 0.78rem; font-weight: 700; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.15s; }

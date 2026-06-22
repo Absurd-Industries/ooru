@@ -16,11 +16,6 @@ export const megaMenuItems: NavItem[] = [
     icon: "ph-bold ph-discord-logo",
     isExternal: true,
   },
-  {
-    label: "Hardware Devroom",
-    href: "/hardware-devroom",
-    icon: "ph-bold ph-monitor",
-  },
   { label: "FAQ", href: "/faq", icon: "ph-bold ph-question" },
   { label: "Contact", href: "/contact", icon: "ph-bold ph-envelope" },
 ];

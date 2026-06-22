@@ -9,7 +9,7 @@ import ModelExperience from "../../../components/ModelExperience.vue";
 import { projects } from "../../../data/projects";
 import { makers } from "../../../data/makers";
 import { campaigns } from "../../../data/campaigns";
-import { makerUrl, campaignUrl, PROJECTS_URL } from "../../../lib/urls";
+import { makerUrl, campaignUrl } from "../../../lib/urls";
 import type { Project } from "../../../types";
 
 export function getStaticPaths() {
@@ -122,9 +122,9 @@ const projectLd = {
             ) : null
         }
         <a
-            href={PROJECTS_URL}
+            href={makerUrl(p.makerSlug)}
             class="hero-overlay-btn hero-overlay-btn--back"
-            title="Back to projects"
+            title={maker ? `Back to ${maker.name}` : "Back"}
         >
             <i class="ph-bold ph-arrow-left"></i>
         </a>
@@ -137,7 +137,7 @@ const projectLd = {
     </div>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-24">
-        <div class="flex flex-col lg:flex-row gap-6 items-start">
+        <div class="flex flex-col lg:flex-row gap-6 lg:items-start">
             <!-- ── Main column ────────────────────────────────────────────── -->
             <div class="flex-1 min-w-0">
                 <Card>
@@ -525,8 +525,8 @@ const projectLd = {
                 </Card>
             </div>
 
-            <!-- ── Sidebar ───────────────────────────────────────────────── -->
-            <div class="w-full lg:w-72 flex-shrink-0 space-y-5">
+            <!-- ── Sidebar (above the fold on phones, right rail on desktop) ── -->
+            <div class="w-full lg:w-72 flex-shrink-0 space-y-5 order-first lg:order-none">
                 <!-- Buy / status card -->
                 <Card>
                     <div class="p-5">

@@ -169,49 +169,52 @@ interface ProfileProject {
     name: string;
     description: string;
     iconClass: string;
+    image?: string;
     status: string;
     percent: number | null;
     href: string;
 }
 
-/** Prefer real linked project/campaign; fall back to derived mock entries. */
-const profileProjects: ProfileProject[] = hasRealWork
+/** Project folios (real). Only makers with a linked project have these. */
+const projectCards: ProfileProject[] = featuredProject
     ? [
-          ...(featuredProject
-              ? [
-                    {
-                        name: featuredProject.title,
-                        description: featuredProject.tagline,
-                        iconClass: featuredProject.icon,
-                        status: "Project Folio",
-                        percent: null,
-                        href: projectUrl(maker.slug, featuredProject.slug),
-                    },
-                ]
-              : []),
-          ...(featuredCampaign
-              ? [
-                    {
-                        name: featuredCampaign.title,
-                        description: featuredCampaign.tagline,
-                        iconClass: featuredCampaign.icon,
-                        status:
-                            featuredCampaign.status === "live"
-                                ? "Live"
-                                : featuredCampaign.status === "funded"
-                                  ? "Funded"
-                                  : "Coming Soon",
-                        percent: featuredCampaign.percent,
-                        href: campaignUrl(maker.slug, featuredCampaign.slug),
-                    },
-                ]
-              : []),
+          {
+              name: featuredProject.title,
+              description: featuredProject.tagline,
+              iconClass: featuredProject.icon,
+              image: featuredProject.heroImages?.[0],
+              status: "Project",
+              percent: null,
+              href: projectUrl(maker.slug, featuredProject.slug),
+          },
+      ]
+    : [];
+
+/** Campaigns (real if linked, else derived mock entries for makers we don't
+    have real data for yet). */
+const campaignCards: ProfileProject[] = featuredCampaign
+    ? [
+          {
+              name: featuredCampaign.title,
+              description: featuredCampaign.tagline,
+              iconClass: featuredCampaign.icon,
+              image: featuredCampaign.image,
+              status:
+                  featuredCampaign.status === "live"
+                      ? "Live"
+                      : featuredCampaign.status === "funded"
+                        ? "Funded"
+                        : "Coming Soon",
+              percent: featuredCampaign.percent,
+              href: campaignUrl(maker.slug, featuredCampaign.slug),
+          },
       ]
     : [
           {
               name: showcase.name,
               description: showcase.description,
               iconClass: `ph-bold ph-${showcase.icon}`,
+              image: undefined,
               status: "Live",
               percent: showcase.percent,
               href: "/campaigns",
@@ -222,6 +225,7 @@ const profileProjects: ProfileProject[] = hasRealWork
                         name: `${maker.skills[0]} Monitor`,
                         description: `Open-source ${maker.skills[0].toLowerCase()} monitoring system with wireless alerts.`,
                         iconClass: "ph-bold ph-chart-line",
+                        image: undefined,
                         status: "Completed",
                         percent: 100,
                         href: "/campaigns",
@@ -234,6 +238,7 @@ const profileProjects: ProfileProject[] = hasRealWork
                         name: `${maker.skills[1] ?? maker.specialty} Kit`,
                         description: `Upcoming kit for ${maker.specialty.toLowerCase()} enthusiasts.`,
                         iconClass: "ph-bold ph-package",
+                        image: undefined,
                         status: "Coming Soon",
                         percent: null,
                         href: "/campaigns",
@@ -699,91 +704,77 @@ const makerLd = {
                             </div>
                         </div>
 
-                        <!-- ── ALL PROJECTS ── -->
-                        <div id="projects" class="profile-section">
-                            <div class="flex items-center justify-between mb-5 gap-3 flex-wrap">
-                                <h2
-                                    class="font-serif font-bold text-xl sm:text-2xl tracking-tight"
-                                >
-                                    Projects
-                                </h2>
-                                <div class="flex items-center gap-3 text-sm font-semibold">
-                                    <a href={makerProjectsUrl(maker.slug)} class="text-stamp hover:underline" style="text-decoration:none;">All projects</a>
-                                    <span class="text-ink-faint">·</span>
-                                    <a href={makerCampaignsUrl(maker.slug)} class="text-stamp hover:underline" style="text-decoration:none;">Campaigns</a>
+                        <!-- ── PROJECTS ── -->
+                        {projectCards.length > 0 && (
+                            <div id="projects" class="profile-section">
+                                <div class="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                                    <h2 class="font-serif font-bold text-xl sm:text-2xl tracking-tight">Projects</h2>
+                                    <a href={makerProjectsUrl(maker.slug)} class="text-sm font-semibold text-stamp hover:underline" style="text-decoration:none;">All projects →</a>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {projectCards.map((project) => (
+                                        <a href={project.href} class="proj-vcard group">
+                                            <div class="proj-vcard-media">
+                                                {project.image ? (
+                                                    <img src={project.image} alt={project.name} class="proj-vcard-img" loading="lazy" />
+                                                ) : (
+                                                    <div class="proj-vcard-fallback"><i class={`${project.iconClass}`} /></div>
+                                                )}
+                                                <span class="proj-vcard-status is-muted">{project.status}</span>
+                                            </div>
+                                            <div class="proj-vcard-body">
+                                                <h3 class="proj-vcard-title group-hover:text-stamp transition-colors">{project.name}</h3>
+                                                <p class="proj-vcard-desc line-clamp-2">{project.description}</p>
+                                            </div>
+                                        </a>
+                                    ))}
                                 </div>
                             </div>
+                        )}
 
-                            <div class="space-y-3">
-                                {
-                                    profileProjects.map((project, idx) => (
-                                        <a
-                                            href={project.href}
-                                            class:list={[
-                                                "project-card group",
-                                                idx === 0 &&
-                                                    "project-card--featured",
-                                            ]}
-                                        >
-                                            {idx === 0 && (
-                                                <div class="project-featured-label">
-                                                    <i
-                                                        class="ph-bold ph-star"
-                                                        style="font-size:0.55rem;"
-                                                    />
-                                                    Featured
-                                                </div>
-                                            )}
-                                            <div class="flex items-center gap-3 mb-2">
-                                                <div class="w-10 h-10 rounded-lg bg-kraft-light flex items-center justify-center flex-shrink-0">
-                                                    <i
-                                                        class={`${project.iconClass} text-lg text-stencil group-hover:text-stamp transition-colors`}
-                                                    />
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <h3 class="text-sm font-semibold truncate group-hover:text-stamp transition-colors">
-                                                        {project.name}
-                                                    </h3>
-                                                    <span
-                                                        class:list={[
-                                                            "text-[0.6rem] font-semibold uppercase tracking-wider",
-                                                            project.status ===
-                                                            "Live"
-                                                                ? "text-stamp"
-                                                                : project.status ===
-                                                                        "Completed" ||
-                                                                    project.status ===
-                                                                        "Funded"
-                                                                  ? "text-funded"
-                                                                  : "text-stencil",
-                                                        ]}
-                                                    >
-                                                        {project.status}
-                                                    </span>
-                                                </div>
-                                                <i class="ph-bold ph-caret-right text-xs text-ink-faint/40 flex-shrink-0" />
+                        <!-- ── CAMPAIGNS ── -->
+                        {campaignCards.length > 0 && (
+                            <div id="campaigns" class="profile-section">
+                                <div class="flex items-center justify-between mb-5 gap-3 flex-wrap">
+                                    <h2 class="font-serif font-bold text-xl sm:text-2xl tracking-tight">Campaigns</h2>
+                                    <a href={makerCampaignsUrl(maker.slug)} class="text-sm font-semibold text-stamp hover:underline" style="text-decoration:none;">All campaigns →</a>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {campaignCards.map((project) => (
+                                        <a href={project.href} class="proj-vcard group">
+                                            <div class="proj-vcard-media">
+                                                {project.image ? (
+                                                    <img src={project.image} alt={project.name} class="proj-vcard-img" loading="lazy" />
+                                                ) : (
+                                                    <div class="proj-vcard-fallback"><i class={`${project.iconClass}`} /></div>
+                                                )}
+                                                <span
+                                                    class:list={[
+                                                        "proj-vcard-status",
+                                                        project.status === "Live"
+                                                            ? "is-live"
+                                                            : project.status === "Completed" || project.status === "Funded"
+                                                              ? "is-funded"
+                                                              : "is-muted",
+                                                    ]}
+                                                >
+                                                    {project.status}
+                                                </span>
                                             </div>
-                                            <p class="text-xs text-stencil leading-relaxed line-clamp-2">
-                                                {project.description}
-                                            </p>
-                                            {project.percent !== null && (
-                                                <div class="mt-2.5">
-                                                    <ProgressBar
-                                                        percent={
-                                                            project.percent
-                                                        }
-                                                        hot={
-                                                            project.percent >=
-                                                            100
-                                                        }
-                                                    />
-                                                </div>
-                                            )}
+                                            <div class="proj-vcard-body">
+                                                <h3 class="proj-vcard-title group-hover:text-stamp transition-colors">{project.name}</h3>
+                                                <p class="proj-vcard-desc line-clamp-2">{project.description}</p>
+                                                {project.percent !== null && (
+                                                    <div class="mt-2.5">
+                                                        <ProgressBar percent={project.percent} hot={project.percent >= 100} />
+                                                    </div>
+                                                )}
+                                            </div>
                                         </a>
-                                    ))
-                                }
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <!-- ── ACTIVITY & WALL ── -->
                         <div id="wall" class="profile-section">
@@ -910,8 +901,13 @@ const makerLd = {
                             <a href="#setup" class="side-nav-link"
                                 ><i class="ph-bold ph-wrench"></i> Setup</a
                             >
-                            <a href="#projects" class="side-nav-link"
-                                ><i class="ph-bold ph-folder-open"></i> Projects</a
+                            {projectCards.length > 0 && (
+                                <a href="#projects" class="side-nav-link"
+                                    ><i class="ph-bold ph-folder-open"></i> Projects</a
+                                >
+                            )}
+                            <a href="#campaigns" class="side-nav-link"
+                                ><i class="ph-bold ph-rocket-launch"></i> Campaigns</a
                             >
                             <a href="#wall" class="side-nav-link"
                                 ><i class="ph-bold ph-chat-circle"></i> Log</a
@@ -978,8 +974,13 @@ const makerLd = {
                 <a href="#setup" class="profile-nav-pill"
                     ><i class="ph-bold ph-wrench"></i> Setup</a
                 >
-                <a href="#projects" class="profile-nav-pill"
-                    ><i class="ph-bold ph-folder-open"></i> Projects</a
+                {projectCards.length > 0 && (
+                    <a href="#projects" class="profile-nav-pill"
+                        ><i class="ph-bold ph-folder-open"></i> Projects</a
+                    >
+                )}
+                <a href="#campaigns" class="profile-nav-pill"
+                    ><i class="ph-bold ph-rocket-launch"></i> Campaigns</a
                 >
                 <a href="#wall" class="profile-nav-pill"
                     ><i class="ph-bold ph-chat-circle"></i> Log</a
@@ -994,7 +995,7 @@ const makerLd = {
         var pills = document.querySelectorAll(
             ".profile-nav-pill, .side-nav-link",
         );
-        var sections = ["about", "overview", "setup", "projects", "wall"];
+        var sections = ["about", "overview", "setup", "projects", "campaigns", "wall"];
 
         var observer = new IntersectionObserver(
             function (entries) {
@@ -1337,6 +1338,108 @@ const makerLd = {
         width: 1rem;
         height: 1rem;
         flex-shrink: 0;
+    }
+
+    /* Visual project cards (image-forward) */
+    .proj-vcard {
+        display: block;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1.5px solid rgba(26, 26, 26, 0.1);
+        background: rgba(250, 243, 232, 0.45);
+        text-decoration: none;
+        color: #1a1a1a;
+        transition:
+            transform 0.18s ease,
+            border-color 0.15s,
+            box-shadow 0.18s ease;
+    }
+    .proj-vcard:hover {
+        transform: translateY(-3px);
+        border-color: rgba(26, 26, 26, 0.28);
+        box-shadow: 0 8px 22px rgba(26, 26, 26, 0.12);
+    }
+    .proj-vcard-media {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        background: #ece0cc;
+    }
+    .proj-vcard-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .proj-vcard:hover .proj-vcard-img {
+        transform: scale(1.05);
+    }
+    .proj-vcard-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ece0cc, #d9c9ac);
+    }
+    .proj-vcard-fallback i {
+        font-size: 2.4rem;
+        color: #9a875f;
+    }
+    .proj-vcard-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.55rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #11131a;
+        background: #ff8a3d;
+        padding: 0.18rem 0.45rem;
+        border-radius: 999px;
+    }
+    .proj-vcard-badge i {
+        font-size: 0.55rem;
+    }
+    .proj-vcard-status {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 0.55rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.18rem 0.5rem;
+        border-radius: 999px;
+        color: #faf3e8;
+        background: rgba(26, 26, 26, 0.7);
+        backdrop-filter: blur(4px);
+    }
+    .proj-vcard-status.is-live {
+        background: #ff5900;
+    }
+    .proj-vcard-status.is-funded {
+        background: #2a5f41;
+    }
+    .proj-vcard-body {
+        padding: 0.85rem 1rem 1rem;
+    }
+    .proj-vcard-title {
+        font-family: "Fraunces", serif;
+        font-weight: 700;
+        font-size: 1rem;
+        line-height: 1.2;
+        color: #1a1a1a;
+        margin-bottom: 0.3rem;
+    }
+    .proj-vcard-desc {
+        font-size: 0.8rem;
+        color: #6b5b4a;
+        line-height: 1.5;
     }
 
     /* Project cards with clear clickable boundaries */
