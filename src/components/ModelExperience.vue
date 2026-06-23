@@ -1398,7 +1398,7 @@ onBeforeUnmount(() => {
 .mx-stage--page { height: 100svh; min-height: 100vh; border-radius: 0; }
 @media (max-width: 640px) {
   .mx-stage { height: 78vw; min-height: 320px; max-height: 460px; }
-  .mx-stage--page { height: 80svh; min-height: 80svh; max-height: none; } /* 80% on phone - dodges the address bar */
+  .mx-stage--page { height: 90svh; min-height: 90svh; max-height: none; } /* 90% on phone - dodges the address bar */
   .mx-ui--tl, .mx-ui--tr { top: 8px; }
   .mx-ui--tl { left: 8px; gap: 0.25rem; }
   .mx-ui--tr { right: 8px; }

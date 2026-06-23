@@ -41,6 +41,7 @@ const config = reactive<Record<string, string>>(
   Object.fromEntries(PARTS.map((p) => [p.id, p.options[0].color]))
 );
 const openPart = ref<string>(PARTS[0].id);
+const toolsOpen = ref(true); // phone: collapse the "Make it yours" sheet completely
 // persist the chosen build so the on-page backing section can show it
 function persistBuild() {
   setPref("corydora.build", PARTS.map((p) => ({ id: p.id, label: p.label, color: config[p.id], name: labelFor(p.id) })));
@@ -237,8 +238,12 @@ watch(
       <!-- ===== CUSTOMISE: transparent tool layer ===== -->
       <template v-if="view === 'customize'">
         <!-- left: live colour controls (no boxes, fully transparent) -->
-        <div class="cx-tools">
-          <p class="cx-tools-h">Make it yours</p>
+        <div class="cx-tools" :class="{ collapsed: !toolsOpen }">
+          <button class="cx-tools-h" @click="toolsOpen = !toolsOpen" :aria-expanded="toolsOpen">
+            <span>Make it yours</span>
+            <i class="ph-bold cx-tools-caret" :class="toolsOpen ? 'ph-caret-down' : 'ph-caret-up'"></i>
+          </button>
+          <div v-show="toolsOpen" class="cx-tools-list">
           <div v-for="part in PARTS" :key="part.id" class="cx-tool" :class="{ open: openPart === part.id }">
             <button class="cx-tool-head" @click="openPart = openPart === part.id ? '' : part.id">
               <span class="cx-tool-dot" :style="{ background: config[part.id] }"></span>
@@ -259,6 +264,7 @@ watch(
               </div>
               <p v-if="descFor(part.id)" class="cx-tool-desc">{{ descFor(part.id) }}</p>
             </div>
+          </div>
           </div>
         </div>
 
@@ -359,7 +365,9 @@ watch(
 
 /* ── customise tool layer (fully transparent, no boxes) ── */
 .cx-tools { position: absolute; top: 5.5rem; left: 1.5rem; z-index: 8; width: 15rem; display: flex; flex-direction: column; gap: 0.15rem; }
-.cx-tools-h { font-family: "Fraunces", serif; font-weight: 800; font-size: 1.15rem; color: #faf3e8; margin-bottom: 0.4rem; text-shadow: 0 1px 10px rgba(0,0,0,0.6); }
+.cx-tools-h { display: flex; align-items: center; gap: 0.5rem; width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;
+  font-family: "Fraunces", serif; font-weight: 800; font-size: 1.15rem; color: #faf3e8; margin-bottom: 0.4rem; padding: 0; text-shadow: 0 1px 10px rgba(0,0,0,0.6); }
+.cx-tools-caret { display: none; font-size: 0.9rem; color: #ff9a5c; margin-left: auto; } /* collapse affordance - phone only */
 .cx-tool { background: none; border: none; }
 .cx-tool-head { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.1rem; background: none; border: none; cursor: pointer; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
 .cx-tool-dot { width: 16px; height: 16px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.35); flex-shrink: 0; }
@@ -406,15 +414,20 @@ watch(
   .cx-mode { padding: 0.5rem 0.6rem; }
 
   /* customiser = a bottom sheet (rows scroll) sitting ABOVE a pinned action bar */
-  .cx-tools { top: auto; bottom: 3.6rem; left: 0; right: 0; width: auto; gap: 0.15rem;
-    padding: 0.8rem 1rem 0.6rem; max-height: 42vh; overflow-y: auto;
+  .cx-tools { top: auto; bottom: 3rem; left: 0; right: 0; width: auto; gap: 0.15rem;
+    padding: 0.7rem 1rem 0.5rem; max-height: 42vh; overflow-y: auto;
     background: linear-gradient(to top, rgba(8,9,12,0.92), rgba(8,9,12,0)); }
+  .cx-tools-caret { display: inline; } /* tap "Make it yours" to collapse the whole sheet */
+  .cx-tools.collapsed { max-height: none; overflow: visible; padding-bottom: 0.4rem;
+    background: linear-gradient(to top, rgba(8,9,12,0.92), rgba(8,9,12,0.2)); }
+  .cx-tools.collapsed .cx-tools-h { margin-bottom: 0; }
   .cx-cust-copy { display: none; } /* descriptive copy hidden on phone (heading is on the floor) */
 
-  .cx-mobile-actions { display: flex; gap: 0.5rem; position: absolute; left: 0; right: 0; bottom: 0;
-    z-index: 9; padding: 0.5rem 0.8rem; background: rgba(8,9,12,0.95); border-top: 1px solid rgba(255,255,255,0.1); }
-  .cx-mobile-actions .cx-tb { flex: 1; justify-content: center; }
-  .cx-mobile-actions .cx-share { justify-content: center; }
+  /* compact pinned action bar - much smaller Reserve + Share on phone */
+  .cx-mobile-actions { display: flex; gap: 0.4rem; justify-content: flex-end; align-items: center; position: absolute; left: 0; right: 0; bottom: 0;
+    z-index: 9; padding: 0.35rem 0.7rem; background: rgba(8,9,12,0.95); border-top: 1px solid rgba(255,255,255,0.1); }
+  .cx-mobile-actions .cx-tb,
+  .cx-mobile-actions .cx-share { flex: 0 0 auto; justify-content: center; font-size: 0.74rem; padding: 0.32rem 0.7rem; gap: 0.3rem; }
 
   /* cart stays top-right (fixed) and compact - just icon + dots */
   .cx-cart-label { display: none; }
