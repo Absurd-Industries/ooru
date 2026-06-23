@@ -1,4 +1,5 @@
 import type { Campaign } from "../types";
+import { corydoraLanding } from "./corydora-landing";
 
 export const campaigns: Campaign[] = [
   {
@@ -33,15 +34,27 @@ export const campaigns: Campaign[] = [
     location: "Bengaluru, India",
     avatarColor: "#1B6B5E",
     category: "Electronics",
-    status: "funded",
-    percent: 100,
+    status: "live",
+    percent: 72,
     goalINR: 200000,
     goalFormatted: "₹2,00,000",
-    raisedFormatted: "₹4,94,900",
-    backers: 100,
+    raisedFormatted: "₹1,44,000",
+    backers: 58,
+    daysLeft: 19,
     license: "GPL-3.0",
     projectSlug: "corydora",
-    image: "/images/campaigns/cory-dora.jpg",
+    image: "/images/projects/cory-dora/repo-4-cory-dora-deku-shopabsurdindustries-519762.webp",
+    gallery: [
+      "/images/projects/cory-dora/repo-4-cory-dora-deku-shopabsurdindustries-519762.webp",
+      "/images/projects/cory-dora/repo-5-cory-dora-deku-shopabsurdindustries-534888.webp",
+      "/images/projects/cory-dora/repo-3-corydora-real.webp",
+      "/images/projects/cory-dora/repo-1-corydora-front.webp",
+      "/images/projects/cory-dora/repo-2-corydora.webp",
+    ],
+    richDescription:
+      "CoryDora is a palm-sized 3x3 macropad with a rotary encoder and a 0.91\" OLED - nine hot-swap keys you can map to anything: media controls, shortcuts, macros, layers for work, editing or gaming. Remap every key live in VIA from your browser; no firmware reflash, no code.\n\nUnder the hood it's an RP2040 Zero running QMK, with MX hot-swap sockets so you can try clicky, tactile or silent switches without ever picking up a soldering iron. The three-part case prints in PETG or PLA, and every layer of the design - KiCad PCB, schematic, STEP and Fusion case, STLs and the full BOM - is open on GitHub under GPL-3.0.\n\nOrder it fully assembled and it just works, or grab the kit for a friendly first soldering build (through-hole only). Designed and made in Bengaluru by Balu B / Team Deku.",
+    richLayout: true,
+    tiers: corydoraLanding.tiers,
   },
   {
     slug: "tinytracker-gps-wildlife",

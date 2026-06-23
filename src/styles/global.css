@@ -862,3 +862,14 @@ html.dark ::-webkit-scrollbar-thumb {
 .coming-soon-dismiss:hover {
     background: rgba(26, 26, 26, 0.12);
 }
+
+/* ---------------------------------------------------------------------------
+   Octagon avatar clip - global so it applies everywhere regardless of whether
+   an island's scoped CSS has been injected yet (creator cards, comments, etc.)
+   Needs the <clipPath id="rounded-octagon"> from SvgFilters (in BaseLayout).
+--------------------------------------------------------------------------- */
+.dsc-avatar,
+.oct-sm,
+.oct-avatar {
+    clip-path: url(#rounded-octagon);
+}

@@ -459,6 +459,11 @@ const makerLd = {
                     style={`--maker: ${bannerColor};`}
                     data-configurable="banner"
                 >
+                    {maker.cover && (
+                        <div class="profile-cover">
+                            <img src={maker.cover} alt={`${maker.name}'s lab`} loading="lazy" />
+                        </div>
+                    )}
                     <div class="punch-hole"></div>
                     <div class="banner-layout">
                         <!-- Octagon Avatar -->
@@ -1057,6 +1062,17 @@ const makerLd = {
             padding: 1.75rem 2rem;
         }
     }
+    /* lab cover photo - a banner strip pulled to the card edges */
+    .profile-cover {
+        margin: -1.5rem -1.5rem 1.25rem;
+        height: 190px;
+        overflow: hidden;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    @media (min-width: 640px) {
+        .profile-cover { margin: -1.75rem -2rem 1.5rem; height: 230px; }
+    }
+    .profile-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
     /* Hole-punch through the card stock, revealing the kraft paper behind.
      Maker colour stays just in the specialty pill. */
     .punch-hole {

@@ -106,6 +106,7 @@ export const makers: Maker[] = [
     location: "Bengaluru, India",
     avatarColor: "#1B6B5E",
     avatar: "/images/makers/balub.jpg",
+    cover: "/images/makers/deku-lab.jpg",
     skills: ["QMK", "Open Hardware", "PCB Design", "Full Stack"],
     projects: 1,
     backers: 100,

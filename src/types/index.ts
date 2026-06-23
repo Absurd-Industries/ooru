@@ -85,6 +85,30 @@ export interface Campaign {
 
   /** Extended project description with full technical details. */
   richDescription?: string;
+
+  /** When true, the campaign URL renders the bespoke rich landing page
+   *  instead of the generic template (generic moves to /…/classic). */
+  richLayout?: boolean;
+
+  /** Backing tiers; when present they replace the page's generic fallback. */
+  tiers?: CampaignTier[];
+}
+
+/** A backing / reward tier for a campaign. */
+export interface CampaignTier {
+  name: string;
+  /** Formatted price with symbol, e.g. "₹4,500". */
+  price: string;
+  blurb: string;
+  perks: string[];
+  /** Estimated delivery window, e.g. "Oct 2026". */
+  delivery: string;
+  /** Shipping note, e.g. "Worldwide" or "Digital - no shipping". */
+  ships: string;
+  backers: number;
+  claimed: number;
+  /** Capacity; null = unlimited. */
+  total: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -110,6 +134,9 @@ export interface Maker {
 
   /** Path or URL to the maker's profile image. */
   avatar?: string;
+
+  /** Path or URL to a wide banner/cover image (e.g. a photo of their lab). */
+  cover?: string;
 
   /** List of skill/tag labels, e.g. ["PCB Design", "Rust", "KiCad"]. */
   skills: string[];
@@ -398,6 +425,86 @@ export interface Project {
   onboarding?: ProjectGuide;
   /** Project-specific FAQ. */
   faqs?: { q: string; a: string }[];
+}
+
+// ---------------------------------------------------------------------------
+// Rich flagship landing (bespoke, feature-first campaign page)
+// ---------------------------------------------------------------------------
+
+/** A use-case / capability card ("what it does"). */
+export interface LandingUseCase {
+  icon: string;   // Phosphor class
+  title: string;
+  body: string;
+}
+
+/** One audience track (e.g. newcomers vs veterans). */
+export interface LandingAudience {
+  key: string;
+  label: string;       // "New to keyboards"
+  icon: string;
+  blurb: string;
+  points: string[];
+}
+
+/** A scene in the narrative "journey" through the model + open files. */
+export interface LandingScene {
+  id: string;
+  title: string;
+  body: string;
+  /** Small-caps eyebrow above the heading. */
+  eyebrow?: string;
+  /** Script-style accent line. */
+  script?: string;
+  /** Big bold display word/name set beside the model. */
+  bigType?: string;
+  /** Show the "Nutrition Facts"-style spec card this chapter. */
+  spec?: boolean;
+  /** Magic render mode label to switch to, e.g. "X-Ray". */
+  mode?: string;
+  /** OLED program to run this chapter (e.g. "logo", "layer", "wpm"). */
+  oled?: string;
+  /** Mesh names to isolate (ghost the rest). Empty = show all. */
+  isolate?: string[];
+  /** Camera frame, same shape the viewer's tour uses. */
+  cam?: { pos: [number, number, number]; target: [number, number, number] };
+  /** Per-chapter nudge for the floor text panel (world mm) when the camera angle
+   *  pushes it off-position. dx = +X, dz = +Z. */
+  panel?: { dx?: number; dz?: number };
+  /** A supporting image path. */
+  media?: string;
+  /** A supporting video URL (embed). */
+  video?: string;
+  /** Open-source file names to surface as chips (matched against project.files). */
+  files?: string[];
+}
+
+/** The complete bespoke landing content for a flagship product. */
+export interface ProductLanding {
+  /** Project slug this landing belongs to. */
+  projectSlug: string;
+  /** Campaign slug for the backing flow. */
+  campaignSlug: string;
+  hero: {
+    eyebrow: string;
+    headline: string;
+    subhead: string;
+    /** Short stat chips, e.g. "9 keys", "rotary encoder". */
+    chips: string[];
+    ctaLabel: string;
+  };
+  whatItDoes: LandingUseCase[];
+  audiences: LandingAudience[];
+  canDo: string[];
+  cantDo: string[];
+  /** Feature deck cards. */
+  features: { icon: string; title: string; body: string }[];
+  /** Secondary "open source is a bonus" section. */
+  openSource: { headline: string; body: string; points: string[] };
+  /** Narrative journey scenes for the visualizer. */
+  journey: LandingScene[];
+  /** Backing tiers (also mirrored on the campaign for the classic page). */
+  tiers: CampaignTier[];
 }
 
 // ---------------------------------------------------------------------------

@@ -70,7 +70,7 @@ const statusVariant = p.status === "shipping" ? "funded" : "default";
 
 const sectionNav = [
     p.specs?.length ? { id: "specs", label: "Specs" } : null,
-    p.modelUrl ? { id: "model", label: "3D View" } : null,
+    p.modelUrl ? { id: "model", label: "Visualizer" } : null,
     p.pcbViewerUrl ? { id: "pcb", label: "Schematic" } : null,
     p.bom?.length ? { id: "bom", label: "Materials" } : null,
     p.files?.length ? { id: "files", label: "Files" } : null,
@@ -286,7 +286,7 @@ const projectLd = {
                             <div class="folio-section" id="sec-model">
                                 <h2 class="folio-h2">
                                     <i class="ph-duotone ph-cube" />
-                                    3D View
+                                    Visualizer
                                 </h2>
                                 <ModelExperience
                                     src={p.modelUrl}

@@ -1,0 +1,43 @@
+---
+/**
+ * CoryDora campaign page = the interactive visualizer (story + customizer) up
+ * top, then the standard showcase campaign body (same as Supersaber) populated
+ * with CoryDora's details. No separate "classic" view - this is the one page.
+ */
+import GenericCampaign from "../GenericCampaign.astro";
+import CoryDoraExperience from "./CoryDoraExperience.vue";
+import { projects } from "../../data/projects";
+import { corydoraLanding as L } from "../../data/corydora-landing";
+import type { Campaign } from "../../types";
+
+interface Props {
+    campaign: Campaign;
+}
+const { campaign } = Astro.props;
+const project = projects.find((p) => p.slug === L.projectSlug);
+---
+
+<GenericCampaign campaign={campaign}>
+    <section slot="top" class="cd-viewer">
+        {
+            project?.modelUrl ? (
+                <CoryDoraExperience
+                    src={project.modelUrl}
+                    alt={project.title}
+                    dimensions={project.modelDimensions}
+                    campaignSlug={campaign.slug}
+                    tiers={campaign.tiers ?? L.tiers}
+                    journey={L.journey}
+                    files={project.files}
+                    specs={project.specs}
+                    license={project.license}
+                    client:load
+                />
+            ) : null
+        }
+    </section>
+</GenericCampaign>
+
+<style>
+    .cd-viewer { background: #12141a; }
+</style>
