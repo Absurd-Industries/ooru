@@ -468,9 +468,13 @@ export interface LandingScene {
   isolate?: string[];
   /** Camera frame, same shape the viewer's tour uses. */
   cam?: { pos: [number, number, number]; target: [number, number, number] };
+  /** Phone-only camera frame (narrow portrait needs its own framing). */
+  camMobile?: { pos: [number, number, number]; target: [number, number, number] };
   /** Per-chapter nudge for the floor text panel (world mm) when the camera angle
    *  pushes it off-position. dx = +X, dz = +Z. */
   panel?: { dx?: number; dz?: number };
+  /** Phone-only absolute floor-panel placement (world mm). */
+  panelMobile?: { x: number; z: number };
   /** A supporting image path. */
   media?: string;
   /** A supporting video URL (embed). */
@@ -503,6 +507,8 @@ export interface ProductLanding {
   openSource: { headline: string; body: string; points: string[] };
   /** Narrative journey scenes for the visualizer. */
   journey: LandingScene[];
+  /** Phone-only camera frame for the customizer view. */
+  customizeCamMobile?: { pos: [number, number, number]; target: [number, number, number] };
   /** Backing tiers (also mirrored on the campaign for the classic page). */
   tiers: CampaignTier[];
 }

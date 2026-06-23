@@ -8,7 +8,7 @@
  *     floating swatch tiles (desktop) / a bottom tray (mobile) give live control.
  *   - Back it: the chosen build flows into the reserve flow.
  */
-import { ref, reactive, computed, watch, onMounted } from "vue";
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue";
 import ModelExperience from "../ModelExperience.vue";
 import { setPref, getPref, onChange } from "../../lib/store";
 import { PARTS } from "../../data/corydora-parts";
@@ -21,6 +21,7 @@ const props = defineProps<{
   campaignSlug: string;
   tiers: CampaignTier[];
   journey: LandingScene[];
+  customizeCamMobile?: { pos: [number, number, number]; target: [number, number, number] };
   files?: ProjectFile[];
   specs?: ProjectSpec[];
   license?: string;
@@ -30,6 +31,10 @@ const viewer = ref<any>(null);
 const view = ref<"tour" | "customize">("tour");
 const active = ref(0);
 const scene = computed<LandingScene | undefined>(() => props.journey[active.value]);
+
+// phone gets its own camera frames + floor-panel placement (narrow portrait)
+const isPhone = ref(false);
+function checkPhone() { isPhone.value = typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches; }
 
 // ── customizer config (mirrors the viewer's per-part colour) ──
 const config = reactive<Record<string, string>>(
@@ -69,7 +74,8 @@ function applyScene(i: number) {
   if (!v || !s) return;
   if (s.mode) v.setMode(s.mode);
   v.isolate(s.isolate ?? []);
-  if (s.cam) v.frameTo(s.cam, s.isolate);
+  const cam = (isPhone.value && s.camMobile) ? s.camMobile : s.cam;
+  if (cam) v.frameTo(cam, s.isolate);
   if (s.oled) v.setOled?.(s.oled);
   // everything printed on the floor around the model, in editorial type
   v.setStoryFloor?.({
@@ -80,6 +86,7 @@ function applyScene(i: number) {
     specs: s.spec ? props.specs : undefined,
     dims: s.id === "meet",
     panel: s.panel,
+    panelPos: isPhone.value ? s.panelMobile : undefined,
     fade: true,
   });
   v.setFloorLogo?.(true);
@@ -93,7 +100,8 @@ function enterCustomize() {
   view.value = "customize";
   const v = viewer.value; if (!v) return;
   v.setMode("Studio"); v.isolate([]);
-  if (scene.value?.cam) v.frameTo(scene.value.cam);
+  const cam = (isPhone.value && props.customizeCamMobile) ? props.customizeCamMobile : scene.value?.cam;
+  if (cam) v.frameTo(cam);
   // print the customise heading on the floor too (like the tour chapters)
   v.setStoryFloor?.({ eyebrow: "Yours, down to the colour", title: "MAKE IT\nYOURS", fade: true });
   v.setFloorLogo?.(false);
@@ -147,12 +155,20 @@ function readSharedBuild() {
   } catch {}
 }
 
+function onResize() {
+  const was = isPhone.value; checkPhone();
+  if (was === isPhone.value || !viewer.value?.ready) return; // only re-frame when crossing the breakpoint
+  if (view.value === "customize") enterCustomize(); else applyScene(active.value);
+}
 onMounted(() => {
+  checkPhone();
+  window.addEventListener("resize", onResize);
   readSharedBuild();
   persistBuild(); // seed the page backing section with the (possibly shared) build
   reloadCart();
   onChange(reloadCart);
 });
+onUnmounted(() => window.removeEventListener("resize", onResize));
 
 // once the model is ready: apply a shared build into Customise, else play chapter 1
 const started = ref(false);

@@ -105,6 +105,8 @@ const chosen = ref<Record<string, string>>(Object.fromEntries(PARTS.map((p) => [
 const loading = ref(true);
 const failed = ref(false);
 const debugOn = ref(false);
+// which target the debug copy buttons format for (auto-detects phone on open)
+const debugPhone = ref(false);
 const panelOpen = ref(true);
 const isFs = ref(false);
 const ready = ref(false); // flips true once the model has loaded (for parent islands)
@@ -570,17 +572,29 @@ function toggleFullscreen() {
   if (document.fullscreenElement) document.exitFullscreen?.();
   else (el as any).requestFullscreen?.();
 }
-watch(debugOn, () => applyDebugSurface());
+watch(debugOn, (on) => {
+  if (on) {
+    try { debugPhone.value = window.matchMedia("(max-width: 720px)").matches; } catch {}
+    // start the panel sliders from whatever placement is live (phone panelPos or the desktop default)
+    if (lastStory?.panelPos) { tune.panelX = lastStory.panelPos.x; tune.panelZ = lastStory.panelPos.z; }
+    if (lastStory) setStoryFloor(lastStory);
+  }
+  applyDebugSurface();
+});
 // live floor tuning: re-apply placements whenever a tune value changes
 watch(tune, () => { if (lastStory) setStoryFloor(lastStory); applyLogoTune(); applyOledTune(); applyLayerMapTune(); }, { deep: true });
 function toggleDebug() { debugOn.value = !debugOn.value; }
 function copyTune() {
   const v = tune;
-  const snippet =
-`STORY_PANEL_OFFSET = { x: ${v.panelX}, z: ${v.panelZ} }
-LOGO_POS = (${v.logoX}, 0.16, ${v.logoZ})   LOGO_LONG = ${v.logoSize}
+  // shared constants (same on phone + desktop): logo / OLED / layer-map
+  const shared =
+`LOGO_POS = (${v.logoX}, 0.16, ${v.logoZ})   LOGO_LONG = ${v.logoSize}
 OLED_POS = (${v.oledX}, ${v.oledY}, ${v.oledZ})   OLED_ROT = ${v.oledRot}°   OLED_SIZE = { w: ${v.oledW}, h: ${v.oledH} }
 MAP_OFFSET = { x: ${v.mapX}, z: ${v.mapZ} }   MAP_H = ${v.mapH}`;
+  const snippet = debugPhone.value
+    // phone: the only per-frame phone value is the floor panel; rest is shared
+    ? `panelMobile: { x: ${v.panelX}, z: ${v.panelZ} },\n// shared constants (unchanged on phone):\n${shared}`
+    : `STORY_PANEL_OFFSET = { x: ${v.panelX}, z: ${v.panelZ} }\n${shared}`;
   navigator.clipboard?.writeText(snippet);
 }
 
@@ -927,7 +941,7 @@ function updateFloorLabels(step: TourStep) {
 //   - headline cluster (eyebrow / script / title) anchored off the TOP-RIGHT edge
 //   - body wrapped along the front edge, facts list down the left, dims on the size step
 // All offsets are grouped here so they're easy to tune (like the camera frames).
-type StoryOpts = { eyebrow?: string; script?: string; title?: string; body?: string; specs?: { label: string; value: string }[]; dims?: boolean; panel?: { dx?: number; dz?: number }; fade?: boolean };
+type StoryOpts = { eyebrow?: string; script?: string; title?: string; body?: string; specs?: { label: string; value: string }[]; dims?: boolean; panel?: { dx?: number; dz?: number }; panelPos?: { x: number; z: number }; fade?: boolean };
 function setDims(on: boolean) { if (S.value?.dims) S.value.dims.visible = on; }
 function setStoryFloor(opts: StoryOpts) {
   const st = S.value; const sz = st?.modelSize; if (!st || !sz) return;
@@ -940,7 +954,12 @@ function setStoryFloor(opts: StoryOpts) {
   const hasText = opts.eyebrow || opts.script || opts.title || opts.body || (opts.specs && opts.specs.length);
   if (hasText) {
     const dx = opts.panel?.dx ?? 0, dz = opts.panel?.dz ?? 0;
-    specs.push({ role: "panel", opts, x: tune.panelX + dx, z: -hd - tune.panelZ + dz, h: STORY_PANEL_H });
+    // panelPos = absolute override (phone-specific placement). While the debug
+    // panel is open the live tuner sliders win, so you can tune either target.
+    const usePos = opts.panelPos && !debugOn.value;
+    const px = usePos ? opts.panelPos!.x : tune.panelX + dx;
+    const pz = usePos ? -hd - opts.panelPos!.z : -hd - tune.panelZ + dz;
+    specs.push({ role: "panel", opts, x: px, z: pz, h: STORY_PANEL_H });
   }
 
   // mm dimensions printed beside their scale lines (width along the front, depth up the right)
@@ -1269,7 +1288,9 @@ function pickColor(id: string, color: string) {
 // ── debug ──
 function copyFrame() {
   const d = dbg.value;
-  const snippet = `az ${d.az}°, polar ${d.polar}°, dist ${d.dist} | pos [${d.px}, ${d.py}, ${d.pz}] target [${d.tx}, ${d.ty}, ${d.tz}]`;
+  const key = debugPhone.value ? "camMobile" : "cam";
+  // ready to paste into the scene, with the human-readable angles as a trailing comment
+  const snippet = `${key}: { pos: [${d.px}, ${d.py}, ${d.pz}], target: [${d.tx}, ${d.ty}, ${d.tz}] }, // az ${d.az}°, polar ${d.polar}°, dist ${d.dist}`;
   navigator.clipboard?.writeText(snippet);
 }
 
@@ -1333,6 +1354,10 @@ onBeforeUnmount(() => {
       <!-- debug sidebar -->
       <div v-if="debugOn" class="mx-debug">
         <div class="mx-debug-h">Camera <button class="mx-debug-x" @click="debugOn = false">×</button></div>
+        <div class="mx-debug-seg">
+          <button :class="{ active: !debugPhone }" @click="debugPhone = false">Desktop</button>
+          <button :class="{ active: debugPhone }" @click="debugPhone = true">Phone</button>
+        </div>
         <dl>
           <div><dt>azimuth</dt><dd>{{ dbg.az }}°</dd></div>
           <div><dt>polar</dt><dd>{{ dbg.polar }}°</dd></div>
@@ -1360,7 +1385,7 @@ onBeforeUnmount(() => {
           <label>map h<input type="number" step="4" v-model.number="tune.mapH" /></label>
         </div>
         <button class="mx-debug-copy" @click="copyTune"><i class="ph-bold ph-copy"></i> Copy tune</button>
-        <p class="mx-debug-hint">Drag the model for a frame, or edit positions live, then copy &amp; paste to me.</p>
+        <p class="mx-debug-hint">Copying for <b>{{ debugPhone ? 'phone' : 'desktop' }}</b> - frame copies as <code>{{ debugPhone ? 'camMobile' : 'cam' }}</code>. Drag the model or edit live, then paste to me.</p>
       </div>
     </div>
   </div>
@@ -1373,7 +1398,7 @@ onBeforeUnmount(() => {
 .mx-stage--page { height: 100svh; min-height: 100vh; border-radius: 0; }
 @media (max-width: 640px) {
   .mx-stage { height: 78vw; min-height: 320px; max-height: 460px; }
-  .mx-stage--page { height: 100svh; min-height: 100vh; max-height: none; }
+  .mx-stage--page { height: 80svh; min-height: 80svh; max-height: none; } /* 80% on phone - dodges the address bar */
   .mx-ui--tl, .mx-ui--tr { top: 8px; }
   .mx-ui--tl { left: 8px; gap: 0.25rem; }
   .mx-ui--tr { right: 8px; }
@@ -1432,6 +1457,9 @@ onBeforeUnmount(() => {
 
 .mx-debug { position: absolute; top: 54px; right: 10px; z-index: 5; width: 184px; background: rgba(10,10,12,0.82); border: 1px solid rgba(255,255,255,0.14); border-radius: 0.6rem; padding: 0.6rem 0.7rem; color: #e7ddca; backdrop-filter: blur(10px); font-size: 0.72rem; }
 .mx-debug-h { display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #ff9a5c; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.6rem; margin-bottom: 0.4rem; }
+.mx-debug-seg { display: flex; gap: 2px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.07); border-radius: 6px; padding: 2px; }
+.mx-debug-seg button { flex: 1; border: none; background: transparent; color: #cdbfa6; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem; border-radius: 4px; cursor: pointer; }
+.mx-debug-seg button.active { background: #ff7a1a; color: #1a1a1a; }
 .mx-debug-x { background: none; border: none; color: #e7ddca; font-size: 1rem; cursor: pointer; line-height: 1; }
 .mx-debug dl { display: flex; flex-direction: column; gap: 0.2rem; margin: 0; }
 .mx-debug dl > div { display: flex; justify-content: space-between; gap: 0.5rem; font-variant-numeric: tabular-nums; }

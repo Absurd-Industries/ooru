@@ -107,6 +107,8 @@ export const corydoraLanding: ProductLanding = {
       oled: "hello",
       isolate: [],
       cam: { pos: [-43.7, 362.2, -26.8], target: [1.8, 8.9, -35.2] },
+      camMobile: { pos: [-197.4, 575.7, 27.7], target: [51.7, 29.3, -22] },
+      panelMobile: { x: 0, z: 65 },
     },
     {
       id: "open",
@@ -118,6 +120,8 @@ export const corydoraLanding: ProductLanding = {
       oled: "boot",
       isolate: ["pcb"],
       cam: { pos: [-162, 243.9, -73.6], target: [-3.9, 4.3, -26.3] },
+      camMobile: { pos: [-236, 381.3, -92.8], target: [7.2, 12.8, -20] },
+      panelMobile: { x: 0, z: 75 },
       files: ["CoryDora.kicad_pcb", "CoryDora.kicad_sch", "CoryDora Schematic.pdf"],
     },
     {
@@ -130,6 +134,8 @@ export const corydoraLanding: ProductLanding = {
       oled: "swap",
       isolate: ["pcb", "switches"],
       cam: { pos: [-132.8, 161.2, 83.1], target: [-25.6, 26.9, 8.6] },
+      camMobile: { pos: [-241.9, 313.6, 157.7], target: [-19.4, 34.9, 3.1] },
+      panelMobile: { x: 0, z: 75 },
     },
     {
       id: "case",
@@ -141,6 +147,8 @@ export const corydoraLanding: ProductLanding = {
       oled: "case",
       isolate: [],
       cam: { pos: [-331.7, 249.6, 17.9], target: [-3.4, 42, -8.6] },
+      camMobile: { pos: [-275.2, 361.8, -181.2], target: [2.6, 55.5, -10.4] },
+      panelMobile: { x: 0, z: 75 },
       files: ["Case_top.stl", "Case_Bottom.stl", "Case_trim.stl", "CoryDora_Fully_Assembled_v1.2.step"],
     },
     {
@@ -154,9 +162,14 @@ export const corydoraLanding: ProductLanding = {
       oled: "via",
       isolate: [],
       cam: { pos: [-26.4, 263.2, -35], target: [5.1, 19.3, -28.6] },
+      camMobile: { pos: [-75.7, 543.2, -45.3], target: [-5.5, 14.2, 22.6] },
+      panelMobile: { x: 0, z: 75 },
       files: ["CoryDora BOM.csv", "CoryDora_v1.2.zip"],
     },
   ],
+
+  // phone-only camera for the customizer view
+  customizeCamMobile: { pos: [-251.1, 312.1, 133.1], target: [-2.6, 15.1, 3.2] },
 
   tiers: [
     {
