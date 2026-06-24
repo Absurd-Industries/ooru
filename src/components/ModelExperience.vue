@@ -73,6 +73,19 @@ const LOGO_POS = new THREE.Vector3(120, 0.16, 0);    // "on top" (+X) of the mod
 const MAP_OFFSET = { x: 0, z: 65 };                  // layer-map: x + distance beyond the front edge
 const MAP_H = 112;                                   // layer-map world height
 
+// Frame 3 "switch hover": a slowly-orbiting sphere of mechanical switches floating
+// above the "Click, clack, yours" heading, to show the hot-swap idea (pick whichever
+// switch you like). Real multi-material switch geometry (body / coloured stem / copper
+// pins) is loaded from a converted GLB; a cube is the fallback shape until it arrives.
+const PILE_COUNT = 14;
+const PILE_SWITCH_URL = "/models/switch.glb";
+const PILE_CENTER = { x: 25, z: -112 };              // hover-sphere centre on the floor plan (tunable in ?debug)
+const PILE_HEIGHT = 38;                              // hover height above the floor (mm)
+const PILE_RADIUS = 46;                              // sphere radius (mm)
+const PILE_SWITCH_SCALE = 1.3;                       // each switch scaled up a touch so they read
+// per-switch STEM colours = the classic "which switch type?" cue (red/brown/blue/…)
+const PILE_STEM_COLORS = ["#d23b3b", "#7a5230", "#3b6fd4", "#e8b53b", "#48b06a", "#c14fd0", "#e9dcc3"];
+
 const TOUR: TourStep[] = [
   { id: "size", dims: true,
     cam: { pos: [-222.7, 283, 83.7], target: [-20.2, 4.3, 39.4] },
@@ -118,9 +131,52 @@ const tune = reactive({
   oledX: OLED_POS.x, oledY: OLED_POS.y, oledZ: OLED_POS.z, oledRot: Math.round((OLED_ROT * 180) / Math.PI),
   oledW: OLED_SIZE.w, oledH: OLED_SIZE.h,
   mapX: MAP_OFFSET.x, mapZ: MAP_OFFSET.z, mapH: MAP_H,
+  pileX: PILE_CENTER.x, pileZ: PILE_CENTER.z, pileH: PILE_HEIGHT, pileR: PILE_RADIUS,
 });
 const dbg = ref({ az: 0, polar: 0, dist: 0, px: 0, py: 0, pz: 0, tx: 0, ty: 0, tz: 0 });
 const canvasWrap = ref<HTMLDivElement | null>(null);
+
+// ── Scene-tuner config: one place to describe every live-tunable value, so the
+// debug panel renders rich slider+input rows (and is trivial to extend). ──
+type TuneKey = keyof typeof tune;
+interface TuneField { k: TuneKey; label: string; min: number; max: number; step: number; unit: string }
+interface TuneSection { id: string; title: string; note?: string; fields: TuneField[] }
+const TUNE_SECTIONS: TuneSection[] = [
+  { id: "panel", title: "Story panel", fields: [
+    { k: "panelX", label: "x", min: -150, max: 150, step: 1, unit: "mm" },
+    { k: "panelZ", label: "z", min: -50, max: 250, step: 1, unit: "mm" },
+  ] },
+  { id: "logo", title: "Logo", fields: [
+    { k: "logoX", label: "x", min: -200, max: 200, step: 1, unit: "mm" },
+    { k: "logoZ", label: "z", min: -200, max: 200, step: 1, unit: "mm" },
+    { k: "logoSize", label: "size", min: 10, max: 200, step: 2, unit: "mm" },
+  ] },
+  { id: "oled", title: "OLED", fields: [
+    { k: "oledX", label: "x", min: -60, max: 60, step: 0.5, unit: "mm" },
+    { k: "oledY", label: "y", min: 0, max: 60, step: 0.5, unit: "mm" },
+    { k: "oledZ", label: "z", min: -60, max: 60, step: 0.5, unit: "mm" },
+    { k: "oledRot", label: "rotation", min: -180, max: 180, step: 5, unit: "°" },
+    { k: "oledW", label: "width", min: 5, max: 80, step: 0.5, unit: "mm" },
+    { k: "oledH", label: "height", min: 2, max: 40, step: 0.5, unit: "mm" },
+  ] },
+  { id: "map", title: "Layer map", fields: [
+    { k: "mapX", label: "x", min: -100, max: 100, step: 2, unit: "mm" },
+    { k: "mapZ", label: "z", min: 0, max: 200, step: 2, unit: "mm" },
+    { k: "mapH", label: "height", min: 20, max: 220, step: 4, unit: "mm" },
+  ] },
+  { id: "pile", title: "Switch hover", note: "frame 3", fields: [
+    { k: "pileX", label: "x", min: -150, max: 150, step: 1, unit: "mm" },
+    { k: "pileZ", label: "z", min: -200, max: 100, step: 1, unit: "mm" },
+    { k: "pileH", label: "height", min: 0, max: 200, step: 1, unit: "mm" },
+    { k: "pileR", label: "radius", min: 10, max: 120, step: 1, unit: "mm" },
+  ] },
+];
+const secOpen = reactive<Record<string, boolean>>({ camera: true, panel: false, logo: false, oled: false, map: false, pile: true, explode: true });
+function toggleSec(id: string) { secOpen[id] = !secOpen[id]; }
+// brief "Copied" confirmation on a per-button basis
+const copied = ref("");
+let copiedT: ReturnType<typeof setTimeout> | undefined;
+function flashCopied(id: string) { copied.value = id; clearTimeout(copiedT); copiedT = setTimeout(() => (copied.value = ""), 1200); }
 
 const S = shallowRef<any>(null);
 let disposed = false;
@@ -273,6 +329,7 @@ onMounted(() => {
     S.value.debugMarkers = buildDebugMarkers(size); scene.add(S.value.debugMarkers);
     buildOled();
     buildLayerMap();
+    buildSwitchPile();
     applyStep(0, true);
     S.value.ready = true;
     ready.value = true;
@@ -339,20 +396,36 @@ onMounted(() => {
       st.controls.target.lerpVectors(st.tween.tFrom, st.tween.tTo, e);
       if (k >= 1) st.tween = null;
     }
-    // drop-insert loop: switch + keycap fall into the sockets together
-    const drop = st.insertActive ? 1 - Math.pow(1 - (performance.now() % 1700) / 1700, 3) : -1;
-    if (st.meshes.switches) {
-      const sw = st.meshes.switches;
-      if (drop >= 0) sw.position.y = st.switchBaseY + 22 * (1 - drop);
-      else sw.position.y += (st.switchBaseY - sw.position.y) * 0.2;
+    // drop-insert loop: switch + keycap fall into the sockets together.
+    // Skipped in the exploded mode, where the explode layout owns these positions
+    // (otherwise the idle "settle to base" easing fights the explode offsets).
+    if (MODES[modeIndex.value].fx?.explode == null) {
+      const drop = st.insertActive ? 1 - Math.pow(1 - (performance.now() % 1700) / 1700, 3) : -1;
+      if (st.meshes.switches) {
+        const sw = st.meshes.switches;
+        if (drop >= 0) sw.position.y = st.switchBaseY + 22 * (1 - drop);
+        else sw.position.y += (st.switchBaseY - sw.position.y) * 0.2;
+      }
+      if (st.meshes.keycaps) {
+        const kc = st.meshes.keycaps;
+        if (drop >= 0) kc.position.y = st.keycapBaseY + 42 * (1 - drop); // caps fall from higher
+        else if (st.pressActive) {
+          const p = (Math.sin(performance.now() / 320) * 0.5 + 0.5) ** 2;
+          kc.position.y = st.keycapBaseY - p * 1.35; // shallow press so caps meet switches, no bleed
+        } else kc.position.y += (st.keycapBaseY - kc.position.y) * 0.2;
+      }
     }
-    if (st.meshes.keycaps) {
-      const kc = st.meshes.keycaps;
-      if (drop >= 0) kc.position.y = st.keycapBaseY + 42 * (1 - drop); // caps fall from higher
-      else if (st.pressActive) {
-        const p = (Math.sin(performance.now() / 320) * 0.5 + 0.5) ** 2;
-        kc.position.y = st.keycapBaseY - p * 1.35; // shallow press so caps meet switches, no bleed
-      } else kc.position.y += (st.keycapBaseY - kc.position.y) * 0.2;
+    // glide the case layers to/from their exploded heights (animates frame 3↔4↔5).
+    // switches + keycaps are left to the insert/press loop above when NOT exploded.
+    {
+      const exploded = MODES[modeIndex.value].fx?.explode != null;
+      for (const name of EXPLODE_ANIM) {
+        const m = st.meshes[name]; const bp = st.basePos?.[name]; if (!m || !bp) continue;
+        if (!exploded && (name === "switches" || name === "keycaps")) continue;
+        const targetY = exploded ? explodeYFor(name) : bp.y;
+        const dy = targetY - m.position.y;
+        m.position.y = Math.abs(dy) > 0.04 ? m.position.y + dy * EXPLODE_EASE : targetY;
+      }
     }
     if (st.oled && st.oled.mesh.visible) {
       const now = performance.now();
@@ -410,6 +483,18 @@ onMounted(() => {
           mat.transparent = true; mat.opacity = op; mat.depthWrite = op > 0.6; mat.needsUpdate = true;
           if (st.edges[name]) st.edges[name].visible = k > 0.25;
         }
+      }
+    }
+    if (st.pile?.active && st.pile.group.visible) updatePile(performance.now());
+    if (st.remix?.on) {
+      const now = performance.now();
+      if (now - st.remix.last > REMIX_EVERY) {
+        st.remix.last = now;
+        st.remix.bi = (st.remix.bi + 1) % REMIX_BODY.length;
+        st.remix.ti = (st.remix.ti + 2) % REMIX_TRIM.length;
+        tweenMeshColor(st.meshes.frontplate, REMIX_BODY[st.remix.bi]);
+        tweenMeshColor(st.meshes.backplate, REMIX_BODY[st.remix.bi]);
+        tweenMeshColor(st.meshes.trim, REMIX_TRIM[st.remix.ti]);
       }
     }
     st.controls.update();
@@ -478,6 +563,42 @@ const MODES: VizMode[] = [
   { label: "Vapor",     bg: 0x120a2a, ground: 0x2a1f5e, keyColor: 0x9affff, key: 2.2, hemi: 0.5,  fill: 0.55, rimA: 1.1,  rimB: 0.9,  exposure: 1.15, tone: "agx",     fog: 0.0014,  bloom: 0.5 },
 ];
 const modeIndex = ref(0);
+// ── Exploded "layers" (frame 4 / case): each part fans up or down by its stack
+// order × a gap, plus a live per-layer offset; layers can also be hidden. Driven
+// from the Scene tuner. 'interior' tracks the pcb. ──
+const EXPLODE_ORDER: Record<string, number> = { backplate: -2, pcb: -1, interior: -1, switches: 1, frontplate: 1, trim: 2, keycaps: 3, knob: 4 };
+const EXPLODE_ANIM = Object.keys(EXPLODE_ORDER); // meshes the explode animator glides in Y
+const EXPLODE_EASE = 0.12;                        // per-frame glide toward the target height
+const EXPLODE_PARTS = ["backplate", "pcb", "switches", "trim", "keycaps", "knob"];
+// tuned default arrangement for the case frame (offsets on top of order × gap)
+const EXPLODE_DEFAULT_OFFSET: Record<string, number> = { backplate: 78, pcb: 45, switches: 17, trim: -45, keycaps: -20, knob: -52 };
+const explode = reactive({
+  gap: 26,
+  offset: Object.fromEntries(EXPLODE_PARTS.map((p) => [p, EXPLODE_DEFAULT_OFFSET[p] ?? 0])) as Record<string, number>,
+  hidden: Object.fromEntries(EXPLODE_PARTS.map((p) => [p, false])) as Record<string, boolean>,
+});
+function explodeKey(name: string) { return name === "interior" ? "pcb" : name; }
+function explodeYFor(name: string): number {
+  const base = S.value?.basePos[name]?.y ?? 0;
+  return base + (EXPLODE_ORDER[name] ?? 0) * explode.gap + (explode.offset[explodeKey(name)] ?? 0);
+}
+// re-apply positions + visibility live (only meaningful while the exploded mode is on)
+function relayoutExplode() {
+  const st = S.value; if (!st || MODES[modeIndex.value].fx?.explode == null) return;
+  for (const [name, m] of Object.entries<any>(st.meshes)) {
+    m.visible = !explode.hidden[explodeKey(name)];   // Y is glided by the explode animator
+  }
+}
+watch(explode, relayoutExplode, { deep: true });
+function explodeSnippet(): string {
+  const offs = EXPLODE_PARTS.map((p) => `${p}: ${explode.offset[p]}`).join(", ");
+  const hidden = EXPLODE_PARTS.filter((p) => explode.hidden[p]);
+  let s = `EXPLODE_DEFAULT_OFFSET = { ${offs} }   gap = ${explode.gap}`;
+  if (hidden.length) s += `   hidden: [${hidden.join(", ")}]`;
+  return s;
+}
+function copyExplode() { navigator.clipboard?.writeText(explodeSnippet()); flashCopied("explode"); }
+
 // undo any geometry/material transform a previous mode applied
 function resetModeEffects() {
   const st = S.value; if (!st) return;
@@ -490,7 +611,8 @@ function resetModeEffects() {
       mat.emissive.copy(base.emissive); mat.emissiveIntensity = base.emissiveIntensity;
       mat.envMapIntensity = base.envMapIntensity;
     }
-    if (st.basePos[name]) m.position.copy(st.basePos[name]);
+    if (st.basePos[name]) { m.position.x = st.basePos[name].x; m.position.z = st.basePos[name].z; } // Y is glided by the explode animator
+    m.visible = true; // a prior exploded session may have hidden a layer
     mat.needsUpdate = true;
   }
 }
@@ -527,9 +649,9 @@ function applyModeEffects(fx: VizMode["fx"]) {
       mat.emissive.copy(mat.color); mat.emissiveIntensity = fx.emissiveFromColor;
     }
     if (fx.explode != null && st.basePos[name]) {
-      // fan parts out vertically by their stack order (knob/keycaps up, pcb down)
-      const order: Record<string, number> = { backplate: -2, pcb: -1, interior: -1, switches: 1, frontplate: 1, trim: 2, keycaps: 3, knob: 4 };
-      m.position.y = st.basePos[name].y + (order[name] ?? 0) * fx.explode;
+      // fan parts out vertically by stack order × gap + offset; the Y move itself
+      // is glided each frame by the explode animator in the render loop
+      m.visible = !explode.hidden[explodeKey(name)];
     }
     mat.needsUpdate = true;
   }
@@ -584,18 +706,25 @@ watch(debugOn, (on) => {
 // live floor tuning: re-apply placements whenever a tune value changes
 watch(tune, () => { if (lastStory) setStoryFloor(lastStory); applyLogoTune(); applyOledTune(); applyLayerMapTune(); }, { deep: true });
 function toggleDebug() { debugOn.value = !debugOn.value; }
-function copyTune() {
+// One snippet per section, ready to paste back into the constants. The story
+// panel is the only per-frame phone value (others are shared phone + desktop).
+function sectionSnippet(id: string): string {
   const v = tune;
-  // shared constants (same on phone + desktop): logo / OLED / layer-map
-  const shared =
-`LOGO_POS = (${v.logoX}, 0.16, ${v.logoZ})   LOGO_LONG = ${v.logoSize}
-OLED_POS = (${v.oledX}, ${v.oledY}, ${v.oledZ})   OLED_ROT = ${v.oledRot}°   OLED_SIZE = { w: ${v.oledW}, h: ${v.oledH} }
-MAP_OFFSET = { x: ${v.mapX}, z: ${v.mapZ} }   MAP_H = ${v.mapH}`;
-  const snippet = debugPhone.value
-    // phone: the only per-frame phone value is the floor panel; rest is shared
-    ? `panelMobile: { x: ${v.panelX}, z: ${v.panelZ} },\n// shared constants (unchanged on phone):\n${shared}`
-    : `STORY_PANEL_OFFSET = { x: ${v.panelX}, z: ${v.panelZ} }\n${shared}`;
-  navigator.clipboard?.writeText(snippet);
+  switch (id) {
+    case "panel": return debugPhone.value
+      ? `panelMobile: { x: ${v.panelX}, z: ${v.panelZ} },`
+      : `STORY_PANEL_OFFSET = { x: ${v.panelX}, z: ${v.panelZ} }`;
+    case "logo": return `LOGO_POS = (${v.logoX}, 0.16, ${v.logoZ})   LOGO_LONG = ${v.logoSize}`;
+    case "oled": return `OLED_POS = (${v.oledX}, ${v.oledY}, ${v.oledZ})   OLED_ROT = ${v.oledRot}°   OLED_SIZE = { w: ${v.oledW}, h: ${v.oledH} }`;
+    case "map": return `MAP_OFFSET = { x: ${v.mapX}, z: ${v.mapZ} }   MAP_H = ${v.mapH}`;
+    case "pile": return `PILE_CENTER = { x: ${v.pileX}, z: ${v.pileZ} }   PILE_HEIGHT = ${v.pileH}   PILE_RADIUS = ${v.pileR}`;
+    default: return "";
+  }
+}
+function copySection(id: string) { navigator.clipboard?.writeText(sectionSnippet(id)); flashCopied(id); }
+function copyTune() {
+  const all = [...TUNE_SECTIONS.map((s) => sectionSnippet(s.id)), explodeSnippet()].join("\n");
+  navigator.clipboard?.writeText(all); flashCopied("all");
 }
 
 // ── public API — lets a parent island (the rich page) drive the viewer ──
@@ -614,7 +743,7 @@ defineExpose({
   parts: PARTS, modes: MODES, ready,
   setPartColor, getConfig, goStep, setMode, isolate, frameTo,
   setStoryFloor, setDims, setFloorLogo, setOled, toggleDebug, flashPart,
-  enterTour, enterCustomize, cycleMode,
+  setSwitchPile, setRemix, enterTour, enterCustomize, cycleMode,
 });
 
 // ── dimension lines ──
@@ -1031,6 +1160,12 @@ function buildOled() {
 }
 function setOled(program: string) {
   const st = S.value; if (!st?.oled) return;
+  if (!program || program === "off") { // hide the screen (e.g. the exploded frame)
+    st.oled.mesh.visible = false;
+    if (st.layerMap) st.layerMap.mesh.visible = false;
+    st.knobHint = false; restoreKnobEmissive();
+    return;
+  }
   st.oled.program = program || "via";
   st.oled.mesh.visible = true;
   drawOled(st.oled, performance.now());
@@ -1261,6 +1396,107 @@ function flashPart(keep: string[]) {
   st.flash = { keep: new Set(keep), start: performance.now(), dur: 750 };
 }
 
+// ── "Remix rolodex": auto cross-fade the case + trim through their printable
+// colourways to show how remixable the print is. Pure-visual - it never touches
+// the user's chosen build; colours ease via the existing colorTweens system. ──
+const REMIX_BODY = (PARTS.find((p) => p.id === "body")?.options ?? []).map((o) => o.color);
+const REMIX_TRIM = (PARTS.find((p) => p.id === "trim")?.options ?? []).map((o) => o.color);
+const REMIX_EVERY = 1100; // ms between colourway flips
+function tweenMeshColor(m: any, color: string | THREE.Color, dur = 750) {
+  const st = S.value; if (!m || !st) return;
+  const mat = m.material as THREE.MeshStandardMaterial;
+  const to = color instanceof THREE.Color ? color.clone() : new THREE.Color(color);
+  st.colorTweens = (st.colorTweens || []).filter((tw: any) => tw.mat !== mat);
+  st.colorTweens.push({ mat, from: mat.color.clone(), to, start: performance.now(), dur });
+}
+function setRemix(on: boolean) {
+  const st = S.value; if (!st) return;
+  if (on && REMIX_BODY.length) { st.remix = { on: true, last: 0, bi: 0, ti: 0 }; }
+  else if (st.remix) {
+    st.remix.on = false; // ease the case + trim back to the chosen / base colours
+    for (const mn of ["frontplate", "backplate", "trim"]) tweenMeshColor(st.meshes[mn], colorFor(mn) as any);
+  }
+}
+
+// ── frame-3 switch hover: a slowly-orbiting sphere of switches above the heading ──
+// Switches sit on a Fibonacci sphere that yaws slowly and bobs; each switch also
+// turns on its own axis. Real multi-material geometry loads from a GLB (body / stem /
+// pins); a cube stands in until then. The stem material is cloned + re-tinted per
+// instance so the cluster reads as a mix of switch types.
+function fibSphere(n: number): THREE.Vector3[] {
+  const pts: THREE.Vector3[] = [];
+  const phi = Math.PI * (3 - Math.sqrt(5)); // golden angle
+  for (let i = 0; i < n; i++) {
+    const y = n === 1 ? 0 : 1 - (i / (n - 1)) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const th = phi * i;
+    pts.push(new THREE.Vector3(Math.cos(th) * r, y, Math.sin(th) * r));
+  }
+  return pts;
+}
+function buildSwitchPile() {
+  const st = S.value; if (!st) return;
+  const group = new THREE.Group(); group.visible = false; st.scene.add(group);
+  const dirs = fibSphere(PILE_COUNT);
+  const fallbackGeo = new THREE.BoxGeometry(14, 14, 14);
+  const fallbackMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2e, roughness: 0.5, metalness: 0.08 });
+  const bodies: any[] = [];
+  dirs.forEach((dir, i) => {
+    const obj = new THREE.Mesh(fallbackGeo, fallbackMat); obj.castShadow = true;
+    group.add(obj);
+    bodies.push({ obj, dir, spin: (i % 2 ? 1 : -1) * (0.5 + (i % 3) * 0.25), phase: i * 0.7 });
+  });
+  st.pile = { group, bodies, active: false, t0: 0, template: null, fallbackGeo, fallbackMat };
+
+  // swap in the real multi-material switch when it loads (keep cubes if it's missing)
+  const draco = new DRACOLoader().setDecoderPath("/draco/");
+  new GLTFLoader().setDRACOLoader(draco).load(PILE_SWITCH_URL, (g) => {
+    if (disposed || !st.pile) return;
+    const tpl = g.scene;
+    const box = new THREE.Box3().setFromObject(tpl);
+    const center = box.getCenter(new THREE.Vector3());
+    tpl.position.sub(center); // centre on origin so it spins about its middle
+    tpl.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    st.pile.template = tpl;
+    st.pile.bodies.forEach((b: any, i: number) => {
+      const obj = tpl.clone(true);
+      // clone of an Object3D shares materials - clone the STEM material so the
+      // per-instance tint stays local (body + pins stay shared / constant)
+      obj.traverse((o: any) => {
+        if (o.isMesh && o.material?.name === "stem") {
+          o.material = o.material.clone();
+          o.material.color.set(PILE_STEM_COLORS[i % PILE_STEM_COLORS.length]);
+        }
+      });
+      obj.position.copy(b.obj.position); obj.rotation.copy(b.obj.rotation);
+      group.remove(b.obj); group.add(obj); b.obj = obj;
+    });
+  }, undefined, () => {});
+}
+function setSwitchPile(on: boolean) {
+  const st = S.value; if (!st?.pile) return;
+  if (on) { st.pile.group.visible = true; st.pile.active = true; st.pile.t0 = performance.now(); }
+  else { st.pile.active = false; st.pile.group.visible = false; }
+}
+function updatePile(now: number) {
+  const pile = S.value?.pile; if (!pile?.active) return;
+  const t = (now - pile.t0) / 1000;
+  const e = Math.min(1, t / 0.7); const grow = e * e * (3 - 2 * e); // smoothstep scale-in
+  const yaw = t * 0.28;                                             // slow cluster spin
+  const cy = tune.pileH + Math.sin(t * 0.8) * 4;                    // gentle vertical bob
+  const cosY = Math.cos(yaw), sinY = Math.sin(yaw);
+  const R = tune.pileR, cx = tune.pileX, cz = tune.pileZ;
+  const s = PILE_SWITCH_SCALE * grow;
+  for (const b of pile.bodies) {
+    const dx = b.dir.x * cosY - b.dir.z * sinY;   // rotate the base direction about Y
+    const dz = b.dir.x * sinY + b.dir.z * cosY;
+    b.obj.position.set(cx + dx * R, cy + b.dir.y * R, cz + dz * R);
+    b.obj.scale.setScalar(s);
+    b.obj.rotation.y += b.spin * 0.016;           // each switch turns on its own axis
+    b.obj.rotation.x = Math.sin(t * 0.6 + b.phase) * 0.3;
+  }
+}
+
 function enterTour() { mode.value = "tour"; if (S.value) { S.value.insertActive = false; S.value.pressActive = false; } applyStep(tourIndex.value); }
 function enterCustomize() {
   mode.value = "customize";
@@ -1299,6 +1535,13 @@ onBeforeUnmount(() => {
   cancelAnimationFrame(st.raf); st._ro?.disconnect?.(); st._io?.disconnect?.();
   if (st._onClick) st.renderer.domElement.removeEventListener("click", st._onClick);
   if (st._onFs) document.removeEventListener("fullscreenchange", st._onFs);
+  if (st.pile) {
+    // per-instance stem-material clones
+    st.pile.bodies.forEach((b: any) => b.obj.traverse?.((o: any) => { if (o.isMesh && o.material?.name === "stem") o.material.dispose?.(); }));
+    // shared template geometry + body/pins materials, then the cube fallback
+    st.pile.template?.traverse?.((o: any) => { if (o.isMesh) { o.geometry?.dispose?.(); const m = o.material; (Array.isArray(m) ? m : [m]).forEach((x: any) => x?.dispose?.()); } });
+    st.pile.fallbackGeo?.dispose?.(); st.pile.fallbackMat?.dispose?.();
+  }
   st.controls.dispose(); st.composer.dispose?.(); st.renderer.dispose(); st.renderer.domElement.remove();
 });
 </script>
@@ -1351,41 +1594,92 @@ onBeforeUnmount(() => {
       </div>
       </template>
 
-      <!-- debug sidebar -->
+      <!-- scene tuner -->
       <div v-if="debugOn" class="mx-debug">
-        <div class="mx-debug-h">Camera <button class="mx-debug-x" @click="debugOn = false">×</button></div>
+        <div class="mx-dbg-top">
+          <span class="mx-dbg-title"><i class="ph-bold ph-sliders"></i> Scene tuner</span>
+          <button class="mx-debug-x" @click="debugOn = false" aria-label="Close tuner">×</button>
+        </div>
         <div class="mx-debug-seg">
           <button :class="{ active: !debugPhone }" @click="debugPhone = false">Desktop</button>
           <button :class="{ active: debugPhone }" @click="debugPhone = true">Phone</button>
         </div>
-        <dl>
-          <div><dt>azimuth</dt><dd>{{ dbg.az }}°</dd></div>
-          <div><dt>polar</dt><dd>{{ dbg.polar }}°</dd></div>
-          <div><dt>distance</dt><dd>{{ dbg.dist }}</dd></div>
-          <div><dt>pos</dt><dd>{{ dbg.px }}, {{ dbg.py }}, {{ dbg.pz }}</dd></div>
-          <div><dt>target</dt><dd>{{ dbg.tx }}, {{ dbg.ty }}, {{ dbg.tz }}</dd></div>
-        </dl>
-        <button class="mx-debug-copy" @click="copyFrame"><i class="ph-bold ph-copy"></i> Copy frame</button>
 
-        <div class="mx-debug-h" style="margin-top:0.6rem;">Floor tuner</div>
-        <div class="mx-tune">
-          <label>panel x<input type="number" v-model.number="tune.panelX" /></label>
-          <label>panel z<input type="number" v-model.number="tune.panelZ" /></label>
-          <label>logo x<input type="number" v-model.number="tune.logoX" /></label>
-          <label>logo z<input type="number" v-model.number="tune.logoZ" /></label>
-          <label>logo size<input type="number" v-model.number="tune.logoSize" /></label>
-          <label>oled x<input type="number" step="0.5" v-model.number="tune.oledX" /></label>
-          <label>oled y<input type="number" step="0.5" v-model.number="tune.oledY" /></label>
-          <label>oled z<input type="number" step="0.5" v-model.number="tune.oledZ" /></label>
-          <label>oled rot°<input type="number" step="5" v-model.number="tune.oledRot" /></label>
-          <label>oled w<input type="number" step="0.5" v-model.number="tune.oledW" /></label>
-          <label>oled h<input type="number" step="0.5" v-model.number="tune.oledH" /></label>
-          <label>map x<input type="number" step="2" v-model.number="tune.mapX" /></label>
-          <label>map z<input type="number" step="2" v-model.number="tune.mapZ" /></label>
-          <label>map h<input type="number" step="4" v-model.number="tune.mapH" /></label>
-        </div>
-        <button class="mx-debug-copy" @click="copyTune"><i class="ph-bold ph-copy"></i> Copy tune</button>
-        <p class="mx-debug-hint">Copying for <b>{{ debugPhone ? 'phone' : 'desktop' }}</b> - frame copies as <code>{{ debugPhone ? 'camMobile' : 'cam' }}</code>. Drag the model or edit live, then paste to me.</p>
+        <!-- Camera: live read-only frame -->
+        <section class="mx-sec">
+          <button class="mx-sec-h" @click="toggleSec('camera')">
+            <i class="ph-bold mx-sec-caret" :class="secOpen.camera ? 'ph-caret-down' : 'ph-caret-right'"></i>
+            <span class="mx-sec-t">Camera</span>
+            <span class="mx-sec-live">{{ dbg.az }}° · {{ dbg.dist }}mm</span>
+          </button>
+          <div v-show="secOpen.camera" class="mx-sec-b">
+            <div class="mx-read">
+              <div><span>azimuth</span><b>{{ dbg.az }}°</b></div>
+              <div><span>polar</span><b>{{ dbg.polar }}°</b></div>
+              <div><span>distance</span><b>{{ dbg.dist }}</b></div>
+              <div><span>position</span><b>{{ dbg.px }}, {{ dbg.py }}, {{ dbg.pz }}</b></div>
+              <div><span>target</span><b>{{ dbg.tx }}, {{ dbg.ty }}, {{ dbg.tz }}</b></div>
+            </div>
+            <button class="mx-copy" :class="{ done: copied === 'frame' }" @click="copyFrame(); flashCopied('frame')">
+              <i class="ph-bold" :class="copied === 'frame' ? 'ph-check' : 'ph-copy'"></i>
+              {{ copied === 'frame' ? 'Copied' : `Copy frame (${debugPhone ? 'camMobile' : 'cam'})` }}
+            </button>
+          </div>
+        </section>
+
+        <!-- Tunable sections (slider + number per field) -->
+        <section v-for="sec in TUNE_SECTIONS" :key="sec.id" class="mx-sec">
+          <button class="mx-sec-h" @click="toggleSec(sec.id)">
+            <i class="ph-bold mx-sec-caret" :class="secOpen[sec.id] ? 'ph-caret-down' : 'ph-caret-right'"></i>
+            <span class="mx-sec-t">{{ sec.title }}</span>
+            <span v-if="sec.note" class="mx-sec-tag">{{ sec.note }}</span>
+            <span class="mx-sec-cp" :class="{ done: copied === sec.id }" role="button" :title="`Copy ${sec.title}`" @click.stop="copySection(sec.id)">
+              <i class="ph-bold" :class="copied === sec.id ? 'ph-check' : 'ph-copy'"></i>
+            </span>
+          </button>
+          <div v-show="secOpen[sec.id]" class="mx-sec-b">
+            <label v-for="f in sec.fields" :key="f.k" class="mx-row">
+              <span class="mx-row-l">{{ f.label }}</span>
+              <input class="mx-row-s" type="range" :min="f.min" :max="f.max" :step="f.step" v-model.number="tune[f.k]" />
+              <input class="mx-row-n" type="number" :step="f.step" v-model.number="tune[f.k]" />
+              <span class="mx-row-u">{{ f.unit }}</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Exploded layers (frame 4): gap + per-layer offset + show/hide -->
+        <section class="mx-sec">
+          <button class="mx-sec-h" @click="toggleSec('explode')">
+            <i class="ph-bold mx-sec-caret" :class="secOpen.explode ? 'ph-caret-down' : 'ph-caret-right'"></i>
+            <span class="mx-sec-t">Exploded layers</span>
+            <span class="mx-sec-tag">frame 4</span>
+            <span class="mx-sec-cp" :class="{ done: copied === 'explode' }" role="button" title="Copy layers" @click.stop="copyExplode">
+              <i class="ph-bold" :class="copied === 'explode' ? 'ph-check' : 'ph-copy'"></i>
+            </span>
+          </button>
+          <div v-show="secOpen.explode" class="mx-sec-b">
+            <label class="mx-row">
+              <span class="mx-row-l">gap</span>
+              <input class="mx-row-s" type="range" min="0" max="90" step="1" v-model.number="explode.gap" />
+              <input class="mx-row-n" type="number" step="1" v-model.number="explode.gap" />
+              <span class="mx-row-u">mm</span>
+            </label>
+            <div v-for="p in EXPLODE_PARTS" :key="p" class="mx-lyr">
+              <button class="mx-lyr-eye" :class="{ off: explode.hidden[p] }" @click="explode.hidden[p] = !explode.hidden[p]" :title="explode.hidden[p] ? 'Show layer' : 'Hide layer'">
+                <i class="ph-bold" :class="explode.hidden[p] ? 'ph-eye-slash' : 'ph-eye'"></i>
+              </button>
+              <span class="mx-lyr-name">{{ p }}</span>
+              <input class="mx-row-s" type="range" min="-120" max="120" step="1" v-model.number="explode.offset[p]" />
+              <input class="mx-row-n" type="number" step="1" v-model.number="explode.offset[p]" />
+            </div>
+          </div>
+        </section>
+
+        <button class="mx-copy mx-copy--all" :class="{ done: copied === 'all' }" @click="copyTune">
+          <i class="ph-bold" :class="copied === 'all' ? 'ph-check' : 'ph-clipboard-text'"></i>
+          {{ copied === 'all' ? 'Copied all values' : 'Copy all tune values' }}
+        </button>
+        <p class="mx-debug-hint">Editing for <b>{{ debugPhone ? 'phone' : 'desktop' }}</b>. Drag a slider (or the model) live, then copy a section or all, and paste it to me.</p>
       </div>
     </div>
   </div>
@@ -1412,7 +1706,7 @@ onBeforeUnmount(() => {
   .mx-parts { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
   .mx-parts::-webkit-scrollbar { display: none; }
   .mx-part-tab { flex: 0 0 auto; }
-  .mx-debug { width: 160px; font-size: 0.66rem; }
+  .mx-debug { width: min(76vw, 230px); font-size: 0.68rem; }
   .mx-scale { font-size: 0.58rem; top: 8px; padding: 0.18rem 0.5rem; }
 }
 .mx-vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2;
@@ -1455,19 +1749,60 @@ onBeforeUnmount(() => {
 .mx-swatch:hover { transform: translateY(-2px); }
 .mx-swatch.active { box-shadow: 0 0 0 2px #11131a, 0 0 0 4px #ff6c1e; }
 
-.mx-debug { position: absolute; top: 54px; right: 10px; z-index: 5; width: 184px; background: rgba(10,10,12,0.82); border: 1px solid rgba(255,255,255,0.14); border-radius: 0.6rem; padding: 0.6rem 0.7rem; color: #e7ddca; backdrop-filter: blur(10px); font-size: 0.72rem; }
-.mx-debug-h { display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #ff9a5c; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.6rem; margin-bottom: 0.4rem; }
-.mx-debug-seg { display: flex; gap: 2px; margin-bottom: 0.5rem; background: rgba(255,255,255,0.07); border-radius: 6px; padding: 2px; }
-.mx-debug-seg button { flex: 1; border: none; background: transparent; color: #cdbfa6; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.25rem; border-radius: 4px; cursor: pointer; }
+.mx-debug { position: absolute; top: 54px; right: 10px; z-index: 5; width: 248px; max-height: calc(100% - 66px); overflow-y: auto; background: rgba(12,13,17,0.9); border: 1px solid rgba(255,255,255,0.14); border-radius: 0.7rem; padding: 0.7rem 0.75rem; color: #e7ddca; backdrop-filter: blur(12px); font-size: 0.72rem; box-shadow: 0 10px 30px rgba(0,0,0,0.45); scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.25) transparent; }
+.mx-debug::-webkit-scrollbar { width: 7px; }
+.mx-debug::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 99px; }
+.mx-dbg-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; }
+.mx-dbg-title { display: inline-flex; align-items: center; gap: 0.35rem; font-family: "Fraunces", serif; font-weight: 800; font-size: 0.92rem; color: #faf3e8; }
+.mx-debug-x { background: none; border: none; color: #b8ab93; font-size: 1.15rem; cursor: pointer; line-height: 1; padding: 0 0.15rem; transition: color 0.15s; }
+.mx-debug-x:hover { color: #ff7a1a; }
+.mx-debug-seg { display: flex; gap: 3px; margin-bottom: 0.6rem; background: rgba(255,255,255,0.07); border-radius: 8px; padding: 3px; }
+.mx-debug-seg button { flex: 1; border: none; background: transparent; color: #cdbfa6; font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.32rem; border-radius: 6px; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .mx-debug-seg button.active { background: #ff7a1a; color: #1a1a1a; }
-.mx-debug-x { background: none; border: none; color: #e7ddca; font-size: 1rem; cursor: pointer; line-height: 1; }
-.mx-debug dl { display: flex; flex-direction: column; gap: 0.2rem; margin: 0; }
-.mx-debug dl > div { display: flex; justify-content: space-between; gap: 0.5rem; font-variant-numeric: tabular-nums; }
-.mx-debug dt { color: #9a8f7c; }
-.mx-debug dd { margin: 0; font-weight: 600; }
-.mx-debug-copy { margin-top: 0.5rem; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.35rem; border-radius: 0.45rem; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,108,30,0.15); color: #ffb486; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
-.mx-debug-hint { margin-top: 0.4rem; font-size: 0.6rem; color: #8f8674; line-height: 1.35; }
-.mx-tune { display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem 0.4rem; margin-top: 0.35rem; }
-.mx-tune label { display: flex; align-items: center; justify-content: space-between; gap: 0.3rem; font-size: 0.6rem; color: #b8ab93; }
-.mx-tune input { width: 3.2rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.25rem; color: #faf3e8; font-size: 0.62rem; padding: 0.1rem 0.25rem; }
+
+/* collapsible sections */
+.mx-sec { border-top: 1px solid rgba(255,255,255,0.09); }
+.mx-sec:first-of-type { border-top: none; }
+.mx-sec-h { display: flex; align-items: center; gap: 0.4rem; width: 100%; padding: 0.5rem 0.1rem; background: none; border: none; cursor: pointer; color: inherit; text-align: left; }
+.mx-sec-caret { font-size: 0.7rem; color: #8f8674; width: 0.8rem; flex-shrink: 0; }
+.mx-sec-t { font-weight: 800; font-size: 0.74rem; color: #faf3e8; }
+.mx-sec-tag { font-size: 0.54rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #1a1a1a; background: #ffb163; padding: 0.05rem 0.34rem; border-radius: 99px; white-space: nowrap; }
+.mx-sec-live { margin-left: auto; font-size: 0.62rem; color: #9a8f7c; font-variant-numeric: tabular-nums; }
+.mx-sec-cp { margin-left: auto; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; color: #b8ab93; transition: background 0.15s, color 0.15s; }
+.mx-sec-cp:hover { background: rgba(255,108,30,0.18); color: #ffb486; }
+.mx-sec-cp.done { color: #6fd08a; }
+.mx-sec-b { padding: 0.1rem 0 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; }
+
+/* read-only camera grid */
+.mx-read { display: flex; flex-direction: column; gap: 0.18rem; padding: 0.1rem 0 0.35rem; }
+.mx-read > div { display: flex; justify-content: space-between; gap: 0.6rem; font-variant-numeric: tabular-nums; }
+.mx-read span { color: #9a8f7c; }
+.mx-read b { font-weight: 600; color: #faf3e8; }
+
+/* slider + number row */
+.mx-row { display: grid; grid-template-columns: 3.4rem 1fr 2.9rem 1.1rem; align-items: center; gap: 0.4rem; }
+.mx-row-l { font-size: 0.66rem; color: #cdbfa6; text-transform: capitalize; }
+.mx-row-s { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 99px; background: rgba(255,255,255,0.16); cursor: pointer; }
+.mx-row-s::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 13px; height: 13px; border-radius: 50%; background: #ff7a1a; border: 2px solid #14151b; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+.mx-row-s::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: #ff7a1a; border: 2px solid #14151b; cursor: pointer; }
+.mx-row-s:hover::-webkit-slider-thumb { background: #ff9445; }
+.mx-row-n { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 0.3rem; color: #faf3e8; font-size: 0.66rem; padding: 0.16rem 0.3rem; text-align: right; font-variant-numeric: tabular-nums; }
+.mx-row-n:focus { outline: none; border-color: #ff7a1a; }
+.mx-row-u { font-size: 0.58rem; color: #8f8674; }
+
+/* exploded-layer row: eye toggle + name + slider + number */
+.mx-lyr { display: grid; grid-template-columns: 1.3rem 3.2rem 1fr 2.9rem; align-items: center; gap: 0.4rem; }
+.mx-lyr-eye { width: 1.3rem; height: 1.3rem; display: inline-flex; align-items: center; justify-content: center; border: none; border-radius: 5px; background: rgba(255,255,255,0.07); color: #cdbfa6; font-size: 0.66rem; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.mx-lyr-eye:hover { background: rgba(255,255,255,0.14); }
+.mx-lyr-eye.off { color: #6b6256; }
+.mx-lyr-name { font-size: 0.64rem; color: #cdbfa6; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; }
+.mx-sec-b .mx-copy { margin-top: 0.4rem; }
+
+/* copy buttons */
+.mx-copy { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,108,30,0.15); color: #ffb486; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+.mx-copy:hover { background: rgba(255,108,30,0.28); border-color: rgba(255,122,26,0.6); }
+.mx-copy.done { background: rgba(70,176,106,0.2); border-color: rgba(70,176,106,0.5); color: #8fe0a6; }
+.mx-copy--all { margin-top: 0.6rem; background: #ff6c1e; border-color: #ff6c1e; color: #14151b; }
+.mx-copy--all:hover { background: #ff7d33; border-color: #ff7d33; }
+.mx-debug-hint { margin-top: 0.45rem; font-size: 0.6rem; color: #8f8674; line-height: 1.4; }
 </style>

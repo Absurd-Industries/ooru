@@ -133,7 +133,8 @@ export const corydoraLanding: ProductLanding = {
       mode: "Studio",
       oled: "swap",
       isolate: ["pcb", "switches"],
-      cam: { pos: [-132.8, 161.2, 83.1], target: [-25.6, 26.9, 8.6] },
+      cam: { pos: [-249.2, 204.2, 60.8], target: [-22.2, 38.8, -12.5] }, // az -72.1°, polar 55.3°, dist 290 - framed for the hover sphere
+
       camMobile: { pos: [-241.9, 313.6, 157.7], target: [-19.4, 34.9, 3.1] },
       panelMobile: { x: 0, z: 75 },
     },
@@ -144,9 +145,9 @@ export const corydoraLanding: ProductLanding = {
       title: "The case is yours to print",
       body: "A three-part PETG/PLA case with a snap-in trim ring. Print spares, tweak the colours, or remix it entirely.",
       mode: "Exploded",
-      oled: "case",
+      oled: "off",
       isolate: [],
-      cam: { pos: [-331.7, 249.6, 17.9], target: [-3.4, 42, -8.6] },
+      cam: { pos: [-201.1, 178.5, -224.4], target: [-3.4, 42, -8.6] }, // az -137.5°, polar 65°, dist 323
       camMobile: { pos: [-275.2, 361.8, -181.2], target: [2.6, 55.5, -10.4] },
       panelMobile: { x: 0, z: 75 },
       files: ["Case_top.stl", "Case_Bottom.stl", "Case_trim.stl", "CoryDora_Fully_Assembled_v1.2.step"],

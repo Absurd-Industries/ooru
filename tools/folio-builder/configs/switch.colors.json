@@ -1,0 +1,12 @@
+{
+  "_comment": "Per-part materials for _reference/assets/switch.step (a single MX-style switch), so the frame-3 hover pile shows a real housing / coloured stem / copper pins instead of grey clay. Solids bucket cleanly by volume: housing ~600-1100, stem/slider ~30-50, pins/contacts <=6. The stem colour is re-tinted per instance in ModelExperience to suggest different switch types.",
+  "tolerance": 0.12,
+  "yUp": true,
+  "separate": true,
+  "fallback": { "name": "interior", "color": "#2A2A2E" },
+  "rules": [
+    { "name": "pins",  "color": "#B87333", "volMax": 8 },
+    { "name": "stem",  "color": "#D23B3B", "volMin": 20, "volMax": 120 },
+    { "name": "body",  "color": "#2A2A2E", "volMin": 300 }
+  ]
+}

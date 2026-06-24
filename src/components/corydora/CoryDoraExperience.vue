@@ -78,6 +78,10 @@ function applyScene(i: number) {
   const cam = (isPhone.value && s.camMobile) ? s.camMobile : s.cam;
   if (cam) v.frameTo(cam, s.isolate);
   if (s.oled) v.setOled?.(s.oled);
+  // frame 3 only: rain a little pile of switches in to show the hot-swap idea
+  v.setSwitchPile?.(s.id === "hotswap");
+  // frame 4 (the case): auto-cycle case + trim colourways to show it's remixable
+  v.setRemix?.(s.id === "case");
   // everything printed on the floor around the model, in editorial type
   v.setStoryFloor?.({
     eyebrow: s.eyebrow,
@@ -100,7 +104,7 @@ function enterTour() { view.value = "tour"; applyScene(active.value); }
 function enterCustomize() {
   view.value = "customize";
   const v = viewer.value; if (!v) return;
-  v.setMode("Studio"); v.isolate([]);
+  v.setMode("Studio"); v.isolate([]); v.setSwitchPile?.(false); v.setRemix?.(false);
   const cam = (isPhone.value && props.customizeCamMobile) ? props.customizeCamMobile : scene.value?.cam;
   if (cam) v.frameTo(cam);
   // print the customise heading on the floor too (like the tour chapters)
