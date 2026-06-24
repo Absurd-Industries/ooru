@@ -25,7 +25,10 @@ const props = defineProps<{
   files?: ProjectFile[];
   specs?: ProjectSpec[];
   license?: string;
+  /** colourway of the field unit we zoomed into - the story continues from it */
+  introColors?: Record<string, string>;
 }>();
+const emit = defineEmits<{ ready: [] }>();
 
 const viewer = ref<any>(null);
 const view = ref<"tour" | "customize">("tour");
@@ -182,13 +185,19 @@ watch(
   (r) => {
     if (!r || started.value) return;
     started.value = true;
-    if (incomingBuild) {
+    if (props.introColors && Object.keys(props.introColors).length) {
+      // continue from the field unit we zoomed into: adopt its colourway, open at frame 0
+      for (const id in props.introColors) { config[id] = props.introColors[id]; viewer.value.setPartColor(id, props.introColors[id]); }
+      persistBuild();
+      applyScene(0);
+    } else if (incomingBuild) {
       // a shared build is just a PREVIEW - not the user's cart until they tweak it
       for (const p of PARTS) viewer.value.setPartColor(p.id, config[p.id]);
       enterCustomize();
     } else {
       applyScene(0);
     }
+    emit("ready");
   },
   { immediate: true }
 );
