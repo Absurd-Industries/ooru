@@ -610,11 +610,37 @@ function setMode(which: number | string) {
 }
 function isolate(parts?: string[]) { if (!parts || !parts.length) restoreAll(); else showOnly(parts); }
 function frameTo(cam: Cam, parts?: string[]) { frameCam(cam, radiusOf(parts)); }
+
+// ── studio helpers: capture the live camera, map a cursor to the floor, and
+//    place arbitrary floor text (the Figma-on-the-floor authoring tool) ──
+function getCam(): Cam {
+  const st = S.value; const r = (n: number) => Math.round(n * 10) / 10;
+  const p = st.camera.position, t = st.controls.target;
+  return { pos: [r(p.x), r(p.y), r(p.z)], target: [r(t.x), r(t.y), r(t.z)] };
+}
+const _floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+const _floorRay = new THREE.Raycaster();
+function groundPoint(clientX: number, clientY: number): { x: number; z: number } | null {
+  const st = S.value; if (!st) return null;
+  const rect = st.renderer.domElement.getBoundingClientRect();
+  const ndc = new THREE.Vector2(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+  _floorRay.setFromCamera(ndc, st.camera);
+  const hit = new THREE.Vector3();
+  if (!_floorRay.ray.intersectPlane(_floorPlane, hit)) return null;
+  return { x: Math.round(hit.x * 10) / 10, z: Math.round(hit.z * 10) / 10 };
+}
+function setFloorItems(specs: FloorSpec[]) {
+  setFloorLabels(specs);
+  const st = S.value; if (st) for (const fl of st.floorLabels) if (fl.mesh.visible) fl.mat.opacity = 1;
+}
+function floorCapacity(): number { return S.value?.floorLabels.length ?? 0; }
+
 defineExpose({
   parts: PARTS, modes: MODES, ready,
   setPartColor, getConfig, goStep, setMode, isolate, frameTo,
   setStoryFloor, setDims, setFloorLogo, setOled, toggleDebug, flashPart,
   enterTour, enterCustomize, cycleMode,
+  getCam, groundPoint, setFloorItems, floorCapacity,
 });
 
 // ── dimension lines ──

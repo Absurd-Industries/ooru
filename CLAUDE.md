@@ -75,12 +75,52 @@ All mock data lives in `src/data/*.ts` as typed arrays. Each file exports a cons
 shaped like what a future Cloudflare D1 API would return. When the API is built, swap the
 import for a fetch call - the types stay the same.
 
-- `campaigns.ts` - campaign listings (INR only)
-- `makers.ts` - maker profiles
+- `campaigns.ts` - campaign listings (INR only); `richLayout: true` swaps in the bespoke page
+- `projects.ts` - project folios (specs, BOM, files, build/onboarding guides, model)
+- `makers.ts` - maker profiles (incl. `timeline`)
+- `corydora-landing.ts` - CoryDora flagship content (hero, journey scenes, tiers)
+- `corydora-parts.ts` - 3D customizer parts + swatch options
 - `events.ts` - Bengaluru-first STEAM events
 - `requests.ts` - community requests
 - `friends.ts` - partner logos for "Friends of Absurd"
 - `navigation.ts` - bottom bar tabs and mega menu items
+
+## CoryDora Visualizer (flagship 3D campaign)
+
+`/balub/corydora` is a bespoke immersive 3D experience and the template for "rich" campaigns
+going forward. Because Astro islands are isolated, the whole interactive surface is **one Vue
+island** that embeds the viewer and drives it through `defineExpose`:
+
+- `components/ModelExperience.vue` - the Three.js viewer (GLTF+Draco, OrbitControls, HDR env,
+  bloom, AgX tone-map). Generic + reusable; exposes an API, holds no CoryDora specifics.
+- `components/corydora/CoryDoraExperience.vue` - the single island: embeds `<ModelExperience ref>`
+  and runs the scroll tour, the live colour customizer, and the reserve/share/cart flow.
+- `components/corydora/CoryDoraLanding.astro` - puts the island in `GenericCampaign`'s
+  `<slot name="top">`; below it is the standard campaign body fed CoryDora data.
+
+**Routing:** `Campaign.richLayout` makes `[maker]/[campaign].astro` render `CoryDoraLanding`
+instead of `GenericCampaign`.
+
+**Viewer API (`defineExpose`):** `ready`, `frameTo(cam, parts)`, `setMode(label)`,
+`isolate(parts)`, `setPartColor`/`getConfig`, `setStoryFloor(opts)`, `setFloorLogo`, `setDims`,
+`setOled(program)`, `flashPart`, `enterTour`/`enterCustomize`, `toggleDebug`.
+
+**Journey scene** (`LandingScene` in `corydora-landing.ts`): `{ id, eyebrow?, script?, bigType?,
+title, body, mode?, oled?, isolate?, cam, camMobile?, panelMobile?, files?, spec? }`. Advancing a
+chapter reframes the camera, ghosts non-isolated parts, switches render `mode`, drives the OLED,
+and prints editorial copy on the floor via `setStoryFloor`.
+
+**Mobile:** scenes carry phone-specific `camMobile` + `panelMobile`, applied below 720px; stage is
+`90svh` on phones.
+
+**OLED:** a simulated 128x32 emissive plane; `setOled(program)` switches screens (`hello`, `boot`,
+`swap`, `case`, `via`). On the VIA chapter the encoder glows until clicked; a click cycles 4 layers
+and shows a floor "layer map".
+
+**`?debug`:** opens a live tuner - drag the model for a camera frame, nudge floor/logo/OLED/map
+positions, toggle Phone/Desktop, then **Copy frame** / **Copy tune** to paste values back into the
+scene data or the constants at the top of `ModelExperience.vue` (`STORY_PANEL_OFFSET`, `LOGO_POS`/
+`LOGO_LONG`, `OLED_POS`/`OLED_SIZE`/`OLED_ROT`, `MAP_OFFSET`/`MAP_H`).
 
 ## Deployment
 

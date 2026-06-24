@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import VisualizerStudio from "../../components/dev/VisualizerStudio.vue";
+
+// Dev-only authoring tool for the 3D visualizer: drop a GLB, capture camera
+// frames, and write/move floor text WYSIWYG. No private data.
+---
+
+<BaseLayout
+  title="Visualizer Studio"
+  description="Author 3D folios: drop a GLB, capture frames, write on the floor."
+  noindex={true}
+  hideNav={true}
+  activeTab=""
+>
+  <VisualizerStudio client:only="vue" />
+</BaseLayout>
+
+<style is:global>
+  /* full-bleed tool: drop BaseLayout's page chrome around it */
+  body { overflow: hidden; }
+  footer, .bottom-bar { display: none !important; }
+</style>
