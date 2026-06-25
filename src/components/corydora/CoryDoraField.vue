@@ -19,7 +19,7 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { PARTS } from "../../data/corydora-parts";
 import { drawScreen } from "../../lib/corydora-screens";
 
-const props = defineProps<{ src: string }>();
+const props = defineProps<{ src: string; fill?: boolean }>();
 
 const wrap = ref<HTMLDivElement | null>(null);
 const loading = ref(true);
@@ -485,7 +485,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="cf">
+    <div class="cf" :class="{ 'cf--fill': fill }">
         <div class="cf-stage" ref="wrap"></div>
         <div class="cf-top"></div>
     </div>
@@ -499,6 +499,10 @@ onBeforeUnmount(() => {
     min-height: 360px;
     background: #12141a;
     overflow: hidden;
+}
+.cf--fill {
+    height: 100%;
+    min-height: 0;
 }
 .cf-stage {
     position: absolute;
