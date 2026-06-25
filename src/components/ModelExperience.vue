@@ -192,7 +192,10 @@ onMounted(() => {
 
   const w = wrap.clientWidth || 800, h = wrap.clientHeight || 460;
   renderer.setSize(w, h);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); // cap: full-screen bloom/shadows on retina are fill-rate heavy
+  // phone canvas is physically small, so it can afford full DPR and stay sharp; desktop
+  // is full-screen where bloom/shadow fill-rate is heavy, so cap it lower.
+  const _phone = window.matchMedia("(max-width: 720px)").matches;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, _phone ? 2 : 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.AgXToneMapping;
