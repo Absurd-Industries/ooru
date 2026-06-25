@@ -1,0 +1,41 @@
+---
+/**
+ * Experiment: an ambient "sea" of CoryDoras (the former CoryDora-page footer).
+ * Lives under /dev so it can be iterated without loading on the live campaign page.
+ */
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import CoryDoraField from "../../../components/corydora/CoryDoraField.vue";
+import { projects } from "../../../data/projects";
+import { corydoraLanding as L } from "../../../data/corydora-landing";
+
+const project = projects.find((p) => p.slug === L.projectSlug);
+---
+
+<BaseLayout
+  title="Experiment · Sea of CoryDoras"
+  description="Ambient instanced field of CoryDoras with generative OLED screens."
+  noindex={true}
+  activeTab=""
+>
+  <a href="/dev" class="exp-back"><i class="ph-bold ph-arrow-left"></i> Dev</a>
+  <div class="exp-stage">
+    {
+      project?.modelUrl ? (
+        <CoryDoraField src={project.modelUrl} client:load />
+      ) : (
+        <p class="exp-missing">No CoryDora model found.</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .exp-back {
+    position: fixed; top: 12px; left: 12px; z-index: 20; display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; text-decoration: none;
+    background: rgba(10, 10, 12, 0.6); color: #faf3e8; border: 1px solid rgba(255, 255, 255, 0.18); backdrop-filter: blur(8px);
+  }
+  .exp-back:hover { border-color: #ff6c1e; color: #ff9a5c; }
+  .exp-stage { width: 100%; background: #12141a; }
+  .exp-missing { display: grid; place-items: center; height: 60svh; color: #cbb89a; }
+</style>

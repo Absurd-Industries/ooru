@@ -6,17 +6,17 @@
  */
 import GenericCampaign from "../GenericCampaign.astro";
 import CoryDoraExperience from "./CoryDoraExperience.vue";
-import CoryDoraField from "./CoryDoraField.vue";
 import { projects } from "../../data/projects";
 import { corydoraLanding as L } from "../../data/corydora-landing";
 import type { Campaign } from "../../types";
 
+// The "sea of CoryDoras" footer moved to /dev/experiments/cory-sea (kept the campaign
+// page to a single WebGL context for performance).
 interface Props {
     campaign: Campaign;
 }
 const { campaign } = Astro.props;
 const project = projects.find((p) => p.slug === L.projectSlug);
-const SHOW_FOOTER = false; // footer "sea" - off for a perf test; flip to true to restore
 ---
 
 <GenericCampaign campaign={campaign}>
@@ -39,11 +39,6 @@ const SHOW_FOOTER = false; // footer "sea" - off for a perf test; flip to true t
             ) : null
         }
     </section>
-    {
-        SHOW_FOOTER && project?.modelUrl ? (
-            <CoryDoraField slot="bottom" src={project.modelUrl} client:visible />
-        ) : null
-    }
 </GenericCampaign>
 
 <style>

@@ -223,6 +223,14 @@ onMounted(() => {
     }[] = [];
     const rowSign = new Float32Array(COUNT),
         baseX = new Float32Array(COUNT);
+    // live OLED screens (redrawn at a throttled rate for animation)
+    const screens: {
+        ctx: CanvasRenderingContext2D;
+        tex: THREE.CanvasTexture;
+        seed: number;
+        phase: number;
+    }[] = [];
+    let lastOled = 0;
 
     const draco = new DRACOLoader().setDecoderPath("/draco/");
     new GLTFLoader().setDRACOLoader(draco).load(
@@ -368,8 +376,9 @@ onMounted(() => {
                 im.renderOrder = 2;
                 scene.add(im);
                 oledMeshes.push(im);
-                drawScreen(ctx, 128, 32, grp.seed, 0); // rendered ONCE - static (no per-frame redraw)
+                drawScreen(ctx, 128, 32, grp.seed, 0);
                 tex.needsUpdate = true;
+                screens.push({ ctx, tex, seed: grp.seed, phase: grp.phase });
                 oledAnimArr.push({ im, members: grp.members, baseX: obx });
             }
             oledAnim = oledAnimArr;
@@ -425,6 +434,14 @@ onMounted(() => {
             for (let j = 0; j < od.members.length; j++)
                 arr[j * 16 + 12] = od.baseX[j] + rowSign[od.members[j]] * S;
             od.im.instanceMatrix.needsUpdate = true;
+        }
+        if (now - lastOled > 100) {
+            // ~10fps screen refresh - the generative widgets animate again
+            lastOled = now;
+            for (const s of screens) {
+                drawScreen(s.ctx, 128, 32, s.seed, t + s.phase);
+                s.tex.needsUpdate = true;
+            }
         }
         renderer.render(scene, camera);
     }
