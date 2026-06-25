@@ -192,7 +192,7 @@ onMounted(() => {
 
   const w = wrap.clientWidth || 800, h = wrap.clientHeight || 460;
   renderer.setSize(w, h);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75)); // cap: full-screen bloom on retina is heavy
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); // cap: full-screen bloom/shadows on retina are fill-rate heavy
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.AgXToneMapping;
@@ -219,7 +219,7 @@ onMounted(() => {
   // ── Lighting: warm key + soft hemisphere lift + cool fill + colour rims ──
   const key = new THREE.DirectionalLight(0xfff3e2, 2.7);
   key.position.set(150, 300, 170); key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.mapSize.set(1024, 1024); // 1k is plenty for one small model; halves shadow-pass cost
   key.shadow.camera.near = 20; key.shadow.camera.far = 1100; key.shadow.bias = -0.0004; key.shadow.radius = 9;
   Object.assign(key.shadow.camera as THREE.OrthographicCamera, { left: -200, right: 200, top: 200, bottom: -200 });
   scene.add(key);
@@ -430,7 +430,7 @@ onMounted(() => {
     }
     if (st.oled && st.oled.mesh.visible) {
       const now = performance.now();
-      if (now - (st._oledT || 0) > 70) { drawOled(st.oled, now); st._oledT = now; } // ~14fps is plenty
+      if (now - (st._oledT || 0) > 120) { drawOled(st.oled, now); st._oledT = now; } // ~8fps - tiny screen, cuts the generative-screen redraw cost
     }
     // gently pulse the encoder so people know to click it - until they do, once
     if (st.knobHint && st.meshes.knob) {
@@ -1238,23 +1238,28 @@ function drawOled(o: any, t: number) {
   } else if (p === "hello") {
     // greet, then loop the footer's generative "people around the world" screens,
     // fading between each (two offscreen buffers crossfaded on the OLED canvas)
+    // Each screen is drawn ONCE to an offscreen buffer (text rasterisation is the
+    // expensive bit), then only composited/crossfaded per frame - so this no longer
+    // re-renders glyphs every frame (that was the panning hitch).
     if (!o.world) {
       const mk = () => { const cv = document.createElement("canvas"); cv.width = W; cv.height = H; return { cv, cx: cv.getContext("2d") as CanvasRenderingContext2D }; };
-      o.world = { start: t, a: mk(), b: mk(), seedA: (Math.random() * 1e9) | 0, seedB: 0, fade: 0, nextAt: t + 1700 + 3200 };
+      const a = mk(), b = mk(), seedA = (Math.random() * 1e9) | 0;
+      drawScreen(a.cx, W, H, seedA, 0); // render once
+      o.world = { start: t, a, b, seedA, seedB: 0, fade: 0, nextAt: t + 1700 + 3200 };
     }
-    const ws = o.world, sec = t / 1000;
+    const ws = o.world;
     if (t - ws.start < 1700) {
       ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.font = '700 15px "Fraunces", serif';
       ctx.fillText("Hello!", 6, cy0);
     } else {
-      drawScreen(ws.a.cx, W, H, ws.seedA, sec);
       ctx.globalAlpha = 1; ctx.drawImage(ws.a.cv, 0, 0);
       if (ws.fade) {
         const k = Math.min(1, (t - ws.fade) / 650);
-        drawScreen(ws.b.cx, W, H, ws.seedB, sec);
         ctx.globalAlpha = k; ctx.drawImage(ws.b.cv, 0, 0); ctx.globalAlpha = 1;
         if (k >= 1) { ws.seedA = ws.seedB; const tmp = ws.a; ws.a = ws.b; ws.b = tmp; ws.fade = 0; ws.nextAt = t + 3000 + Math.random() * 2000; }
-      } else if (t >= ws.nextAt) { ws.seedB = (Math.random() * 1e9) | 0; ws.fade = t; }
+      } else if (t >= ws.nextAt) { // pick + render the next screen ONCE, then crossfade
+        ws.seedB = (Math.random() * 1e9) | 0; drawScreen(ws.b.cx, W, H, ws.seedB, 0); ws.fade = t;
+      }
     }
   } else { // logo
     ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = '700 18px "Fraunces", serif';

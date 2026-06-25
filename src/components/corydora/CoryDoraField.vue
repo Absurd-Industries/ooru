@@ -15,7 +15,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { PARTS } from "../../data/corydora-parts";
 import { drawScreen } from "../../lib/corydora-screens";
 
@@ -24,6 +24,8 @@ const props = defineProps<{ src: string }>();
 const wrap = ref<HTMLDivElement | null>(null);
 const loading = ref(true);
 let disposed = false;
+let liveId = 0;                       // invalidates in-flight model loads across rebuilds
+let release: (() => void) | null = null;
 const disposers: (() => void)[] = [];
 
 const FIELD_MESHES: Record<string, string> = {
@@ -81,6 +83,24 @@ function radialAlpha(): THREE.Texture {
 onMounted(() => {
     const el = wrap.value;
     if (!el) return;
+    let built = false;
+    let onscreen = true;
+    let teardownTimer: ReturnType<typeof setTimeout> | undefined;
+
+    // Fully release the WebGL context + GPU memory when scrolled away (not just pause
+    // the loop), so the footer stops eating RAM while you're up at the story. Rebuilds
+    // (re-loads the cached GLB) when it scrolls back into view.
+    const teardown = () => {
+        if (!built) return;
+        built = false; liveId++; // invalidate any in-flight model load
+        disposers.forEach((d) => d());
+        disposers.length = 0;
+        loading.value = true;
+    };
+    const build = () => {
+        if (built || disposed) return;
+        built = true;
+        const myId = ++liveId;
     const isPhone = window.matchMedia("(max-width: 720px)").matches;
     const COUNT = isPhone ? 36 : 36; // +25% density
 
@@ -135,12 +155,18 @@ onMounted(() => {
     rimB.position.set(-150, 30, -160);
     scene.add(rimB);
 
-    // soft procedural environment for subtle PBR reflections (kept dim via the
-    // materials' envMapIntensity so it doesn't wash the colours) - cheap, built once.
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    pmrem.dispose();
-    disposers.push(() => scene.environment?.dispose());
+    // same soft studio HDR the main viewer uses - its smooth gradient reflects cleanly
+    // off the flat case panels (RoomEnvironment's hard light strips warped them).
+    new RGBELoader().load("/hdr/studio.hdr", (hdr) => {
+        if (disposed || myId !== liveId) return;
+        hdr.mapping = THREE.EquirectangularReflectionMapping;
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        const env = pmrem.fromEquirectangular(hdr).texture;
+        scene.environment = env;
+        hdr.dispose();
+        pmrem.dispose();
+        disposers.push(() => env.dispose());
+    });
 
     const cols = Math.round(Math.sqrt(COUNT));
     const rows = Math.ceil(COUNT / cols);
@@ -178,8 +204,8 @@ onMounted(() => {
     controls.target.set(280, -100, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.enableZoom = false;
-    controls.enablePan = false;
+    controls.enableZoom = true;
+    controls.enablePan = true;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.4;
     controls.maxPolarAngle = 1.28; // stay above the floor
@@ -188,13 +214,6 @@ onMounted(() => {
     controls.update();
     disposers.push(() => controls.dispose());
 
-    const screens: {
-        ctx: CanvasRenderingContext2D;
-        tex: THREE.CanvasTexture;
-        seed: number;
-        phase: number;
-    }[] = [];
-    let lastOled = 0;
     // per-instance row sway: alternate rows drift horizontally opposite ways
     let partMeshes: THREE.InstancedMesh[] = [];
     let oledAnim: {
@@ -209,7 +228,7 @@ onMounted(() => {
     new GLTFLoader().setDRACOLoader(draco).load(
         props.src,
         (gltf) => {
-            if (disposed) return;
+            if (disposed || myId !== liveId) return; // torn down / rebuilt while loading
 
             const parts: { name: string; geo: THREE.BufferGeometry }[] = [];
             const box = new THREE.Box3();
@@ -269,9 +288,9 @@ onMounted(() => {
             for (const p of parts) {
                 const mat = new THREE.MeshStandardMaterial({
                     color: 0xffffff,
-                    roughness: 0.52,
+                    roughness: 0.55,
                     metalness: 0.05,
-                    envMapIntensity: 0.5, // soft reflections, not a white wash
+                    envMapIntensity: 1.1, // match the viewer (soft studio HDR, Neutral tonemap)
                 });
                 const im = new THREE.InstancedMesh(p.geo, mat, COUNT);
                 im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -349,9 +368,8 @@ onMounted(() => {
                 im.renderOrder = 2;
                 scene.add(im);
                 oledMeshes.push(im);
-                drawScreen(ctx, 128, 32, grp.seed, 0);
+                drawScreen(ctx, 128, 32, grp.seed, 0); // rendered ONCE - static (no per-frame redraw)
                 tex.needsUpdate = true;
-                screens.push({ ctx, tex, seed: grp.seed, phase: grp.phase });
                 oledAnimArr.push({ im, members: grp.members, baseX: obx });
             }
             oledAnim = oledAnimArr;
@@ -377,14 +395,6 @@ onMounted(() => {
         },
     );
 
-    let onscreen = true;
-    const io = new IntersectionObserver(
-        (es) => {
-            onscreen = es[0].isIntersecting;
-        },
-        { threshold: 0 },
-    );
-    io.observe(el);
     const ro = new ResizeObserver(() => {
         const ww = el.clientWidth,
             hh = el.clientHeight;
@@ -416,30 +426,44 @@ onMounted(() => {
                 arr[j * 16 + 12] = od.baseX[j] + rowSign[od.members[j]] * S;
             od.im.instanceMatrix.needsUpdate = true;
         }
-        if (now - lastOled > 100) {
-            // ~10fps screen refresh is plenty for ambient OLEDs
-            lastOled = now;
-            for (const s of screens) {
-                drawScreen(s.ctx, 128, 32, s.seed, t + s.phase);
-                s.tex.needsUpdate = true;
-            }
-        }
         renderer.render(scene, camera);
     }
     loop();
 
     disposers.push(() => {
         cancelAnimationFrame(raf);
-        io.disconnect();
         ro.disconnect();
         renderer.dispose();
         renderer.domElement.remove();
     });
+    }; // end build()
+
+    // persistent: build on (re)enter, release the GPU context ~3s after leaving view
+    const io = new IntersectionObserver(
+        (es) => {
+            onscreen = es[0].isIntersecting;
+            if (onscreen) {
+                clearTimeout(teardownTimer);
+                build();
+            } else {
+                clearTimeout(teardownTimer);
+                teardownTimer = setTimeout(teardown, 3000);
+            }
+        },
+        { threshold: 0 },
+    );
+    io.observe(el);
+    build(); // client:visible → mounted because in view
+    release = () => {
+        clearTimeout(teardownTimer);
+        io.disconnect();
+        teardown();
+    };
 });
 
 onBeforeUnmount(() => {
     disposed = true;
-    disposers.forEach((d) => d());
+    release?.();
 });
 </script>
 

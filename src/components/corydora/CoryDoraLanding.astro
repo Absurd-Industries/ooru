@@ -16,6 +16,7 @@ interface Props {
 }
 const { campaign } = Astro.props;
 const project = projects.find((p) => p.slug === L.projectSlug);
+const SHOW_FOOTER = false; // footer "sea" - off for a perf test; flip to true to restore
 ---
 
 <GenericCampaign campaign={campaign}>
@@ -39,7 +40,7 @@ const project = projects.find((p) => p.slug === L.projectSlug);
         }
     </section>
     {
-        project?.modelUrl ? (
+        SHOW_FOOTER && project?.modelUrl ? (
             <CoryDoraField slot="bottom" src={project.modelUrl} client:visible />
         ) : null
     }

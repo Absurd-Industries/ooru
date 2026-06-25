@@ -58,8 +58,7 @@ function pick(partId: string, color: string) {
   persistBuild();
   updateUrl();                 // keep the shareable URL live
 }
-// ── "Spin me a theme": a slot-machine roll that lands on a curated combo ──
-const spinning = ref(false);
+// ── random themes: a curated combo (or, 1-in-4, a fully wild roll) ──
 // hand-picked harmonious builds (colours exist in the part palettes)
 const THEMES: Record<string, string>[] = [
   { body: "#0E0E10", trim: "#E25303", keycaps: "#ECEAE3", knob: "#E25303", switches: "#C0392B" }, // stealth
@@ -71,26 +70,16 @@ const THEMES: Record<string, string>[] = [
   { body: "#3A3B3C", trim: "#8C969D", keycaps: "#3A3B40", knob: "#8B97A3", switches: "#1C1C1E" }, // mono
   { body: "#0E0E10", trim: "#00B51B", keycaps: "#ECEAE3", knob: "#FFF600", switches: "#2F6FB0" }, // acid
 ];
-function magicTheme() {
-  const v = viewer.value;
-  if (spinning.value || !v) return;
-  spinning.value = true;
+function randomTheme(): Record<string, string> {
   // 1-in-4 goes fully wild, else a curated theme
-  const theme = Math.random() < 0.25
+  return Math.random() < 0.25
     ? Object.fromEntries(PARTS.map((p) => [p.id, p.options[(Math.random() * p.options.length) | 0].color]))
     : THEMES[(Math.random() * THEMES.length) | 0];
-  let step = 0; const STEPS = 12;
-  const tick = () => {
-    if (step >= STEPS) {                       // land: commit colours, peek the internals
-      for (const p of PARTS) pick(p.id, theme[p.id]);
-      spinning.value = false;
-      return;
-    }
-    for (const p of PARTS) v.setPartColor(p.id, p.options[(Math.random() * p.options.length) | 0].color);
-    step++;
-    setTimeout(tick, 45 + step * 16);          // decelerate so it "lands"
-  };
-  tick();
+}
+function magicTheme() {                         // click → instant (smooth-tweened) random theme
+  if (!viewer.value) return;
+  const theme = randomTheme();
+  for (const p of PARTS) pick(p.id, theme[p.id]);
 }
 function labelFor(partId: string): string {
   const part = PARTS.find((p) => p.id === partId);
@@ -130,7 +119,11 @@ function applyScene(i: number) {
   });
   v.setFloorLogo?.(true);
 }
-const next = () => applyScene(active.value + 1);
+const next = () => {
+  // past the last chapter, flow into Customise instead of looping back to the start
+  if (active.value >= props.journey.length - 1) enterCustomize();
+  else applyScene(active.value + 1);
+};
 const prev = () => applyScene(active.value - 1);
 
 // ── mode switching ──
@@ -221,6 +214,10 @@ watch(
       for (const p of PARTS) viewer.value.setPartColor(p.id, config[p.id]);
       enterCustomize();
     } else {
+      // open on a random colourway so every visit's hero is different
+      const theme = randomTheme();
+      for (const p of PARTS) { config[p.id] = theme[p.id]; viewer.value.setPartColor(p.id, theme[p.id]); }
+      persistBuild();           // reflect it in the page's backing section (not "customised" yet)
       applyScene(0);
     }
   },
@@ -281,9 +278,8 @@ watch(
             <span>Make it yours</span>
             <i class="ph-bold cx-tools-caret" :class="toolsOpen ? 'ph-caret-down' : 'ph-caret-up'"></i>
           </button>
-          <button v-show="toolsOpen" class="cx-magic" :class="{ spinning }" :disabled="spinning" @click="magicTheme">
-            <i class="ph-bold" :class="spinning ? 'ph-circle-notch cx-spin' : 'ph-sparkle'"></i>
-            <span>{{ spinning ? "Spinning…" : "Spin me a theme" }}</span>
+          <button v-show="toolsOpen" class="cx-magic" @click="magicTheme" title="Surprise me with a theme" aria-label="Random theme">
+            <i class="ph-bold ph-sparkle"></i>
           </button>
           <div v-show="toolsOpen" class="cx-tools-list">
           <div v-for="part in PARTS" :key="part.id" class="cx-tool" :class="{ open: openPart === part.id }">
@@ -410,15 +406,12 @@ watch(
 .cx-tools-h { display: flex; align-items: center; gap: 0.5rem; width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;
   font-family: "Fraunces", serif; font-weight: 800; font-size: 1.15rem; color: #faf3e8; margin-bottom: 0.4rem; padding: 0; text-shadow: 0 1px 10px rgba(0,0,0,0.6); }
 .cx-tools-caret { display: none; font-size: 0.9rem; color: #ff9a5c; margin-left: auto; } /* collapse affordance - phone only */
-.cx-magic { display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; margin-bottom: 0.7rem; cursor: pointer;
-  padding: 0.45rem 0.9rem; border-radius: 999px; font-size: 0.82rem; font-weight: 800; color: #14151b;
-  border: none; background: linear-gradient(100deg, #ff8a3c, #ff5900); box-shadow: 0 6px 18px rgba(255,89,0,0.35);
+.cx-magic { display: inline-grid; place-items: center; width: 2.1rem; height: 2.1rem; margin-bottom: 0.7rem; cursor: pointer;
+  border-radius: 999px; font-size: 1rem; color: #14151b; border: none;
+  background: linear-gradient(100deg, #ff8a3c, #ff5900); box-shadow: 0 6px 18px rgba(255,89,0,0.35);
   transition: transform 0.12s, box-shadow 0.12s; }
-.cx-magic:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 9px 24px rgba(255,89,0,0.45); }
-.cx-magic:disabled { cursor: default; }
-.cx-magic.spinning { background: linear-gradient(100deg, #6b5b4a, #8a7560); box-shadow: none; color: #faf3e8; }
-.cx-spin { animation: cx-rot 0.6s linear infinite; }
-@keyframes cx-rot { to { transform: rotate(360deg); } }
+.cx-magic:hover { transform: translateY(-2px) rotate(8deg); box-shadow: 0 9px 24px rgba(255,89,0,0.45); }
+.cx-magic:active { transform: scale(0.92); }
 .cx-tool { background: none; border: none; }
 .cx-tool-head { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.1rem; background: none; border: none; cursor: pointer; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
 .cx-tool-dot { width: 16px; height: 16px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.35); flex-shrink: 0; }
@@ -466,7 +459,7 @@ watch(
 
   /* customiser = a bottom sheet (rows scroll) sitting ABOVE a pinned action bar */
   .cx-tools { top: auto; bottom: 3rem; left: 0; right: 0; width: auto; gap: 0.15rem;
-    padding: 0.7rem 1rem 0.5rem; max-height: 42vh; overflow-y: auto;
+    padding: 0.7rem 1rem 0.5rem; max-height: 21vh; overflow-y: auto;
     background: linear-gradient(to top, rgba(8,9,12,0.92), rgba(8,9,12,0)); }
   .cx-tools-caret { display: inline; } /* tap "Make it yours" to collapse the whole sheet */
   .cx-tools.collapsed { max-height: none; overflow: visible; padding-bottom: 0.4rem;
