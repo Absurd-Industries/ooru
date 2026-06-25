@@ -16,6 +16,7 @@
  */
 import { ref, shallowRef, reactive, watch, onMounted, onBeforeUnmount } from "vue";
 import { PARTS, type PartCfg } from "../data/corydora-parts";
+import { drawScreen } from "../lib/corydora-screens";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -1235,8 +1236,26 @@ function drawOled(o: any, t: number) {
     ctx.font = '400 9px monospace'; ctx.fillText("layout: ortho 3x3", 4, 24);
     ctx.strokeRect(W - 16, 4, 12, 8); // a little glyph
   } else if (p === "hello") {
-    ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.font = '700 15px "Fraunces", serif';
-    ctx.fillText("Hello!", 6, cy0);
+    // greet, then loop the footer's generative "people around the world" screens,
+    // fading between each (two offscreen buffers crossfaded on the OLED canvas)
+    if (!o.world) {
+      const mk = () => { const cv = document.createElement("canvas"); cv.width = W; cv.height = H; return { cv, cx: cv.getContext("2d") as CanvasRenderingContext2D }; };
+      o.world = { start: t, a: mk(), b: mk(), seedA: (Math.random() * 1e9) | 0, seedB: 0, fade: 0, nextAt: t + 1700 + 3200 };
+    }
+    const ws = o.world, sec = t / 1000;
+    if (t - ws.start < 1700) {
+      ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.font = '700 15px "Fraunces", serif';
+      ctx.fillText("Hello!", 6, cy0);
+    } else {
+      drawScreen(ws.a.cx, W, H, ws.seedA, sec);
+      ctx.globalAlpha = 1; ctx.drawImage(ws.a.cv, 0, 0);
+      if (ws.fade) {
+        const k = Math.min(1, (t - ws.fade) / 650);
+        drawScreen(ws.b.cx, W, H, ws.seedB, sec);
+        ctx.globalAlpha = k; ctx.drawImage(ws.b.cv, 0, 0); ctx.globalAlpha = 1;
+        if (k >= 1) { ws.seedA = ws.seedB; const tmp = ws.a; ws.a = ws.b; ws.b = tmp; ws.fade = 0; ws.nextAt = t + 3000 + Math.random() * 2000; }
+      } else if (t >= ws.nextAt) { ws.seedB = (Math.random() * 1e9) | 0; ws.fade = t; }
+    }
   } else { // logo
     ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = '700 18px "Fraunces", serif';
     ctx.fillText("CoryDora", cx0, cy0);

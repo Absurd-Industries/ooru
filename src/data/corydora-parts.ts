@@ -3,9 +3,9 @@
  * the rich customizer UI (CoryDoraExperience), and the opening field hero.
  * A part can drive several meshes (the case = both plates).
  *
- * The printed parts (case / trim / keycaps / knob) use the real Numakers PLA
- * filament catalogue - the colours CoryDora actually ships in. Switches stay as
- * mechanical (Cherry/Gateron) options.
+ * The printed parts (case / trim / knob) use the real Numakers PLA filament
+ * catalogue. Keycaps use standard keycap colours (they're moulded PBT/ABS, not
+ * printed); switches stay mechanical (Cherry/Gateron).
  */
 export interface PartOpt {
   label: string;
@@ -68,10 +68,28 @@ function leadWith(color: string): PartOpt[] {
   return i <= 0 ? NUMAKERS.slice() : [NUMAKERS[i], ...NUMAKERS.slice(0, i), ...NUMAKERS.slice(i + 1)];
 }
 
+// Standard keycap colours from popular sets/brands (moulded PBT/ABS, not printed).
+export const KEYCAPS: PartOpt[] = [
+  { label: "Black", color: "#222226", desc: "PBT black - the everyday classic, legends never fade." },
+  { label: "White", color: "#ECEAE3", desc: "Crisp PBT white. Clean, bright, goes with anything." },
+  { label: "Beige", color: "#E7DCC2", desc: "Retro beige - that vintage terminal look (think SP DCS)." },
+  { label: "Cream", color: "#F2EAD6", desc: "Warm off-white. Soft and premium." },
+  { label: "Dolch Grey", color: "#8A8D91", desc: "Neutral dolch grey. Understated and sharp." },
+  { label: "Charcoal", color: "#3A3B40", desc: "Deep graphite. Stealthy, low-key." },
+  { label: "Navy", color: "#2A3550", desc: "Deep navy - moody and premium (GMK Olivia vibes)." },
+  { label: "Lavender", color: "#B9A3E3", desc: "Soft pastel lavender. An SP Road favourite." },
+  { label: "Purple", color: "#6B4DB3", desc: "Bold purple - the CoryDora signature." },
+  { label: "Pink", color: "#E7A6C6", desc: "Bubblegum pink - make it pop." },
+  { label: "Mint", color: "#9FD8BE", desc: "Fresh mint pastel. Calm and clean." },
+  { label: "Olive", color: "#9CA777", desc: "Muted olive - that GMK Botanical green." },
+  { label: "Red", color: "#BF3B3B", desc: "Classic red modifier accent." },
+  { label: "Yellow", color: "#E8C24A", desc: "Warm mustard yellow - a retro pop." },
+];
+
 export const PARTS: PartCfg[] = [
   { id: "body", label: "Body / case", meshes: ["frontplate", "backplate"], options: leadWith("#0E0E10") },
   { id: "trim", label: "Trim / gasket", meshes: ["trim"], options: leadWith("#E25303") },
-  { id: "keycaps", label: "Keycaps", meshes: ["keycaps"], options: leadWith("#F1ECE1") },
+  { id: "keycaps", label: "Keycaps", meshes: ["keycaps"], options: KEYCAPS },
   {
     id: "switches", label: "Switches", meshes: ["switches"], options: [
       { label: "Cherry MX Red", color: "#C0392B", desc: "Linear · 45g · smooth and quiet. The easy all-rounder, great for gaming." },

@@ -5,7 +5,8 @@
  * with CoryDora's details. No separate "classic" view - this is the one page.
  */
 import GenericCampaign from "../GenericCampaign.astro";
-import CoryDoraOpening from "./CoryDoraOpening.vue";
+import CoryDoraExperience from "./CoryDoraExperience.vue";
+import CoryDoraField from "./CoryDoraField.vue";
 import { projects } from "../../data/projects";
 import { corydoraLanding as L } from "../../data/corydora-landing";
 import type { Campaign } from "../../types";
@@ -21,7 +22,7 @@ const project = projects.find((p) => p.slug === L.projectSlug);
     <section slot="top" class="cd-viewer">
         {
             project?.modelUrl ? (
-                <CoryDoraOpening
+                <CoryDoraExperience
                     src={project.modelUrl}
                     alt={project.title}
                     dimensions={project.modelDimensions}
@@ -37,6 +38,11 @@ const project = projects.find((p) => p.slug === L.projectSlug);
             ) : null
         }
     </section>
+    {
+        project?.modelUrl ? (
+            <CoryDoraField slot="bottom" src={project.modelUrl} client:visible />
+        ) : null
+    }
 </GenericCampaign>
 
 <style>

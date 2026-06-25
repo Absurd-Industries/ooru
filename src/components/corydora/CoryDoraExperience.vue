@@ -25,10 +25,7 @@ const props = defineProps<{
   files?: ProjectFile[];
   specs?: ProjectSpec[];
   license?: string;
-  /** colourway of the field unit we zoomed into - the story continues from it */
-  introColors?: Record<string, string>;
 }>();
-const emit = defineEmits<{ ready: [] }>();
 
 const viewer = ref<any>(null);
 const view = ref<"tour" | "customize">("tour");
@@ -60,6 +57,40 @@ function pick(partId: string, color: string) {
   customized.value = true;     // changing anything makes it the user's live build/cart
   persistBuild();
   updateUrl();                 // keep the shareable URL live
+}
+// ── "Spin me a theme": a slot-machine roll that lands on a curated combo ──
+const spinning = ref(false);
+// hand-picked harmonious builds (colours exist in the part palettes)
+const THEMES: Record<string, string>[] = [
+  { body: "#0E0E10", trim: "#E25303", keycaps: "#ECEAE3", knob: "#E25303", switches: "#C0392B" }, // stealth
+  { body: "#E6D2B5", trim: "#844C82", keycaps: "#E7DCC2", knob: "#844C82", switches: "#6B4A2B" }, // cream + plum
+  { body: "#00387B", trim: "#048B8C", keycaps: "#ECEAE3", knob: "#FFCC33", switches: "#2F6FB0" }, // ocean
+  { body: "#50533C", trim: "#F9A800", keycaps: "#F2EAD6", knob: "#D67842", switches: "#7A5230" }, // forest
+  { body: "#383F44", trim: "#FF4D08", keycaps: "#F2EAD6", knob: "#CC3366", switches: "#C0392B" }, // sunset
+  { body: "#F1ECE1", trim: "#CC3366", keycaps: "#E7A6C6", knob: "#6843B4", switches: "#2F6FB0" }, // bubblegum
+  { body: "#3A3B3C", trim: "#8C969D", keycaps: "#3A3B40", knob: "#8B97A3", switches: "#1C1C1E" }, // mono
+  { body: "#0E0E10", trim: "#00B51B", keycaps: "#ECEAE3", knob: "#FFF600", switches: "#2F6FB0" }, // acid
+];
+function magicTheme() {
+  const v = viewer.value;
+  if (spinning.value || !v) return;
+  spinning.value = true;
+  // 1-in-4 goes fully wild, else a curated theme
+  const theme = Math.random() < 0.25
+    ? Object.fromEntries(PARTS.map((p) => [p.id, p.options[(Math.random() * p.options.length) | 0].color]))
+    : THEMES[(Math.random() * THEMES.length) | 0];
+  let step = 0; const STEPS = 12;
+  const tick = () => {
+    if (step >= STEPS) {                       // land: commit colours, peek the internals
+      for (const p of PARTS) pick(p.id, theme[p.id]);
+      spinning.value = false;
+      return;
+    }
+    for (const p of PARTS) v.setPartColor(p.id, p.options[(Math.random() * p.options.length) | 0].color);
+    step++;
+    setTimeout(tick, 45 + step * 16);          // decelerate so it "lands"
+  };
+  tick();
 }
 function labelFor(partId: string): string {
   const part = PARTS.find((p) => p.id === partId);
@@ -185,19 +216,13 @@ watch(
   (r) => {
     if (!r || started.value) return;
     started.value = true;
-    if (props.introColors && Object.keys(props.introColors).length) {
-      // continue from the field unit we zoomed into: adopt its colourway, open at frame 0
-      for (const id in props.introColors) { config[id] = props.introColors[id]; viewer.value.setPartColor(id, props.introColors[id]); }
-      persistBuild();
-      applyScene(0);
-    } else if (incomingBuild) {
+    if (incomingBuild) {
       // a shared build is just a PREVIEW - not the user's cart until they tweak it
       for (const p of PARTS) viewer.value.setPartColor(p.id, config[p.id]);
       enterCustomize();
     } else {
       applyScene(0);
     }
-    emit("ready");
   },
   { immediate: true }
 );
@@ -255,6 +280,10 @@ watch(
           <button class="cx-tools-h" @click="toolsOpen = !toolsOpen" :aria-expanded="toolsOpen">
             <span>Make it yours</span>
             <i class="ph-bold cx-tools-caret" :class="toolsOpen ? 'ph-caret-down' : 'ph-caret-up'"></i>
+          </button>
+          <button v-show="toolsOpen" class="cx-magic" :class="{ spinning }" :disabled="spinning" @click="magicTheme">
+            <i class="ph-bold" :class="spinning ? 'ph-circle-notch cx-spin' : 'ph-sparkle'"></i>
+            <span>{{ spinning ? "Spinning…" : "Spin me a theme" }}</span>
           </button>
           <div v-show="toolsOpen" class="cx-tools-list">
           <div v-for="part in PARTS" :key="part.id" class="cx-tool" :class="{ open: openPart === part.id }">
@@ -381,6 +410,15 @@ watch(
 .cx-tools-h { display: flex; align-items: center; gap: 0.5rem; width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;
   font-family: "Fraunces", serif; font-weight: 800; font-size: 1.15rem; color: #faf3e8; margin-bottom: 0.4rem; padding: 0; text-shadow: 0 1px 10px rgba(0,0,0,0.6); }
 .cx-tools-caret { display: none; font-size: 0.9rem; color: #ff9a5c; margin-left: auto; } /* collapse affordance - phone only */
+.cx-magic { display: inline-flex; align-items: center; gap: 0.45rem; width: fit-content; margin-bottom: 0.7rem; cursor: pointer;
+  padding: 0.45rem 0.9rem; border-radius: 999px; font-size: 0.82rem; font-weight: 800; color: #14151b;
+  border: none; background: linear-gradient(100deg, #ff8a3c, #ff5900); box-shadow: 0 6px 18px rgba(255,89,0,0.35);
+  transition: transform 0.12s, box-shadow 0.12s; }
+.cx-magic:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 9px 24px rgba(255,89,0,0.45); }
+.cx-magic:disabled { cursor: default; }
+.cx-magic.spinning { background: linear-gradient(100deg, #6b5b4a, #8a7560); box-shadow: none; color: #faf3e8; }
+.cx-spin { animation: cx-rot 0.6s linear infinite; }
+@keyframes cx-rot { to { transform: rotate(360deg); } }
 .cx-tool { background: none; border: none; }
 .cx-tool-head { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.1rem; background: none; border: none; cursor: pointer; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
 .cx-tool-dot { width: 16px; height: 16px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.35); flex-shrink: 0; }
