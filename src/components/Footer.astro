@@ -161,6 +161,13 @@ import ResetData from "./ResetData.vue";
             <p class="text-xs text-stencil">
                 <span class="copyleft">&copy;</span>
                 <span data-i18n="footer.copyright">{t("footer.copyright")}</span>
+                <span class="footer-managed">
+                    · Managed by <a
+                        href="https://absurd.industries"
+                        target="_blank"
+                        rel="noopener">absurd.industries</a
+                    ></span
+                >
             </p>
         </div>
     </div>
@@ -264,5 +271,14 @@ import ResetData from "./ResetData.vue";
         flex-wrap: wrap;
         gap: 1rem;
         margin-bottom: 0.85rem;
+    }
+    .footer-managed a {
+        color: #4a3d2f;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .footer-managed a:hover {
+        color: #d94800;
     }
 </style>

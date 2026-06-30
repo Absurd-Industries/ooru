@@ -875,13 +875,14 @@ html.dark ::-webkit-scrollbar-thumb {
 }
 
 /* Design-preview notice bar (placeholder-data warning). Normal flow so it never
-   fights the sticky TopNav; full-screen experiment overlays simply cover it. */
+   fights the sticky TopNav; full-screen experiment overlays simply cover it.
+   Dark/ink bar with a stamp-orange icon — explicit without shouting. */
 .design-preview-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    background: #ff5900;
+    gap: 0.55rem;
+    background: #1a1a1a;
     color: #faf3e8;
     font-family: "Space Mono", "DM Sans", monospace;
     font-size: 0.7rem;
@@ -892,5 +893,19 @@ html.dark ::-webkit-scrollbar-thumb {
     padding: 0.4rem 1rem;
 }
 .design-preview-bar i {
-    font-size: 0.9rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #ff5900;
+}
+/* Phone: text wraps to two lines — left-align it and bump the icon. */
+@media (max-width: 640px) {
+    .design-preview-bar {
+        justify-content: flex-start;
+        text-align: left;
+        gap: 0.6rem;
+        padding: 0.45rem 0.85rem;
+    }
+    .design-preview-bar i {
+        font-size: 1.3rem;
+    }
 }
