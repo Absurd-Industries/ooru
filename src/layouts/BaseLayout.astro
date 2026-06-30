@@ -11,6 +11,7 @@ import Footer from "../components/Footer.astro";
 import TopNav from "../components/TopNav.vue";
 import BottomBar from "../components/BottomBar.vue";
 import ComingSoon from "../components/ComingSoon.vue";
+import WelcomeModal from "../components/WelcomeModal.vue";
 import DebugPanel from "../components/DebugPanel.vue";
 import I18n from "../components/I18n.astro";
 import "../styles/global.css";
@@ -211,6 +212,7 @@ const jsonLdBlocks = [
         </div>
         <SvgFilters />
         <ComingSoon client:load />
+        <WelcomeModal client:load />
 
         {!hideNav && <TopNav activeTab={activeTab} client:load />}
 
