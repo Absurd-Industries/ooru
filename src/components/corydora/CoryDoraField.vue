@@ -18,11 +18,17 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { PARTS } from "../../data/corydora-parts";
 import { drawScreen } from "../../lib/corydora-screens";
+import { personaForSeed, drawProfileHover, drawProfileOled, type Persona } from "../../lib/corydora-personas";
 
 const props = defineProps<{ src: string; fill?: boolean }>();
+const emit = defineEmits<{ select: [persona: Persona | null] }>();
+let closeFocus: (() => void) | null = null;
+defineExpose({ closeProfile: () => closeFocus?.() });
 
 const wrap = ref<HTMLDivElement | null>(null);
 const loading = ref(true);
+const profileOpen = ref(false);
+const uiClose = () => closeFocus?.();
 let disposed = false;
 let liveId = 0;                       // invalidates in-flight model loads across rebuilds
 let release: (() => void) | null = null;
@@ -117,7 +123,7 @@ onMounted(() => {
     const w = el.clientWidth || 800,
         h = el.clientHeight || 500;
     renderer.setSize(w, h);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.0)); // full-screen field - fill-rate is the cost
     renderer.toneMapping = THREE.NeutralToneMapping; // match the viewer's punchy Studio look (AgX washed it out)
     renderer.toneMappingExposure = 0.98;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -130,7 +136,7 @@ onMounted(() => {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x12141a);
-    scene.fog = new THREE.FogExp2(0x12141a, 0.0005);
+    scene.fog = new THREE.FogExp2(0x12141a, 0.00012); // very light - story's Studio look has none
 
     const camera = new THREE.PerspectiveCamera(
         isPhone ? 40 : 24,
@@ -231,6 +237,15 @@ onMounted(() => {
         phase: number;
     }[] = [];
     let lastOled = 0;
+    // ── click → on-floor profile state (shared between the GLB callback + the loop) ──
+    let backplateMesh: THREE.InstancedMesh | undefined;
+    const personaSeed: number[] = [];
+    let focusId = -1;
+    let focusTween: { fromP: THREE.Vector3; toP: THREE.Vector3; fromT: THREE.Vector3; toT: THREE.Vector3; start: number; dur: number; closing: boolean } | null = null;
+    let profileLayer = 0, layerAt = 0;
+    let persona: Persona | null = null;
+    let redrawProfile = () => {};
+    const LAYER_MS = 2600;
 
     const draco = new DRACOLoader().setDecoderPath("/draco/");
     new GLTFLoader().setDRACOLoader(draco).load(
@@ -312,11 +327,13 @@ onMounted(() => {
                 if (im.instanceColor) im.instanceColor.needsUpdate = true;
                 scene.add(im);
                 meshes.push(im);
+                if (p.name === "backplate") backplateMesh = im; // raycast target (footprint)
             }
             partMeshes = meshes;
             for (let i = 0; i < COUNT; i++) {
                 rowSign[i] = Math.floor(i / cols) % 2 === 0 ? 1 : -1;
                 baseX[i] = mtx[i].elements[12];
+                personaSeed[i] = ((Math.random() * 2 - 1) * 1e9) | 0; // unique persona per unit
             }
 
             // OLED screens: pool of animated widgets, instances grouped by (widget, phase)
@@ -329,7 +346,7 @@ onMounted(() => {
                 new THREE.Vector3(38, 9.5, 1),
             );
             // unique generative screens, pooled to bound OLED draw calls
-            const POOL = Math.min(18, COUNT);
+            const POOL = Math.min(10, COUNT);
             const groups = Array.from({ length: POOL }, () => ({
                 members: [] as number[],
                 seed: (Math.random() * 1e9) | 0,
@@ -383,6 +400,86 @@ onMounted(() => {
             }
             oledAnim = oledAnimArr;
 
+            // ── glowing "frame 5" HUD hovering OVER a clicked unit's keys ──
+            const FOCUS_CAM = new THREE.Vector3(0, 320, -120); // pulled back + overhead so unit + HUD fit
+            const FOCUS_TGT = new THREE.Vector3(0, 45, 0);
+            const HOVER_OFF = new THREE.Vector3(0, 78, 6);     // HUD hovers above the keys
+            const HOVER_H = 96;                                // HUD world height
+            const seaCam = { pos: new THREE.Vector3(), tgt: new THREE.Vector3() };
+            let floorMesh: THREE.Mesh | null = null, floorCtx: CanvasRenderingContext2D | null = null, floorTex: THREE.CanvasTexture | null = null;
+            let pOledMesh: THREE.Mesh | null = null, pOledCtx: CanvasRenderingContext2D | null = null, pOledTex: THREE.CanvasTexture | null = null;
+            const ensureProfile = () => {
+                if (floorMesh) return;
+                const fc = document.createElement("canvas"); fc.width = 512; fc.height = 560;
+                floorCtx = fc.getContext("2d"); floorTex = new THREE.CanvasTexture(fc); floorTex.colorSpace = THREE.SRGBColorSpace; floorTex.anisotropy = 8;
+                // glowing transparent HUD (no lighting, glows over the keys)
+                floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: floorTex, transparent: true, toneMapped: false, depthWrite: false }));
+                floorMesh.rotation.x = -Math.PI / 2; floorMesh.renderOrder = 6; floorMesh.visible = false;
+                floorMesh.scale.set(HOVER_H * (fc.width / fc.height), HOVER_H, 1);
+                scene.add(floorMesh);
+                const oc = document.createElement("canvas"); oc.width = 128; oc.height = 32;
+                pOledCtx = oc.getContext("2d"); pOledTex = new THREE.CanvasTexture(oc); pOledTex.colorSpace = THREE.SRGBColorSpace; pOledTex.magFilter = THREE.NearestFilter; pOledTex.minFilter = THREE.NearestFilter;
+                pOledMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: pOledTex, toneMapped: false }));
+                pOledMesh.renderOrder = 5; pOledMesh.visible = false; scene.add(pOledMesh);
+            };
+            redrawProfile = () => {
+                if (!persona || !floorCtx || !pOledCtx) return;
+                drawProfileHover(floorCtx, 512, 560, persona, profileLayer); floorTex!.needsUpdate = true;
+                drawProfileOled(pOledCtx, 128, 32, profileLayer, persona.layers.length); pOledTex!.needsUpdate = true;
+            };
+            const _u = new THREE.Vector3(), _om = new THREE.Matrix4(), _pp = new THREE.Vector3(), _pq = new THREE.Quaternion(), _ps = new THREE.Vector3();
+            const openProfile = (id: number) => {
+                ensureProfile();
+                focusId = id; persona = personaForSeed(personaSeed[id]); profileLayer = 0; layerAt = performance.now();
+                _u.setFromMatrixPosition(mtx[id]);
+                floorMesh!.position.copy(_u).add(HOVER_OFF); floorMesh!.visible = true;
+                _om.multiplyMatrices(mtx[id], oledLocal);
+                _om.decompose(_pp, _pq, _ps); // extract rotation WITHOUT the baked 38×9.5 scale
+                pOledMesh!.position.copy(_pp); pOledMesh!.position.y += 1.2;
+                pOledMesh!.quaternion.copy(_pq); pOledMesh!.scale.copy(_ps); pOledMesh!.visible = true;
+                redrawProfile();
+                seaCam.pos.copy(camera.position); seaCam.tgt.copy(controls.target);
+                focusTween = { fromP: camera.position.clone(), toP: _u.clone().add(FOCUS_CAM), fromT: controls.target.clone(), toT: _u.clone().add(FOCUS_TGT), start: performance.now(), dur: 900, closing: false };
+                controls.autoRotate = false; controls.enabled = false; // hold the focus framing
+                profileOpen.value = true;
+                emit("select", persona);
+            };
+            const closeProfile = () => {
+                if (focusId < 0) return;
+                profileOpen.value = false;
+                focusTween = { fromP: camera.position.clone(), toP: seaCam.pos.clone(), fromT: controls.target.clone(), toT: seaCam.tgt.clone(), start: performance.now(), dur: 800, closing: true };
+                if (floorMesh) floorMesh.visible = false;
+                if (pOledMesh) pOledMesh.visible = false;
+                focusId = -1; persona = null;
+                emit("select", null);
+            };
+            closeFocus = closeProfile;
+            const raycaster = new THREE.Raycaster();
+            const _ndc = new THREE.Vector2();
+            let downX = 0, downY = 0;
+            const onDown = (e: PointerEvent) => { downX = e.clientX; downY = e.clientY; };
+            const onUp = (e: PointerEvent) => {
+                if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) return; // a drag/orbit, not a click
+                const rect = renderer.domElement.getBoundingClientRect();
+                _ndc.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+                raycaster.setFromCamera(_ndc, camera);
+                const hit = backplateMesh ? raycaster.intersectObject(backplateMesh, false)[0] : undefined;
+                if (hit && hit.instanceId != null) openProfile(hit.instanceId);
+                else if (focusId >= 0) closeProfile();
+            };
+            renderer.domElement.addEventListener("pointerdown", onDown);
+            renderer.domElement.addEventListener("pointerup", onUp);
+            const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeProfile(); };
+            window.addEventListener("keydown", onKey);
+            disposers.push(() => {
+                renderer.domElement.removeEventListener("pointerdown", onDown);
+                renderer.domElement.removeEventListener("pointerup", onUp);
+                window.removeEventListener("keydown", onKey);
+                closeFocus = null;
+                floorMesh?.geometry.dispose(); (floorMesh?.material as THREE.Material)?.dispose?.(); floorTex?.dispose();
+                pOledMesh?.geometry.dispose(); (pOledMesh?.material as THREE.Material)?.dispose?.(); pOledTex?.dispose();
+            });
+
             loading.value = false;
             disposers.push(() => {
                 meshes.forEach((im) => {
@@ -420,27 +517,45 @@ onMounted(() => {
         if (!onscreen) return;
         const now = performance.now(),
             t = now / 1000;
-        controls.update(); // damping + idle auto-rotate, and user drag
-        // gentle row sway: shift each instance's X by its row's signed sine (parts + OLEDs)
-        const S = SWAY_AMP * Math.sin(t * SWAY_SPEED);
-        for (const im of partMeshes) {
-            const arr = im.instanceMatrix.array as Float32Array;
-            for (let i = 0; i < COUNT; i++)
-                arr[i * 16 + 12] = baseX[i] + rowSign[i] * S;
-            im.instanceMatrix.needsUpdate = true;
+        if (focusTween) {
+            // gliding into / out of a unit's profile (sea work is paused meanwhile)
+            const k = Math.min(1, (now - focusTween.start) / focusTween.dur);
+            const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+            camera.position.lerpVectors(focusTween.fromP, focusTween.toP, e);
+            controls.target.lerpVectors(focusTween.fromT, focusTween.toT, e);
+            camera.lookAt(controls.target);
+            if (k >= 1) { if (focusTween.closing) { controls.enabled = true; controls.autoRotate = true; } focusTween = null; }
+        } else if (controls.enabled) {
+            controls.update(); // damping + idle auto-rotate, and user drag (sea only)
         }
-        for (const od of oledAnim) {
-            const arr = od.im.instanceMatrix.array as Float32Array;
-            for (let j = 0; j < od.members.length; j++)
-                arr[j * 16 + 12] = od.baseX[j] + rowSign[od.members[j]] * S;
-            od.im.instanceMatrix.needsUpdate = true;
-        }
-        if (now - lastOled > 100) {
-            // ~10fps screen refresh - the generative widgets animate again
-            lastOled = now;
-            for (const s of screens) {
-                drawScreen(s.ctx, 128, 32, s.seed, t + s.phase);
-                s.tex.needsUpdate = true;
+        if (focusId < 0 && !focusTween) {
+            // SEA: gentle row sway + animated generative OLEDs
+            const S = SWAY_AMP * Math.sin(t * SWAY_SPEED);
+            for (const im of partMeshes) {
+                const arr = im.instanceMatrix.array as Float32Array;
+                for (let i = 0; i < COUNT; i++)
+                    arr[i * 16 + 12] = baseX[i] + rowSign[i] * S;
+                im.instanceMatrix.needsUpdate = true;
+            }
+            for (const od of oledAnim) {
+                const arr = od.im.instanceMatrix.array as Float32Array;
+                for (let j = 0; j < od.members.length; j++)
+                    arr[j * 16 + 12] = od.baseX[j] + rowSign[od.members[j]] * S;
+                od.im.instanceMatrix.needsUpdate = true;
+            }
+            if (now - lastOled > 200) {
+                lastOled = now; // ~5fps ambient screen refresh
+                for (const s of screens) {
+                    drawScreen(s.ctx, 128, 32, s.seed, t + s.phase);
+                    s.tex.needsUpdate = true;
+                }
+            }
+        } else if (focusId >= 0 && !focusTween) {
+            // PROFILE: auto-cycle the 4 layers (redraw only on change)
+            if (now - layerAt > LAYER_MS) {
+                layerAt = now;
+                profileLayer = (profileLayer + 1) % (persona ? persona.layers.length : 4);
+                redrawProfile();
             }
         }
         renderer.render(scene, camera);
@@ -488,6 +603,9 @@ onBeforeUnmount(() => {
     <div class="cf" :class="{ 'cf--fill': fill }">
         <div class="cf-stage" ref="wrap"></div>
         <div class="cf-top"></div>
+        <button v-if="profileOpen" class="cf-close" @click="uiClose">
+            <i class="ph-bold ph-x"></i> Back to the sea
+        </button>
     </div>
 </template>
 
@@ -522,4 +640,15 @@ onBeforeUnmount(() => {
         rgba(18, 20, 26, 0) 100%
     );
 }
+/* full-page experiment: no page above, so drop the gray top-fade */
+.cf--fill .cf-top {
+    display: none;
+}
+.cf-close {
+    position: absolute; top: 12px; right: 12px; z-index: 12; display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 0.9rem; border-radius: 999px; cursor: pointer; font-size: 0.82rem; font-weight: 800;
+    color: #14151b; border: none; background: linear-gradient(100deg, #ff8a3c, #ff5900);
+    box-shadow: 0 6px 18px rgba(255, 89, 0, 0.35);
+}
+.cf-close:hover { background: #ff6c1e; }
 </style>

@@ -873,3 +873,24 @@ html.dark ::-webkit-scrollbar-thumb {
 .oct-avatar {
     clip-path: url(#rounded-octagon);
 }
+
+/* Design-preview notice bar (placeholder-data warning). Normal flow so it never
+   fights the sticky TopNav; full-screen experiment overlays simply cover it. */
+.design-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #ff5900;
+    color: #faf3e8;
+    font-family: "Space Mono", "DM Sans", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0.4rem 1rem;
+}
+.design-preview-bar i {
+    font-size: 0.9rem;
+}
