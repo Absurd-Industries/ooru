@@ -161,6 +161,14 @@ import ResetData from "./ResetData.vue";
             <p class="text-xs text-stencil">
                 <span class="copyleft">&copy;</span>
                 <span data-i18n="footer.copyright">{t("footer.copyright")}</span>
+                ·
+                <a
+                    class="footer-credit-link"
+                    href="https://github.com/Absurd-Industries/ooru"
+                    target="_blank"
+                    rel="noopener"
+                    data-i18n="footer.madeWith">{t("footer.madeWith")}</a
+                >
                 <span class="footer-managed">
                     · Managed by <a
                         href="https://absurd.industries"
@@ -272,13 +280,15 @@ import ResetData from "./ResetData.vue";
         gap: 1rem;
         margin-bottom: 0.85rem;
     }
-    .footer-managed a {
+    .footer-managed a,
+    .footer-credit-link {
         color: #4a3d2f;
         font-weight: 700;
         text-decoration: none;
         transition: color 0.15s;
     }
-    .footer-managed a:hover {
+    .footer-managed a:hover,
+    .footer-credit-link:hover {
         color: #d94800;
     }
 </style>

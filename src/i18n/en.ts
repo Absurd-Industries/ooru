@@ -74,7 +74,8 @@ export const en: Record<string, string> = {
   "footer.privacy": "Privacy",
   "footer.terms": "Terms",
   "footer.sitemap": "Sitemap",
-  "footer.copyright": "Copyleft 2023-2026 · Made with curiosity in Bengaluru",
+  "footer.copyright": "Copyleft 2023-2026",
+  "footer.madeWith": "Made with curiosity in Bengaluru",
   "footer.reset": "Reset my data",
   "footer.resetConfirm":
     "Reset your local Ooru data - reactions, comments, pledges, and language? This can't be undone.",

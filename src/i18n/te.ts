@@ -68,7 +68,8 @@ export const te: Record<string, string> = {
   "footer.privacy": "గోప్యత",
   "footer.terms": "నిబంధనలు",
   "footer.sitemap": "సైట్‌మ్యాప్",
-  "footer.copyright": "Copyleft 2023-2026 · Bengaluru లో కుతూహలంతో తయారు చేయబడింది",
+  "footer.copyright": "Copyleft 2023-2026",
+  "footer.madeWith": "Bengaluru లో కుతూహలంతో తయారు చేయబడింది",
   "footer.reset": "నా డేటాను రీసెట్ చేయండి",
   "footer.resetConfirm":
     "మీ స్థానిక Ooru డేటాను - రియాక్షన్‌లు, వ్యాఖ్యలు, ప్లెడ్జ్‌లు మరియు భాషను - రీసెట్ చేయాలా? దీన్ని రద్దు చేయలేరు.",

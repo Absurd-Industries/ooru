@@ -68,7 +68,8 @@ export const kn: Record<string, string> = {
   "footer.privacy": "ಗೌಪ್ಯತೆ",
   "footer.terms": "ನಿಯಮಗಳು",
   "footer.sitemap": "ಸೈಟ್‌ಮ್ಯಾಪ್",
-  "footer.copyright": "Copyleft 2023-2026 · Bengaluru ನಲ್ಲಿ ಕುತೂಹಲದಿಂದ ತಯಾರಿಸಲಾಗಿದೆ",
+  "footer.copyright": "Copyleft 2023-2026",
+  "footer.madeWith": "Bengaluru ನಲ್ಲಿ ಕುತೂಹಲದಿಂದ ತಯಾರಿಸಲಾಗಿದೆ",
   "footer.reset": "ನನ್ನ ಡೇಟಾವನ್ನು ಮರುಹೊಂದಿಸಿ",
   "footer.resetConfirm":
     "ನಿಮ್ಮ ಸ್ಥಳೀಯ Ooru ಡೇಟಾವನ್ನು - ಪ್ರತಿಕ್ರಿಯೆಗಳು, ಕಾಮೆಂಟ್‌ಗಳು, ಪ್ರತಿಜ್ಞೆಗಳು ಮತ್ತು ಭಾಷೆ - ಮರುಹೊಂದಿಸಬೇಕೆ? ಇದನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗದು.",
