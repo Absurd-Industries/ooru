@@ -11,6 +11,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "optimize:og": "node tools/optimize-og.mjs",
     "astro": "astro",
     "check": "astro check"
   },

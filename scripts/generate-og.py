@@ -8,9 +8,9 @@ macOS-only: rasterizes SVG via QuickLook (`qlmanage`) and resizes with
 Run from the repo root:  python3 scripts/generate-og.py
 Re-run whenever campaigns change, or the branding/banners are updated.
 
-Outputs:
-  public/og/default.png                 - site default (campaign-photo collage)
-  public/og/{campaigns,makers,requests,events,faq}.png  - section banners
+Outputs (all production JPGs, kept under ~300 KB):
+  public/og/default.jpg                 - site default (campaign-photo collage)
+  public/og/{campaigns,makers,requests,events,faq}.jpg  - section banners
   public/og/campaigns/<slug>.jpg        - per-campaign "polaroid card"
 """
 import base64, html, os, re, subprocess
@@ -235,7 +235,7 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org
   <text x="84" y="386" {SERIF} font-size="38" fill="{INK}">open-source hardware</text>
   <text x="84" y="452" {SANS} font-weight="500" font-size="27" fill="{STENCIL}">Back real projects. Get every file.</text>
 </svg>'''
-render(svg, os.path.join(OUT, "default.png"))
+render(svg, os.path.join(OUT, "default.jpg"), jpg=True)
 
 # ── section banners: kraft + ink accent panel ──────────────────────
 sections = {
@@ -256,6 +256,6 @@ for slug, (title, tagline) in sections.items():
   <text x="92" y="330" {SERIF} font-size="104" fill="{INK}">{esc(title)}</text>
   <text x="92" y="410" {SANS} font-size="30" fill="{STENCIL}">{tag_spans}</text>
 </svg>'''
-    render(svg, os.path.join(OUT, slug + ".png"))
+    render(svg, os.path.join(OUT, slug + ".jpg"), jpg=True)
 
 print(f"\nDone: {len(campaigns)} campaign cards + default + {len(sections)} sections")
